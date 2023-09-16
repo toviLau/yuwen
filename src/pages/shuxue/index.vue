@@ -1,7 +1,7 @@
 <template>
     <view class="content">
         <div class="top">
-            <div class="top-left">时间: {{ date('Y-m-d H:i')}}</div>
+            <div class="top-left">日期: {{ date('Y-m-d')}}</div>
             <div class="top-right">用时: {{ startTimed }}</div>
         </div>
         <div class="list">
