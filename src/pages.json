@@ -1,0 +1,41 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	
+	{
+		"path": "pages/index/index",
+		"style": {
+			"navigationBarTitleText": "四小二(8)班"
+		}
+	},{
+		"path": "pages/shuxue/index",
+		"style": {
+			"navigationBarTitleText": "四小二(8)班-数学100以内加减法"
+		}
+	},{
+		"path": "pages/yuwen/index",
+		"style": {
+			"navigationBarTitleText": "四小二(8)班-语文拼音练习"
+		}
+	},
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+        // "pageOrientation": "landscape"
+    }
+	// "tabBar": {
+	// 	"color": "#7A7E83",
+	// 	"selectedColor": "#3cc51f",
+	// 	"borderStyle": "black",
+	// 	"backgroundColor": "#ffffff",
+	// 	"list": [{
+	// 		"pagePath": "pages/yuwen/index",
+	// 		"text": "组件"
+	// 	}, {
+	// 		"pagePath": "pages/shuxue/index",
+	// 		"text": "接口"
+	// 	}]
+	// }
+}
