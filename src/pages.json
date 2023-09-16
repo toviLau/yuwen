@@ -9,12 +9,12 @@
 	},{
 		"path": "pages/shuxue/index",
 		"style": {
-			"navigationBarTitleText": "四小二(8)班-数学100以内加减法"
+			"navigationBarTitleText": "数学：100以内加减法"
 		}
 	},{
 		"path": "pages/yuwen/index",
 		"style": {
-			"navigationBarTitleText": "四小二(8)班-语文拼音练习"
+			"navigationBarTitleText": "语文：拼音练习"
 		}
 	},
 	],
