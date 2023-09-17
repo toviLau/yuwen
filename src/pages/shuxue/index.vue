@@ -1,7 +1,7 @@
 <template>
     <view class="content">
         <div class="top">
-            <div class="top-left">日期: {{ date('Y-m-d')}}</div>
+            <div class="top-left">日期: {{ date('Y-m-d') }}</div>
             <div class="top-right">用时: {{ startTimed }}</div>
         </div>
         <div class="list">
@@ -10,10 +10,11 @@
                 right: v[4] === 1,
                 wrong: v[4] === 0 && !['', undefined].includes(v[3]),
             }">
+                <div class="edited" v-show="v[5] > 0">{{ v[5] }}</div>
                 {{
                     `${v[0]} ${["+", "-"][v[2]]} ${v[1]} = ${curidx !== undefined && numlist[i][3] !== undefined
-                            ? numlist[i][3]
-                            : ""
+                        ? numlist[i][3]
+                        : ""
                         }`
                 }}
             </div>
@@ -34,7 +35,7 @@
             <div class="fen" v-if="submited === 1">
                 <div class="fen-title">
                     <div class="fen-title-left">宝贝你的得分</div>
-                    <div class="fen-title-right" v-show="edited > 0">订正次数: {{ edited }}</div>
+                    <!-- <div class="fen-title-right" v-show="edited > 0">订正次数: {{ edited }}</div> -->
                 </div>
                 <div class="score">{{ score }}</div>
                 <div class="comment">{{ comment }}</div>
@@ -51,12 +52,12 @@
 import { onMounted, ref, reactive, watch } from "vue";
 import { random } from "../../module/tools";
 import date from 'date-php'
-const numlist = reactive([]); // 数据列表:[[数字1,数字2, 运算符, 用户运算结果, 结果对错判定], ...]
+const numlist = reactive([]); // 数据列表:[[数字1,数字2, 运算符, 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
 const score = ref(0); // 得分
 const comment = ref(""); // 评语
 const curidx = ref(); // 当前所计算的索引数据
-const edited = ref(0); // 订正次数
+// const edited = ref(0); // 订正次数
 const startTime = ref(0) // 开始时间
 const startTimed = ref('') // 已用时
 const contTimeFn = ref()
@@ -71,11 +72,11 @@ function createList() {
             const bigValIdx = numArr[0] > numArr[1] ? 0 : 1
             numArr[bigValIdx] = random(8, `1-${100 - numArr[bigValIdx]}`) - 0
         }
-        numlist.push(numArr.concat(notation, undefined, undefined));
+        numlist.push(numArr.concat(notation, undefined, undefined, undefined));
     }
     edit(true);
     curidx.value = "";
-    edited.value = 0;
+    // edited.value = 0;
     startTime.value = Date.now()
     contTime()
 }
@@ -85,12 +86,12 @@ createList();
  * 计时操作
  * @param {boolean} isStop true: 何止计时, false: 开始计时
  */
-function contTime(isStop=false){
-    if(isStop) {
+function contTime(isStop = false) {
+    if (isStop) {
         clearInterval(contTimeFn.value)
         contTimeFn.value = ''
     } else {
-        contTimeFn.value = contTimeFn.value || setInterval(()=>{
+        contTimeFn.value = contTimeFn.value || setInterval(() => {
             const diff = Date.now() - startTime.value
             const _diff = {
                 h: date.duration("H", diff),
@@ -99,11 +100,11 @@ function contTime(isStop=false){
             }
             const _tpl = []
 
-            if(_diff.h - 0 > 0) _tpl.push('H小时')
-            if(_diff.i - 0 > 0) _tpl.push('i分钟')
-            if(_diff.s - 0 > 0) _tpl.push('s秒')
+            if (_diff.h - 0 > 0) _tpl.push('H小时')
+            if (_diff.i - 0 > 0) _tpl.push('i分钟')
+            if (_diff.s - 0 > 0) _tpl.push('s秒')
 
-            startTimed.value = date.duration(_tpl.join(''),  diff)
+            startTimed.value = date.duration(_tpl.join(''), diff)
         }, 1000)
     }
 }
@@ -113,7 +114,7 @@ function contTime(isStop=false){
  * @param {boolean} isInit 是否是初始化
  */
 function edit(isInit = false) {
-    if(!isInit) edited.value = edited.value + 1
+    // if(!isInit) edited.value = edited.value + 1
     submited.value = 0;
     curidx.value = "";
     contTime()
@@ -125,7 +126,10 @@ function edit(isInit = false) {
  */
 const ckItem = (idx) => {
     curidx.value = idx;
-    if (numlist[idx][4] === 0 && submited.value !== 1) numlist[idx][4] = "";
+    if (numlist[idx][4] === 0 && submited.value !== 1) { 
+        numlist[idx][4] = '' 
+        numlist[idx][3] = undefined
+    };
 };
 
 /**
@@ -133,7 +137,7 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyNum = (key) => {
-    const _val = (numlist[curidx.value][3]|| "") + '';
+    const _val = (numlist[curidx.value][3] || "") + '';
     numlist[curidx.value][3] = key === "del"
         // 删除事件
         ? numlist[curidx.value][4] !== 1
@@ -154,7 +158,9 @@ const subEnter = () => {
     // 对错判定
     numlist.map((res) => {
         const _val = res[2] === 0 ? res[0] + res[1] : res[0] - res[1];
-        res[4] = _val === res[3] ? 1 : 0; // 1对,0错
+        if (res[4] === '') res[5] = res[5] ? res[5] + 1 : 1
+        if (!['', undefined].includes(res[3])) res[4] = _val === res[3] ? 1 : 0; // 1对,0错
+
     });
 
     const totleLen = numlist.length; // 总题数
@@ -170,7 +176,7 @@ const subEnter = () => {
         "好好学习，天天向上(*_*)",
         "不要偷懒哦~~ 你一半都还没做完呢。(T_T)",
     ];
-    
+
     // 评语等级
     switch (true) {
         case score.value > 99:
@@ -202,7 +208,7 @@ const subEnter = () => {
     display: flex;
     flex-direction: column;
 
-    .top{
+    .top {
         font-size: 26rpx;
         padding: 0 1em;
         color: #666;
@@ -211,11 +217,12 @@ const subEnter = () => {
         display: flex;
         justify-content: space-between;
         line-height: 1.5em;
-        .top-left{
 
-        }
-        .top-right{}
+        .top-left {}
+
+        .top-right {}
     }
+
     //   height: 100vh;
     .list {
         display: flex;
@@ -233,6 +240,32 @@ const subEnter = () => {
             margin: 0 auto;
             padding: 0 1em;
             box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+
+            .edited {
+                font-size: 12rpx;
+                line-height: 2em;
+                padding: .3em 1.5em .3em .75em;
+                opacity: .95;
+                text-align: center;
+                position: absolute;
+                left: 0;
+                top: 0;
+                // transform: rotate(-90deg);
+                background-color: #ed5d46;
+                color: #f0f0f0;
+                border-radius: 0 0 16rpx 0;
+                transform: scale(.86) translate(-7%, -7%);
+
+                &::before {
+                    content: '订正：'
+                }
+
+                &::after {
+                    content: ' 次'
+                }
+            }
 
             &.right,
             &.wrong {
