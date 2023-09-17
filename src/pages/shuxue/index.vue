@@ -128,7 +128,7 @@ const ckItem = (idx) => {
     curidx.value = idx;
     if (numlist[idx][4] === 0 && submited.value !== 1) { 
         numlist[idx][4] = '' 
-        numlist[idx][3] = undefined
+        // numlist[idx][3] = undefined
     };
 };
 
@@ -158,7 +158,7 @@ const subEnter = () => {
     // 对错判定
     numlist.map((res) => {
         const _val = res[2] === 0 ? res[0] + res[1] : res[0] - res[1];
-        if (res[4] === '') res[5] = res[5] ? res[5] + 1 : 1
+        if (res[4] === '' && !['', undefined].includes(res[3])) res[5] = res[5] ? res[5] + 1 : 1 // 订正次数
         if (!['', undefined].includes(res[3])) res[4] = _val === res[3] ? 1 : 0; // 1对,0错
 
     });
