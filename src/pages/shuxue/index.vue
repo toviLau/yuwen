@@ -26,7 +26,7 @@
                 (numlist[curidx][3] === undefined ? '' : numlist[curidx][3] + '')
                     .length > 2,
         }">
-            <div class="pan" v-if="submited === 0 && curidx !== ''">
+            <div class="pan" :class="{ dsb: numlist[curidx][4] === 1 }" v-if="submited === 0 && curidx !== ''">
                 <div class="pan-item" v-for="i in 10" @click="keyNum(i - 1)">
                     {{ i - 1 }}
                 </div>
@@ -230,7 +230,7 @@ const subEnter = () => {
         padding: 0.25em 0;
 
         .list-item {
-            border-bottom: 1px solid #999;
+            border-bottom: 1px solid #ccc;
             font-size: 32rpx;
             line-height: 2.95em;
             width: 42%;
@@ -255,10 +255,11 @@ const subEnter = () => {
 
             .edited {
 
-                background-color: #e6e6e6;
-                color: #999;
+                background-color: #ececec;
+                color: #c3c3c3;
+
                 &::before {
-                    content: '订正：'
+                    content: '已订正：'
                 }
 
                 &::after {
@@ -303,26 +304,33 @@ const subEnter = () => {
                 }
             }
 
-            &.cur-item:not(.right) {
+            // &.cur-item:not(.right) {
+            &.cur-item {
                 box-shadow: 0 0 0 4rpx #b6aafa;
                 border-bottom: none;
                 border-radius: 5rpx;
 
                 &:after {
-                    animation: guang-biao-shan-shuo 2s infinite;
+                    animation: guang-biao-shan-shuo 1.6s infinite;
+                }
+                &.right{
+                    box-shadow: 0 0 0 4rpx #cfcfcf;
+                    &:after {
+                        animation: none;
+                    }
                 }
             }
 
             @keyframes guang-biao-shan-shuo {
-                20% {
+                45% {
                     opacity: 0;
                 }
 
-                50% {
+                60%, 70% {
                     opacity: 1;
                 }
 
-                80% {
+                85% {
                     opacity: 0;
                 }
             }
@@ -331,7 +339,7 @@ const subEnter = () => {
                 content: "";
                 display: inline-block;
                 width: 0.5em;
-                border-bottom: 5rpx #999 solid;
+                border-bottom: 5rpx #ccc solid;
                 margin-bottom: -0.5em;
                 opacity: 0;
             }
@@ -348,8 +356,8 @@ const subEnter = () => {
             justify-content: space-evenly;
 
             &.dsb {
-                .pan-item {
-                    background-color: #fcfcfc;
+                .pan-item:not(.pan-enter) {
+                    background-color: #f6f6f6;
                     color: #ccc;
                 }
             }
