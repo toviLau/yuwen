@@ -10,7 +10,8 @@
                 right: v[4] === 1,
                 wrong: v[4] === 0 && !['', undefined].includes(v[3]),
             }">
-                <div class="edited" v-show="v[5] > 0">{{ v[5] }}</div>
+                <div class="edited" v-if="v[5] > 0">{{ v[5] }}</div>
+                <div class="wait-edited" v-if="v[4] === 0 && !v[5]"></div>
                 {{
                     `${v[0]} ${["+", "-"][v[2]]} ${v[1]} = ${curidx !== undefined && numlist[i][3] !== undefined
                         ? numlist[i][3]
@@ -60,7 +61,8 @@ const curidx = ref(); // 当前所计算的索引数据
 // const edited = ref(0); // 订正次数
 const startTime = ref(0) // 开始时间
 const startTimed = ref('') // 已用时
-const contTimeFn = ref()
+const subEnterTime = ref('') // 提交时间
+const contTimeId = ref()
 // 生成数据列表
 function createList() {
     numlist.length = 0;
@@ -88,10 +90,10 @@ createList();
  */
 function contTime(isStop = false) {
     if (isStop) {
-        clearInterval(contTimeFn.value)
-        contTimeFn.value = ''
+        clearInterval(contTimeId.value)
+        contTimeId.value = ''
     } else {
-        contTimeFn.value = contTimeFn.value || setInterval(() => {
+        contTimeId.value = contTimeId.value || setInterval(() => {
             const diff = Date.now() - startTime.value
             const _diff = {
                 h: date.duration("H", diff),
@@ -109,14 +111,11 @@ function contTime(isStop = false) {
     }
 }
 
-/**
- * 订正事件
- * @param {boolean} isInit 是否是初始化
- */
+// 订正事件
 function edit(isInit = false) {
-    // if(!isInit) edited.value = edited.value + 1
     submited.value = 0;
     curidx.value = "";
+    startTime.value = startTime.value + ((Date.now() - subEnterTime.value).toString().replace(/\d{3}$/, '000') - 0 + 1000)
     contTime()
 }
 
@@ -126,10 +125,7 @@ function edit(isInit = false) {
  */
 const ckItem = (idx) => {
     curidx.value = idx;
-    if (numlist[idx][4] === 0 && submited.value !== 1) { 
-        numlist[idx][4] = '' 
-        // numlist[idx][3] = undefined
-    };
+    if (numlist[idx][4] === 0 && submited.value !== 1) numlist[idx][4] = ''
 };
 
 /**
@@ -151,6 +147,7 @@ const keyNum = (key) => {
 
 // 查看得分事件
 const subEnter = () => {
+    subEnterTime.value = Date.now()
     // 锁定提交状态
     submited.value = 1;
     contTime(true)
@@ -243,27 +240,38 @@ const subEnter = () => {
             position: relative;
             overflow: hidden;
 
-            .edited {
+            .edited,
+            .wait-edited {
                 font-size: 16rpx;
                 line-height: 1em;
-                padding: 6rpx 1.5em 6rpx .75em;
-                opacity: .8;
+                padding: 6rpx 1.25em 6rpx .75em;
+                // opacity: .8;
                 text-align: center;
                 position: absolute;
                 left: 0;
                 top: 0;
-                // transform: rotate(-90deg);
-                background-color: #ed5d46;
-                color: #f0f0f0;
                 border-radius: 0 0 16rpx 0;
-                // transform: scale(.86) translate(-7%, -7%);
+            }
 
+            .edited {
+
+                background-color: #e6e6e6;
+                color: #999;
                 &::before {
                     content: '订正：'
                 }
 
                 &::after {
                     content: ' 次'
+                }
+            }
+
+            .wait-edited {
+                background-color: #ed5d46;
+                color: #f0f0f0;
+
+                &::before {
+                    content: '尚未订正'
                 }
             }
 
@@ -407,22 +415,25 @@ const subEnter = () => {
                     // border: 1rpx solid #ed5d46;
                     position: absolute;
                     left: 50%;
+                    top: 50%;
                     // width: 3em;
-                    height: 4rpx;
+                    height: .06em;
                     background-color: #ed5d46;
                 }
 
                 &:after {
                     margin-left: -0.816em;
                     width: 1.8em;
-                    bottom: 10rpx;
+                    // bottom: 10rpx;
+                    margin-top: .42em;
                     transform: rotate(-6deg);
                 }
 
                 &:before {
                     margin-left: -0.7em;
                     width: 2em;
-                    bottom: 5rpx;
+                    // bottom: 5rpx;
+                    margin-top: .5em;
                     transform: rotate(-5deg);
                 }
             }
