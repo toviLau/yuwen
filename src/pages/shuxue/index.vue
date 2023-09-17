@@ -235,7 +235,7 @@ const subEnter = () => {
         .list-item {
             border-bottom: 1px solid #999;
             font-size: 32rpx;
-            line-height: 2.8em;
+            line-height: 2.95em;
             width: 42%;
             margin: 0 auto;
             padding: 0 1em;
@@ -244,10 +244,10 @@ const subEnter = () => {
             overflow: hidden;
 
             .edited {
-                font-size: 12rpx;
-                line-height: 2em;
-                padding: .3em 1.5em .3em .75em;
-                opacity: .95;
+                font-size: 16rpx;
+                line-height: 1em;
+                padding: 6rpx 1.5em 6rpx .75em;
+                opacity: .8;
                 text-align: center;
                 position: absolute;
                 left: 0;
@@ -256,7 +256,7 @@ const subEnter = () => {
                 background-color: #ed5d46;
                 color: #f0f0f0;
                 border-radius: 0 0 16rpx 0;
-                transform: scale(.86) translate(-7%, -7%);
+                // transform: scale(.86) translate(-7%, -7%);
 
                 &::before {
                     content: '订正：'
