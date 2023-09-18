@@ -29,14 +29,19 @@
                         .length > 2,
             }">
             <div class="pan" :class="{ dsb: numlist[curidx][4] === 1 }" v-if="submited === 0 && curidx !== ''">
-                <div class="pan-item" v-for="i in 10" @click="keyNum(i - 1)">
-                    {{ i - 1 }}
+                <div class="pan-item" v-for="i in 9" @click="keyNum(i)">
+                    {{ i }}
                 </div>
-                <div class="pan-item pan-enter" @click="subEnter()">查看得分</div>
-                <div class="pan-item pan-set">
-                    <div class="pan-set-btn" @click="setSystemStatusFn(true)"></div>
+                <div class="pan-item" @click="keyNum(0)">
+                    0
                 </div>
-                <div class="pan-item pan-del" @click="keyNum('del')">⇐</div>
+                <div class="pan-footer">
+                    <div class="pan-item pan-enter" @click="subEnter()">查看得分</div>
+                    <div class="pan-item pan-set">
+                        <div class="pan-set-btn" @click="setSystemStatusFn(true)"></div>
+                    </div>
+                    <div class="pan-item pan-del" @click="keyNum('del')">⇐</div>
+                </div>
             </div>
             <div class="fen" v-if="submited === 1">
                 <div class="fen-title">
@@ -110,8 +115,8 @@ const setSystemStatus = ref(false) // 设置框显隐
 // })
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
-    title:'四小二(8)班',
-    content:'二年级数学100以内加减法',
+    title: '四小二(8)班',
+    content: '二年级数学100以内加减法',
     imageUrl: '/assets/icon.jpeg',
     path: '/pages/shuxue/index'
 });
@@ -467,8 +472,7 @@ const setNumChange = val => {
 
         .pan-item,
         .fen-item {
-            width: 16%;
-            margin: 1%;
+            margin: 6rpx 0;
             line-height: 2em;
             text-align: center;
             box-shadow: 0 0 0 1rpx #cfcfcf;
@@ -480,9 +484,11 @@ const setNumChange = val => {
             &.pan-del,
             &.fen-new,
             &.fen-edit {
-                width: 36%;
+                // width: 36%;
                 color: #fcfcfc;
                 box-shadow: none;
+                flex: 1;
+
             }
 
             &.pan-del,
@@ -505,12 +511,27 @@ const setNumChange = val => {
             }
         }
 
+        .pan-item {
+            width: 30%;
+        }
+
+        .fen-item {
+            width: 16%;
+        }
+
+        .pan-footer {
+            width: 96%;
+            display: flex;
+        }
+
         .pan-set {
             border: none;
             background: none;
             border: none;
             box-shadow: none;
             display: flex;
+            flex: 1;
+            // width: auto;
             justify-content: center;
             align-items: center;
         }
@@ -579,7 +600,8 @@ const setNumChange = val => {
                 display: flex;
                 flex-wrap: wrap;
                 justify-content: space-evenly;
-
+                width: 96%;
+                margin: 0 auto;
                 // .fen-item {
                 //   width: 16%;
                 //   margin: 1%;
@@ -703,5 +725,4 @@ const setNumChange = val => {
             }
         }
     }
-}
-</style>
+}</style>
