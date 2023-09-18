@@ -75,6 +75,15 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 
+// #ifdef MP-WEIXIN
+uni.showShareMenu({
+    title:'四小二(8)班',
+    content:'语文拼音练习',
+    imageUrl: '/assets/icon.jpeg',
+    path: '/pages/yuwen/index'
+});
+// #endif
+
 // 有声调韵母字典表
 const dictionary = {
     'ā': '`', 'á': 1, 'ǎ': 2, 'à': 3, 'ō': 4, 'ó': 5, 'ǒ': 6, 'ò': 7,

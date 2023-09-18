@@ -84,6 +84,7 @@ import { onMounted, ref, reactive, watch } from "vue";
 import { random } from "../../module/tools";
 import date from 'date-php'
 import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
+import { onReady, onShow, onHide } from '@dcloudio/uni-app'
 
 const numlist = reactive([]); // 数据列表:[[数字1,数字2, 运算符, 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
@@ -100,6 +101,21 @@ const totalNum = ref(lTotalNum) // 题量
 const setNum = ref(totalNum.value); // 设置滑块题量
 const setSystemStatus = ref(false) // 设置框显隐
 
+// onShow(()=>{
+//     debugger
+//     startTime.value = startTime.value + ((Date.now() - subEnterTime.value).toString().replace(/\d{3}$/, '000') - 0 + 1000)
+// })
+// onHide(()=>{
+//     subEnterTime.value = Date.now()
+// })
+// #ifdef MP-WEIXIN
+uni.showShareMenu({
+    title:'四小二(8)班',
+    content:'二年级数学100以内加减法',
+    imageUrl: '/assets/icon.jpeg',
+    path: '/pages/shuxue/index'
+});
+//#endif
 // 生成数据列表
 function createList() {
     numlist.length = 0;

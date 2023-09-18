@@ -7,6 +7,15 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue';
+
+// #ifdef MP-WEIXIN
+uni.showShareMenu({
+    title:'四小二(8)班',
+    content:'课外练习',
+    imageUrl: '/assets/icon.jpeg',
+    path: '/pages/index/index'
+});
+// #endif
 </script>
 
 <style lang="less">
