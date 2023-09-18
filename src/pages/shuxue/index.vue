@@ -12,6 +12,7 @@
             }">
                 <div class="edited" v-if="v[5] > 0">{{ v[5] }}</div>
                 <div class="wait-edited" v-if="v[4] === 0 && !v[5]"></div>
+                <!-- <div class="list-item-idx">{{i+1}}.</div> -->
                 {{
                     `${v[0]} ${["+", "-"][v[2]]} ${v[1]} = ${curidx !== undefined && numlist[i][3] !== undefined
                         ? numlist[i][3]
@@ -20,29 +21,58 @@
                 }}
             </div>
         </div>
-        <div class="footer" v-show="curidx !== undefined" :class="{
-            dsb:
-                curidx &&
-                (numlist[curidx][3] === undefined ? '' : numlist[curidx][3] + '')
-                    .length > 2,
-        }">
+        <div class="footer" v-show="curidx !== undefined"
+            v-if="submited === 0 && curidx !== '' || submited === 1 || setSystemStatus" :class="{
+                dsb:
+                    curidx &&
+                    (numlist[curidx][3] === undefined ? '' : numlist[curidx][3] + '')
+                        .length > 2,
+            }">
             <div class="pan" :class="{ dsb: numlist[curidx][4] === 1 }" v-if="submited === 0 && curidx !== ''">
                 <div class="pan-item" v-for="i in 10" @click="keyNum(i - 1)">
                     {{ i - 1 }}
                 </div>
                 <div class="pan-item pan-enter" @click="subEnter()">查看得分</div>
+                <div class="pan-item pan-set">
+                    <div class="pan-set-btn" @click="setSystemStatusFn(true)"></div>
+                </div>
                 <div class="pan-item pan-del" @click="keyNum('del')">⇐</div>
             </div>
             <div class="fen" v-if="submited === 1">
                 <div class="fen-title">
                     <div class="fen-title-left">宝贝你的得分</div>
-                    <!-- <div class="fen-title-right" v-show="edited > 0">订正次数: {{ edited }}</div> -->
+                    <div class="fen-title-right">题量: {{ totalNum }}</div>
                 </div>
                 <div class="score">{{ score }}</div>
                 <div class="comment">{{ comment }}</div>
                 <div class="fen-btns">
-                    <div class="fen-item fen-edit" @click="edit()">去订正</div>
+                    <div class="fen-item fen-edit" @click="edit()" :class="{ dsb: score === 100 }">去订正</div>
+                    <div class="pan-item pan-set">
+                        <div class="pan-set-btn" @click="setSystemStatusFn(true)"></div>
+                    </div>
                     <div class="fen-item fen-new" @click="createList()">做新题</div>
+                </div>
+            </div>
+            <div class="set-sys" v-if="setSystemStatus">
+                <div class="set-sys-title">
+                    <div class="set-sys-title-left">设置</div>
+                    <div class="set-sys-title-right">
+                        <div class="rest-default" @click="setNumDefault">恢复默认</div>
+                    </div>
+                </div>
+                <div class="set-sys-bd">
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">题量：</div>
+                        <div class="set-sys-db-list-right">
+                            <hao-slider :step="10" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="10" :value="setNum"
+                                @change="setNumChange" />
+                        </div>
+                    </div>
+                    <div class="btns">
+                        <div class="set-btn set-btn-submit" @click="setNumSubmit()">确定题量</div>
+                        <div class="set-btn set-btn-clean" @click="setSystemStatusFn(false)">取消设置</div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -53,6 +83,8 @@
 import { onMounted, ref, reactive, watch } from "vue";
 import { random } from "../../module/tools";
 import date from 'date-php'
+import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
+
 const numlist = reactive([]); // 数据列表:[[数字1,数字2, 运算符, 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
 const score = ref(0); // 得分
@@ -62,11 +94,17 @@ const curidx = ref(); // 当前所计算的索引数据
 const startTime = ref(0) // 开始时间
 const startTimed = ref('') // 已用时
 const subEnterTime = ref('') // 提交时间
-const contTimeId = ref()
+const contTimeId = ref() // 计时定时器 ID
+const lTotalNum = uni.getStorageSync('totalNum') || 50; // 缓存读取
+const totalNum = ref(lTotalNum) // 题量
+const setNum = ref(totalNum.value); // 设置滑块题量
+const setSystemStatus = ref(false) // 设置框显隐
+
 // 生成数据列表
 function createList() {
     numlist.length = 0;
-    for (let i = 0; i < 50; i++) {
+    score.value = 0
+    for (let i = 0; i < totalNum.value; i++) {
         const numArr = [random(8, "1-90") - 0, random(8, "1-90") - 0]; // 两数字生成
         const notation = Math.random() > 0.5 ? 1 : 0; // 运算符 0:+, 1:-
         if (notation === 1 && numArr[0] < numArr[1]) numArr.reverse(); // 运算符是- 且 数1 < 数2 会调换两数位置(二年级还没有学负数)
@@ -112,7 +150,8 @@ function contTime(isStop = false) {
 }
 
 // 订正事件
-function edit(isInit = false) {
+function edit() {
+    if (score.value === 100) return
     submited.value = 0;
     curidx.value = "";
     startTime.value = startTime.value + ((Date.now() - subEnterTime.value).toString().replace(/\d{3}$/, '000') - 0 + 1000)
@@ -197,6 +236,32 @@ const subEnter = () => {
     if (totleLen * 0.5 > fillLen) comment.value = commentArr[5];
 };
 
+// 设置窗口显隐
+const setSystemStatusFn = (val = false) => {
+    setSystemStatus.value = val
+}
+
+// 滑块数量设置
+function setNumFn(num, isSaveLocalstrage = false) {
+    setNum.value = num
+    if (isSaveLocalstrage) uni.setStorageSync('totalNum', num)
+}
+
+// 恢复默认
+const setNumDefault = () => {
+    setNumFn(50)
+}
+// 确定题量
+const setNumSubmit = val => {
+    setNumFn(setNum.value, true)
+    totalNum.value = setNum.value
+    setSystemStatusFn(false)
+    createList()
+}
+// 滑块更新
+const setNumChange = val => {
+    setNumFn(Math.round(val / 10) * 10)
+}
 </script>
 
 <style lang="less">
@@ -235,10 +300,27 @@ const subEnter = () => {
             line-height: 2.95em;
             width: 42%;
             margin: 0 auto;
-            padding: 0 1em;
+            padding: 0 .6em;
             box-sizing: border-box;
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #333;
+
+            .list-item-idx {
+                background-color: #f6f6f6;
+                border: 1px solid #ececec;
+                border-radius: 5rpx;
+                color: #ccc;
+                padding: 0 .3em;
+                width: 2.3em;
+                line-height: 1.5em;
+                margin-right: .35em;
+                font-size: 18rpx;
+
+            }
 
             .edited,
             .wait-edited {
@@ -313,8 +395,10 @@ const subEnter = () => {
                 &:after {
                     animation: guang-biao-shan-shuo 1.6s infinite;
                 }
-                &.right{
+
+                &.right {
                     box-shadow: 0 0 0 4rpx #cfcfcf;
+
                     &:after {
                         animation: none;
                     }
@@ -326,7 +410,8 @@ const subEnter = () => {
                     opacity: 0;
                 }
 
-                60%, 70% {
+                60%,
+                70% {
                     opacity: 1;
                 }
 
@@ -340,7 +425,7 @@ const subEnter = () => {
                 display: inline-block;
                 width: 0.5em;
                 border-bottom: 5rpx #ccc solid;
-                margin-bottom: -0.5em;
+                margin-bottom: -1.125em;
                 opacity: 0;
             }
         }
@@ -349,6 +434,7 @@ const subEnter = () => {
     .footer {
         box-shadow: 0 0 15px #ececec;
         padding: 0.5em 0;
+        position: relative;
 
         .pan {
             display: flex;
@@ -372,12 +458,13 @@ const subEnter = () => {
             box-shadow: 0 0 0 1rpx #cfcfcf;
             background-color: #f0f0f0;
             border-radius: 5rpx;
+            color: #666;
 
             &.pan-enter,
             &.pan-del,
             &.fen-new,
             &.fen-edit {
-                width: 33%;
+                width: 36%;
                 color: #fcfcfc;
                 box-shadow: none;
             }
@@ -390,6 +477,11 @@ const subEnter = () => {
             &.pan-enter,
             &.fen-edit {
                 background-color: #2ce02c;
+
+                &.dsb {
+                    background-color: #e6e6e6;
+                    color: #999;
+                }
             }
 
             &:active {
@@ -397,16 +489,37 @@ const subEnter = () => {
             }
         }
 
+        .pan-set {
+            border: none;
+            background: none;
+            border: none;
+            box-shadow: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pan-set-btn {
+            background: url(../../assets/set.png) center/cover no-repeat;
+            width: 1.5em;
+            height: 1.5em;
+        }
+
         .fen {
             .fen-title {
                 // background-color: #ececec;
-                background-image: linear-gradient(180deg, #e0e0e0, #f9f9f9);
+                background-image: linear-gradient(180deg, #e0e0e0, #fcfcfc);
                 color: #333;
                 margin-top: -0.5em;
                 line-height: 2.2em;
                 padding: 0 1em;
                 display: flex;
                 justify-content: space-between;
+
+                .fen-title-right {
+                    font-size: 22rpx;
+                    color: #999
+                }
             }
 
             .score {
@@ -478,18 +591,101 @@ const subEnter = () => {
                 color: #232323;
             }
         }
+
+        .set-sys {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            color: #333;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+
+            bottom: 0;
+
+            .set-sys-title {
+                // background-color: #ececec;
+                background-image: linear-gradient(180deg, #e0e0e0, #fcfcfc);
+                margin-top: -0.5em;
+                line-height: 2.5em;
+                padding: 0 1em;
+                display: flex;
+                justify-content: space-between;
+
+                .set-sys-title-right {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    .rest-default {
+                        color: #999;
+                        font-size: 26rpx;
+                    }
+                }
+            }
+
+            .set-sys-bd {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .set-sys-db-list {
+                display: flex;
+                align-items: center;
+                width: 80%;
+
+                .set-sys-db-list-left {
+                    flex-shrink: 0;
+                }
+
+                .set-sys-db-list-right {
+                    flex: 1;
+                }
+            }
+
+            :deep(.hao-slider-block) {
+                background-color: #55a4f3 !important;
+                width: 2.2em !important;
+                // padding: 0 8rpx;
+                text-align: center;
+                border-radius: 6rpx !important;
+                height: 1.5em !important;
+                line-height: 1.5em !important;
+                left: -50%;
+                font-size: 28rpx;
+                color: #fff;
+            }
+
+            :deep(.hao-slider-currentValue) {
+                // display: none;
+                // background: none;
+            }
+
+            .btns {
+                display: flex;
+                margin-top: 1em;
+
+                .set-btn {
+                    padding: 8rpx 16rpx;
+                    border-radius: 5rpx;
+                    margin: 0 1em;
+                    font-size: 28rpx;
+                }
+
+                .set-btn-submit {
+                    background-color: #55a4f3;
+                    color: #f0f0f0;
+                }
+
+                .set-btn-clean {
+                    background-color: #e6e6e6;
+                    color: #999;
+                }
+            }
+        }
     }
 }
 </style>
-<!--
-一.单音节及音节词的拼写规则
-1. j、q、x和ü、üe、ün相拼时,ü上两点要省略。例如：jū(拘)，què(确),xún(寻)。
-2. n、l和ü相拼时,ü上两点要保留。例如：lǖ(旅)，nǚ(女)。
-3. 声母g、k、h不和韵母o、i 、ü相拼。
-4. 声母z、c、s、zh、ch、sh、r不能直接和韵母o、ü相拼。
-5. 韵母i上需加声调时，i上的点要省略。例如：lì(li历)，nín(您),dǐng(顶)。
-6. 韵母o一般只跟声母b、p、m、f相拼。例如：bó(脖)，pò(破)，mō(摸)，fó(佛)。也可跟y、w相拼，例如：yō(哟)，wō(窝)。
-7. 韵母e，除“么(me)”字外，不跟声母b、p、m、f相拼。
-8. 韵母ü不跟声母b、p、m、f相拼。
-9. 用汉语拼音书写句子时，词要连写。
--->
