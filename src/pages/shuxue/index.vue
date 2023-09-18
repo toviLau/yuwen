@@ -12,7 +12,7 @@
             }">
                 <div class="edited" v-if="v[5] > 0">{{ v[5] }}</div>
                 <div class="wait-edited" v-if="v[4] === 0 && !v[5]"></div>
-                <!-- <div class="list-item-idx">{{i+1}}.</div> -->
+                <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}.</div>
                 {{
                     `${v[0]} ${["+", "-"][v[2]]} ${v[1]} = ${curidx !== undefined && numlist[i][3] !== undefined
                         ? numlist[i][3]
@@ -22,13 +22,14 @@
             </div>
         </div>
         <div class="footer" v-show="curidx !== undefined"
-            v-if="submited === 0 && curidx !== '' || submited === 1 || setSystemStatus" :class="{
+            v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
                 dsb:
                     curidx &&
                     (numlist[curidx][3] === undefined ? '' : numlist[curidx][3] + '')
                         .length > 2,
             }">
-            <div class="pan" :class="{ dsb: numlist[curidx][4] === 1 }" v-if="submited === 0 && curidx !== ''">
+            <div class="pan" :class="{ dsb: numlist[curidx][4] === 1, easyKeyboard: !keyboard }"
+                v-if="submited === 0 && curidx !== '' && !setConfig.status">
                 <div class="pan-item" v-for="i in 9" @click="keyNum(i)">
                     {{ i }}
                 </div>
@@ -38,27 +39,27 @@
                 <div class="pan-footer">
                     <div class="pan-item pan-enter" @click="subEnter()">查看得分</div>
                     <div class="pan-item pan-set">
-                        <div class="pan-set-btn" @click="setSystemStatusFn(true)"></div>
+                        <div class="pan-set-btn" @click="showConfig(true)"></div>
                     </div>
                     <div class="pan-item pan-del" @click="keyNum('del')">⇐</div>
                 </div>
             </div>
-            <div class="fen" v-if="submited === 1">
+            <div class="fen" v-if="submited === 1 && !setConfig.status">
                 <div class="fen-title">
                     <div class="fen-title-left">宝贝你的得分</div>
-                    <div class="fen-title-right">题量: {{ totalNum }}</div>
+                    <div class="fen-title-right">题目数量: {{ totalNum }}</div>
                 </div>
                 <div class="score">{{ score }}</div>
                 <div class="comment">{{ comment }}</div>
                 <div class="fen-btns">
                     <div class="fen-item fen-edit" @click="edit()" :class="{ dsb: score === 100 }">去订正</div>
                     <div class="pan-item pan-set">
-                        <div class="pan-set-btn" @click="setSystemStatusFn(true)"></div>
+                        <div class="pan-set-btn" @click="showConfig(true)"></div>
                     </div>
                     <div class="fen-item fen-new" @click="createList()">做新题</div>
                 </div>
             </div>
-            <div class="set-sys" v-if="setSystemStatus">
+            <div class="set-sys" v-if="setConfig.status">
                 <div class="set-sys-title">
                     <div class="set-sys-title-left">设置</div>
                     <div class="set-sys-title-right">
@@ -67,15 +68,39 @@
                 </div>
                 <div class="set-sys-bd">
                     <div class="set-sys-db-list">
-                        <div class="set-sys-db-list-left">题量：</div>
+                        <div class="set-sys-db-list-left">题目数量：</div>
                         <div class="set-sys-db-list-right">
-                            <hao-slider :step="10" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="10" :value="setNum"
-                                @change="setNumChange" />
+                            <hao-slider :step="10" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="10"
+                                :value="setConfig.totalNum" @change="setNumChange" />
+                        </div>
+                    </div>
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">显示序号：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="set-sys-switch">
+                                <div class="set-sys-switch-item set-sys-switch-c">
+                                    <zeroSwitch :size="20" v-model="setConfig.showIdx" inactiveColor="#f9f9f9" activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#dcdcdc"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">键盘布局：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="set-sys-switch">
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">简约
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-c">
+                                    <zeroSwitch :size="20" v-model="setConfig.keyboard" inactiveColor="#f9f9f9" activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3"/>
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">九宫格
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="btns">
-                        <div class="set-btn set-btn-submit" @click="setNumSubmit()">确定题量</div>
-                        <div class="set-btn set-btn-clean" @click="setSystemStatusFn(false)">取消设置</div>
+                        <div class="set-btn set-btn-submit" @click="setNumSubmit()">保存</div>
+                        <div class="set-btn set-btn-clean" @click="showConfig(false)">取消</div>
                     </div>
 
                 </div>
@@ -89,6 +114,7 @@ import { onMounted, ref, reactive, watch } from "vue";
 import { random } from "../../module/tools";
 import date from 'date-php'
 import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
+import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
 import { onReady, onShow, onHide } from '@dcloudio/uni-app'
 
 const numlist = reactive([]); // 数据列表:[[数字1,数字2, 运算符, 用户运算结果, 结果对错判定, 订正次数], ...]
@@ -96,15 +122,29 @@ const submited = ref(0); // 是否提交
 const score = ref(0); // 得分
 const comment = ref(""); // 评语
 const curidx = ref(); // 当前所计算的索引数据
-// const edited = ref(0); // 订正次数
 const startTime = ref(0) // 开始时间
 const startTimed = ref('') // 已用时
 const subEnterTime = ref('') // 提交时间
 const contTimeId = ref() // 计时定时器 ID
-const lTotalNum = uni.getStorageSync('totalNum') || 50; // 缓存读取
-const totalNum = ref(lTotalNum) // 题量
-const setNum = ref(totalNum.value); // 设置滑块题量
-const setSystemStatus = ref(false) // 设置框显隐
+const defaultConf = { // 默认配置
+    totalNum: 50, // 题目数量
+    keyboard: true, // 键盘类型[false:简单, true:九宫格]
+    showIdx: false // 显示序号
+}
+const getStorageData = () => { // 读取设置缓存
+    return uni.getStorageSync('config') || {...defaultConf};
+}
+const storageConf = getStorageData() // 获取
+
+const setConfig = reactive(
+    Object.assign(storageConf, {
+        status: false, // 设置框显隐
+    })
+) // 设置数据
+
+const totalNum = ref(storageConf.totalNum) // 题目数量
+const keyboard = ref(storageConf.keyboard) // 键盘类型
+const showIdx = ref(storageConf.showIdx) // 显示序号
 
 // onShow(()=>{
 //     debugger
@@ -137,7 +177,6 @@ function createList() {
     }
     edit(true);
     curidx.value = "";
-    // edited.value = 0;
     startTime.value = Date.now()
     contTime()
 }
@@ -258,26 +297,35 @@ const subEnter = () => {
 };
 
 // 设置窗口显隐
-const setSystemStatusFn = (val = false) => {
-    setSystemStatus.value = val
+const showConfig = (val = false) => {
+    if (val) Object.assign(setConfig, getStorageData())
+    setConfig.status = val
 }
 
-// 滑块数量设置
-function setNumFn(num, isSaveLocalstrage = false) {
-    setNum.value = num
-    if (isSaveLocalstrage) uni.setStorageSync('totalNum', num)
+// 滑块题目数量设置
+function setNumFn(num) {
+    setConfig.totalNum = num
 }
+
+// 键盘布局设置
 
 // 恢复默认
 const setNumDefault = () => {
-    setNumFn(50)
+    Object.assign(setConfig, defaultConf)
 }
-// 确定题量
+// 保存设置
 const setNumSubmit = val => {
-    setNumFn(setNum.value, true)
-    totalNum.value = setNum.value
-    setSystemStatusFn(false)
-    createList()
+    const _setConfig = { ...setConfig }
+    delete _setConfig.status
+    uni.setStorageSync('config', _setConfig)
+    keyboard.value = setConfig.keyboard
+    showIdx.value = setConfig.showIdx
+    showConfig(false)
+    if (totalNum.value !== setConfig.totalNum) {
+        totalNum.value = setConfig.totalNum
+        createList()
+    }
+
 }
 // 滑块更新
 const setNumChange = val => {
@@ -288,6 +336,7 @@ const setNumChange = val => {
 <style lang="less">
 .content {
     height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
 
@@ -317,11 +366,11 @@ const setNumChange = val => {
 
         .list-item {
             border-bottom: 1px solid #ccc;
-            font-size: 32rpx;
+            font-size: 30rpx;
             line-height: 2.95em;
             width: 42%;
             margin: 0 auto;
-            padding: 0 .6em;
+            padding-left: .6em;
             box-sizing: border-box;
             position: relative;
             overflow: hidden;
@@ -331,16 +380,25 @@ const setNumChange = val => {
             color: #333;
 
             .list-item-idx {
-                background-color: #f6f6f6;
-                border: 1px solid #ececec;
+                // background-color: #f6f6f6;
+                // border: 1px solid #ececec;
+
+                // color: #ccc;
+                // padding: 0 .3em;
+                // width: 2.3em;
+                // line-height: 1.5em;
+                // margin-right: .35em;
+
+                border: 1px solid #f0f0f0;
                 border-radius: 5rpx;
                 color: #ccc;
-                padding: 0 .3em;
+                padding: 0 0.3em;
                 width: 2.3em;
-                line-height: 1.5em;
-                margin-right: .35em;
+                line-height: 1.6em;
+                margin-right: 0.35em;
                 font-size: 18rpx;
-
+                background-image: linear-gradient(180deg, #e9e9e9, #fcfcfc);
+                margin-left: -0.6em;
             }
 
             .edited,
@@ -473,7 +531,7 @@ const setNumChange = val => {
         .pan-item,
         .fen-item {
             margin: 6rpx 0;
-            line-height: 2em;
+            line-height: 2.2em;
             text-align: center;
             box-shadow: 0 0 0 1rpx #cfcfcf;
             background-color: #f0f0f0;
@@ -509,6 +567,10 @@ const setNumChange = val => {
             &:active {
                 opacity: 0.618;
             }
+        }
+
+        .easyKeyboard .pan-item {
+            width: 18%;
         }
 
         .pan-item {
@@ -631,15 +693,15 @@ const setNumChange = val => {
         }
 
         .set-sys {
-            position: absolute;
-            top: 0;
+            // position: absolute;
+            // top: 0;
+            // bottom: 0;
             width: 100%;
             color: #333;
             background-color: #fff;
             display: flex;
             flex-direction: column;
 
-            bottom: 0;
 
             .set-sys-title {
                 // background-color: #ececec;
@@ -668,20 +730,61 @@ const setNumChange = val => {
                 flex: 1;
                 justify-content: center;
                 align-items: center;
+                padding: 1em 0;
             }
 
             .set-sys-db-list {
                 display: flex;
                 align-items: center;
                 width: 80%;
+                padding: .2em;
 
                 .set-sys-db-list-left {
                     flex-shrink: 0;
+                    width: 5.5em;
+                    text-align: right;
                 }
 
                 .set-sys-db-list-right {
                     flex: 1;
                 }
+
+                .set-sys-switch {
+                    display: flex;
+                    align-items: center;
+                    color: #c0c0c0;
+                    font-size: 26rpx;
+
+                    :deep(.uni-switch-input) {
+                        background-color: #55a4f3 !important;
+                        transform: scale(0.7) !important;
+                    }
+
+                    :deep(.double-switch) {
+                        .uni-switch-input {
+                            &::before {
+                                background-color: inherit !important;
+                            }
+                        }
+                    }
+
+
+                    .set-sys-switch-item {
+                        line-height: 30rpx;
+
+                        &.cur {
+                            color: #55a4f3;
+                            // font-weight: bolder;
+                        }
+                    }
+
+                    .set-sys-switch-l {}
+
+                    .set-sys-switch-c {}
+
+                    .set-sys-switch-r {}
+                }
+
             }
 
             :deep(.hao-slider-block) {
@@ -697,10 +800,10 @@ const setNumChange = val => {
                 color: #fff;
             }
 
-            :deep(.hao-slider-currentValue) {
-                // display: none;
-                // background: none;
-            }
+            // :deep(.hao-slider-currentValue) {
+            //     // display: none;
+            //     // background: none;
+            // }
 
             .btns {
                 display: flex;
@@ -711,6 +814,8 @@ const setNumChange = val => {
                     border-radius: 5rpx;
                     margin: 0 1em;
                     font-size: 28rpx;
+                    width: 5em;
+                    text-align: center;
                 }
 
                 .set-btn-submit {
