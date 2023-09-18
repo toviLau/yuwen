@@ -521,7 +521,7 @@ const setNumChange = val => {
             justify-content: space-evenly;
 
             &.dsb {
-                .pan-item:not(.pan-enter) {
+                &>.pan-item:not(.pan-enter),.pan-del {
                     background-color: #f6f6f6;
                     color: #ccc;
                 }
@@ -531,7 +531,7 @@ const setNumChange = val => {
         .pan-item,
         .fen-item {
             margin: 6rpx 0;
-            line-height: 2.2em;
+            line-height: 2em;
             text-align: center;
             box-shadow: 0 0 0 1rpx #cfcfcf;
             background-color: #f0f0f0;
