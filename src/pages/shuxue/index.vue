@@ -393,7 +393,7 @@ const setNumChange = val => {
                 border-radius: 5rpx;
                 color: #ccc;
                 padding: 0 0.3em;
-                width: 2.3em;
+                width: 2em;
                 line-height: 1.6em;
                 margin-right: 0.35em;
                 font-size: 18rpx;
