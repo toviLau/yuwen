@@ -56,7 +56,7 @@
                     <div class="pan-item pan-set">
                         <div class="pan-set-btn" @click="showConfig(true)"></div>
                     </div>
-                    <div class="fen-item fen-new" @click="createList()">做新题</div>
+                    <div class="fen-item fen-new" @click="createList(true)">做新题</div>
                 </div>
             </div>
             <div class="set-sys" v-if="setConfig.status">
@@ -70,8 +70,7 @@
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">题目数量：</div>
                         <div class="set-sys-db-list-right">
-                            <hao-slider :step="10" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="10"
-                                :value="setConfig.totalNum" @change="setNumChange" />
+                            <hao-slider :step="10" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="10" :value="setConfig.totalNum" @change="setNumChange" class="set-slider" />
                         </div>
                     </div>
                     <div class="set-sys-db-list">
@@ -162,25 +161,33 @@ uni.showShareMenu({
 });
 //#endif
 // 生成数据列表
-function createList() {
-    numlist.length = 0;
-    score.value = 0
-    for (let i = 0; i < totalNum.value; i++) {
-        const numArr = [random(8, "1-90") - 0, random(8, "1-90") - 0]; // 两数字生成
-        const notation = Math.random() > 0.5 ? 1 : 0; // 运算符 0:+, 1:-
-        if (notation === 1 && numArr[0] < numArr[1]) numArr.reverse(); // 运算符是- 且 数1 < 数2 会调换两数位置(二年级还没有学负数)
-        if (notation === 0 && numArr[0] + numArr[1] > 100) { // 100以内加减法和不能超过100, 重新生成大数数值
-            const bigValIdx = numArr[0] > numArr[1] ? 0 : 1
-            numArr[bigValIdx] = random(8, `1-${100 - numArr[bigValIdx]}`) - 0
+function createList(isInit=true) {
+    function createData(num){
+        for (let i = 0; i < num; i++) {
+            const numArr = [random(8, "1-90") - 0, random(8, "1-90") - 0]; // 两数字生成
+            const notation = Math.random() > 0.5 ? 1 : 0; // 运算符 0:+, 1:-
+            if (notation === 1 && numArr[0] < numArr[1]) numArr.reverse(); // 运算符是- 且 数1 < 数2 会调换两数位置(二年级还没有学负数)
+            if (notation === 0 && numArr[0] + numArr[1] > 100) { // 100以内加减法和不能超过100, 重新生成大数数值
+                const bigValIdx = numArr[0] > numArr[1] ? 0 : 1
+                numArr[bigValIdx] = random(8, `1-${100 - numArr[bigValIdx]}`) - 0
+            }
+            numlist.push(numArr.concat(notation, undefined, undefined, undefined));
         }
-        numlist.push(numArr.concat(notation, undefined, undefined, undefined));
     }
+    isInit 
+        ? createData(totalNum.value)
+        : totalNum.value > numlist.length
+            ? createData(totalNum.value - numlist.length)
+            : numlist.length = totalNum.value
+
+    score.value = 0
+
     edit(true);
     curidx.value = "";
     startTime.value = Date.now()
     contTime()
 }
-createList();
+createList(true);
 
 /**
  * 计时操作
@@ -323,7 +330,7 @@ const setNumSubmit = val => {
     showConfig(false)
     if (totalNum.value !== setConfig.totalNum) {
         totalNum.value = setConfig.totalNum
-        createList()
+        createList(false)
     }
 
 }
@@ -362,13 +369,13 @@ const setNumChange = val => {
         flex: 1;
         overflow: auto;
         flex-wrap: wrap;
-        padding: 0.25em 0;
+        padding: 0.25em .1em;
 
         .list-item {
             border-bottom: 1px solid #ccc;
             font-size: 30rpx;
             line-height: 2.95em;
-            width: 42%;
+            // width: 42%;
             margin: 0 auto;
             padding-left: .6em;
             box-sizing: border-box;
@@ -378,6 +385,9 @@ const setNumChange = val => {
             align-items: center;
             text-align: center;
             color: #333;
+            min-width: 260rpx;
+            flex: 1;
+            margin: 0 .75em;
 
             .list-item-idx {
                 // background-color: #f6f6f6;
@@ -599,7 +609,7 @@ const setNumChange = val => {
         }
 
         .pan-set-btn {
-            background: url(../../assets/set.png) center/cover no-repeat;
+            background: url(../../assets/set.svg) center/cover no-repeat;
             width: 1.5em;
             height: 1.5em;
         }
@@ -711,7 +721,7 @@ const setNumChange = val => {
                 padding: 0 1em;
                 display: flex;
                 justify-content: space-between;
-
+                font-size: 30rpx;
                 .set-sys-title-right {
                     display: flex;
                     align-items: center;
@@ -738,10 +748,12 @@ const setNumChange = val => {
                 align-items: center;
                 width: 80%;
                 padding: .2em;
+                font-size: 26rpx;
+                line-height: 1.5em;
 
                 .set-sys-db-list-left {
                     flex-shrink: 0;
-                    width: 5.5em;
+                    width: 6.5em;
                     text-align: right;
                 }
 
@@ -753,7 +765,7 @@ const setNumChange = val => {
                     display: flex;
                     align-items: center;
                     color: #c0c0c0;
-                    font-size: 26rpx;
+                    font-size: 20rpx;
 
                     :deep(.uni-switch-input) {
                         background-color: #55a4f3 !important;
@@ -786,7 +798,9 @@ const setNumChange = val => {
                 }
 
             }
-
+            .set-slider{
+                width: 90%;
+            }
             :deep(.hao-slider-block) {
                 background-color: #55a4f3 !important;
                 width: 2.2em !important;
