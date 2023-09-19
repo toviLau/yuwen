@@ -20,6 +20,7 @@
                         }`
                 }}
             </div>
+            <div class="list-item list-item-none" v-for="i in 10"/>
         </div>
         <div class="footer" v-show="curidx !== undefined"
             v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
@@ -70,7 +71,8 @@
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">题目数量：</div>
                         <div class="set-sys-db-list-right">
-                            <hao-slider :step="10" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="10" :value="setConfig.totalNum" @change="setNumChange" class="set-slider" />
+                            <hao-slider :step="10" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="10"
+                                :value="setConfig.totalNum" @change="setNumChange" class="set-slider" />
                         </div>
                     </div>
                     <div class="set-sys-db-list">
@@ -78,7 +80,8 @@
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.showIdx" inactiveColor="#f9f9f9" activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#dcdcdc"/>
+                                    <zeroSwitch :size="20" v-model="setConfig.showIdx" inactiveColor="#f9f9f9"
+                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#dcdcdc" />
                                 </div>
                             </div>
                         </div>
@@ -90,7 +93,8 @@
                                 <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">简约
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.keyboard" inactiveColor="#f9f9f9" activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3"/>
+                                    <zeroSwitch :size="20" v-model="setConfig.keyboard" inactiveColor="#f9f9f9"
+                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">九宫格
                                 </div>
@@ -101,7 +105,6 @@
                         <div class="set-btn set-btn-submit" @click="setNumSubmit()">保存</div>
                         <div class="set-btn set-btn-clean" @click="showConfig(false)">取消</div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -131,7 +134,7 @@ const defaultConf = { // 默认配置
     showIdx: false // 显示序号
 }
 const getStorageData = () => { // 读取设置缓存
-    return uni.getStorageSync('config') || {...defaultConf};
+    return uni.getStorageSync('config') || { ...defaultConf };
 }
 const storageConf = getStorageData() // 获取
 
@@ -161,8 +164,9 @@ uni.showShareMenu({
 });
 //#endif
 // 生成数据列表
-function createList(isInit=true) {
-    function createData(num){
+function createList(isInit = true) {
+    function createData(num) {
+        if (isInit) numlist.length = 0
         for (let i = 0; i < num; i++) {
             const numArr = [random(8, "1-90") - 0, random(8, "1-90") - 0]; // 两数字生成
             const notation = Math.random() > 0.5 ? 1 : 0; // 运算符 0:+, 1:-
@@ -174,7 +178,7 @@ function createList(isInit=true) {
             numlist.push(numArr.concat(notation, undefined, undefined, undefined));
         }
     }
-    isInit 
+    isInit
         ? createData(totalNum.value)
         : totalNum.value > numlist.length
             ? createData(totalNum.value - numlist.length)
@@ -388,17 +392,12 @@ const setNumChange = val => {
             min-width: 260rpx;
             flex: 1;
             margin: 0 .75em;
+            &.list-item-none{
+                border: none;
+                line-height: 0;
+            }
 
             .list-item-idx {
-                // background-color: #f6f6f6;
-                // border: 1px solid #ececec;
-
-                // color: #ccc;
-                // padding: 0 .3em;
-                // width: 2.3em;
-                // line-height: 1.5em;
-                // margin-right: .35em;
-
                 border: 1px solid #f0f0f0;
                 border-radius: 5rpx;
                 color: #ccc;
@@ -475,7 +474,6 @@ const setNumChange = val => {
                 }
             }
 
-            // &.cur-item:not(.right) {
             &.cur-item {
                 box-shadow: 0 0 0 4rpx #b6aafa;
                 border-bottom: none;
@@ -531,7 +529,9 @@ const setNumChange = val => {
             justify-content: space-evenly;
 
             &.dsb {
-                &>.pan-item:not(.pan-enter),.pan-del {
+
+                &>.pan-item:not(.pan-enter),
+                .pan-del {
                     background-color: #f6f6f6;
                     color: #ccc;
                 }
@@ -603,7 +603,6 @@ const setNumChange = val => {
             box-shadow: none;
             display: flex;
             flex: 1;
-            // width: auto;
             justify-content: center;
             align-items: center;
         }
@@ -616,7 +615,6 @@ const setNumChange = val => {
 
         .fen {
             .fen-title {
-                // background-color: #ececec;
                 background-image: linear-gradient(180deg, #e0e0e0, #fcfcfc);
                 color: #333;
                 margin-top: -0.5em;
@@ -642,11 +640,9 @@ const setNumChange = val => {
                 &:after,
                 &:before {
                     content: "";
-                    // border: 1rpx solid #ed5d46;
                     position: absolute;
                     left: 50%;
                     top: 50%;
-                    // width: 3em;
                     height: .06em;
                     background-color: #ed5d46;
                 }
@@ -654,7 +650,6 @@ const setNumChange = val => {
                 &:after {
                     margin-left: -0.816em;
                     width: 1.8em;
-                    // bottom: 10rpx;
                     margin-top: .42em;
                     transform: rotate(-6deg);
                 }
@@ -662,7 +657,6 @@ const setNumChange = val => {
                 &:before {
                     margin-left: -0.7em;
                     width: 2em;
-                    // bottom: 5rpx;
                     margin-top: .5em;
                     transform: rotate(-5deg);
                 }
@@ -703,9 +697,6 @@ const setNumChange = val => {
         }
 
         .set-sys {
-            // position: absolute;
-            // top: 0;
-            // bottom: 0;
             width: 100%;
             color: #333;
             background-color: #fff;
@@ -714,7 +705,6 @@ const setNumChange = val => {
 
 
             .set-sys-title {
-                // background-color: #ececec;
                 background-image: linear-gradient(180deg, #e0e0e0, #fcfcfc);
                 margin-top: -0.5em;
                 line-height: 2.5em;
@@ -722,6 +712,7 @@ const setNumChange = val => {
                 display: flex;
                 justify-content: space-between;
                 font-size: 30rpx;
+
                 .set-sys-title-right {
                     display: flex;
                     align-items: center;
@@ -798,9 +789,11 @@ const setNumChange = val => {
                 }
 
             }
-            .set-slider{
+
+            .set-slider {
                 width: 90%;
             }
+
             :deep(.hao-slider-block) {
                 background-color: #55a4f3 !important;
                 width: 2.2em !important;
@@ -813,11 +806,6 @@ const setNumChange = val => {
                 font-size: 28rpx;
                 color: #fff;
             }
-
-            // :deep(.hao-slider-currentValue) {
-            //     // display: none;
-            //     // background: none;
-            // }
 
             .btns {
                 display: flex;
