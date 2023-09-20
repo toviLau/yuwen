@@ -26,7 +26,8 @@
 				 class="hao-slider-block" 
 				 @touchmove="sliderMove" 
 				 @touchstart="sliderStart" 
-				 @touchend="sliderEnd">{{ Math.round(currentValue / 10) * 10 }}</view>
+				 @touchend="sliderEnd">{{ Math.round(currentValue / step) * step }}</view>
+				 <!-- @touchend="sliderEnd">{{ currentValue }}</view> -->
 				<view
 				  v-if="!imgSliderUrl&&isSliderTop" 
 				  :style="{'position': 'absolute','border-radius': '50%','width':sliderBlockSize+'rpx','height':sliderBlockSize+'rpx','top':blockTop,'left':-(sliderBlockSize/2)+'rpx','background-color':sliderBgColor,'box-shadow':sliderBlockShadow}" 

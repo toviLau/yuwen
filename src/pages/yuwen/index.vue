@@ -27,14 +27,14 @@
         <div class="select"
              :style="{display: show ? 'block' : 'none'}">
             <div class="form">
-<!--                <div class="switch">合并模式:-->
-<!--                    <switch :checked="isMerge"-->
-<!--                            color="#FFCC33"-->
-<!--                            @change="s=>isMerge = s.detail.value"-->
-<!--                            style="transform:scale(0.7)"/>-->
-<!--                    <span class="tip"-->
-<!--                          v-show="isMerge">声母可选: {{ selectLenSm }}个 - 韵母可选: {{ selectLenYm }}个</span>-->
-<!--                </div>-->
+               <!-- <div class="switch">合并模式:
+                   <switch :checked="isMerge"
+                           color="#FFCC33"
+                           @change="s=>isMerge = s.detail.value"
+                           style="transform:scale(0.7)"/>
+                   <span class="tip"
+                         v-show="isMerge">声母可选: {{ selectLenSm }}个 - 韵母可选: {{ selectLenYm }}个</span>
+               </div> -->
                 <div class="btns">
                     <button class="btn"
                             size="mini"

@@ -5,7 +5,7 @@
             <div class="top-right">用时: {{ startTimed }}</div>
         </div>
         <div class="list">
-            <div class="list-item" v-for="(v, i) in numlist" @click="ckItem(i)" :class="{
+            <div class="list-item" v-for="(v, i) in numlist" :key="i" @click="ckItem(i)" :class="{
                 'cur-item': i === curidx && submited === 0,
                 right: v[4] === 1,
                 wrong: v[4] === 0 && !['', undefined].includes(v[3]),
@@ -19,8 +19,14 @@
                         : ""
                         }`
                 }}
+                <div v-show="v[4] === 0">
+                    <div class="tip-wrong" v-if="numlist[i][3] === v[0] + v[1]">粗心了吧，是不是当成加(+)法算啦。</div>
+                    <div class="tip-wrong" v-if="numlist[i][3] === v[0] - v[1] + 10">忘记借位了吧？</div>
+                    <div class="tip-wrong" v-if="numlist[i][3] === v[0] - v[1]">这是加法哦，粗心当减(-)法算了么？</div>
+                    <div class="tip-wrong" v-if="numlist[i][3] === v[0] + v[1] - 10 && v[0] % 10 + v[1] % 10 > 9">忘记进位了吧?</div>
+                </div>
             </div>
-            <div class="list-item list-item-none" v-for="i in 10"/>
+            <div class="list-item list-item-none" v-for="i in 10"  :key="i"/>
         </div>
         <div class="footer" v-show="curidx !== undefined"
             v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
@@ -101,9 +107,16 @@
                             </div>
                         </div>
                     </div>
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">背景音量：</div>
+                        <div class="set-sys-db-list-right">
+                            <hao-slider :step="1" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="0"
+                                :value="setConfig.bgmVolume" @change="bgmVolumeChange" class="set-slider" />
+                        </div>
+                    </div>
                     <div class="btns">
-                        <div class="set-btn set-btn-submit" @click="setNumSubmit()">保存</div>
-                        <div class="set-btn set-btn-clean" @click="showConfig(false)">取消</div>
+                        <div class="set-btn set-btn-submit" @click="saveConfig()">保存</div>
+                        <div class="set-btn set-btn-clean" @click="cleanConfig()">取消</div>
                     </div>
                 </div>
             </div>
@@ -117,7 +130,8 @@ import { random } from "../../module/tools";
 import date from 'date-php'
 import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
 import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
-import { onReady, onShow, onHide } from '@dcloudio/uni-app'
+import { onReady, onShow, onHide, onUnload } from '@dcloudio/uni-app'
+import bgm from "../../assets/music/sxg.mp3";
 
 const numlist = reactive([]); // 数据列表:[[数字1,数字2, 运算符, 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
@@ -131,10 +145,11 @@ const contTimeId = ref() // 计时定时器 ID
 const defaultConf = { // 默认配置
     totalNum: 50, // 题目数量
     keyboard: true, // 键盘类型[false:简单, true:九宫格]
-    showIdx: false // 显示序号
+    showIdx: false, // 显示序号
+    bgmVolume: 50 // 背景音乐音量
 }
 const getStorageData = () => { // 读取设置缓存
-    return uni.getStorageSync('config') || { ...defaultConf };
+    return Object.assign({}, defaultConf, uni.getStorageSync('config'));
 }
 const storageConf = getStorageData() // 获取
 
@@ -155,7 +170,9 @@ const showIdx = ref(storageConf.showIdx) // 显示序号
 // onHide(()=>{
 //     subEnterTime.value = Date.now()
 // })
+
 // #ifdef MP-WEIXIN
+// 条件编译--仅微信
 uni.showShareMenu({
     title: '四小二(8)班',
     content: '二年级数学100以内加减法',
@@ -307,6 +324,14 @@ const subEnter = () => {
     if (totleLen * 0.5 > fillLen) comment.value = commentArr[5];
 };
 
+// BGM
+const innerAudioContext = uni.createInnerAudioContext();
+Object.assign(innerAudioContext, {
+    src: bgm,
+    volume: storageConf.bgmVolume / 100 || 0.8,
+    autoplay: true,
+    loop: true
+})
 // 设置窗口显隐
 const showConfig = (val = false) => {
     if (val) Object.assign(setConfig, getStorageData())
@@ -325,23 +350,50 @@ const setNumDefault = () => {
     Object.assign(setConfig, defaultConf)
 }
 // 保存设置
-const setNumSubmit = val => {
+const saveConfig = val => {
     const _setConfig = { ...setConfig }
     delete _setConfig.status
     uni.setStorageSync('config', _setConfig)
     keyboard.value = setConfig.keyboard
     showIdx.value = setConfig.showIdx
+    innerAudioContext.volume = setConfig.bgmVolume/100
     showConfig(false)
     if (totalNum.value !== setConfig.totalNum) {
         totalNum.value = setConfig.totalNum
         createList(false)
     }
-
+}
+const cleanConfig = ()=>{
+    innerAudioContext.volume = getStorageData().bgmVolume/100
+    showConfig(false)
 }
 // 滑块更新
 const setNumChange = val => {
+    innerAudioContext.volume = setConfig.bgmVolume/100
     setNumFn(Math.round(val / 10) * 10)
 }
+
+const bgmVolumeChange = val => {
+    setConfig.bgmVolume = val
+    innerAudioContext.volume = val/100
+}
+onUnload(()=>{
+    innerAudioContext.destroy()
+})
+onShow(()=>{
+    setTimeout(()=>{
+        innerAudioContext.volume = setConfig.bgmVolume/100
+    }, 10)
+})
+
+// innerAudioContext.src = 'https://bjetxgzv.cdn.bspapp.com/VKCEYUGU-hello-uniapp/2cc220e0-c27a-11ea-9dfb-6da8e309e0d8.mp3'
+// innerAudioContext.onPlay(() => {
+//   console.log('开始播放');
+// });
+// innerAudioContext.onError((res) => {
+//   console.log(res.errMsg);
+//   console.log(res.errCode);
+// });
 </script>
 
 <style lang="less">
@@ -360,10 +412,8 @@ const setNumChange = val => {
         display: flex;
         justify-content: space-between;
         line-height: 1.5em;
-
-        .top-left {}
-
-        .top-right {}
+        // .top-left {}
+        // .top-right {}
     }
 
     //   height: 100vh;
@@ -389,9 +439,9 @@ const setNumChange = val => {
             align-items: center;
             text-align: center;
             color: #333;
-            min-width: 260rpx;
+            min-width: 9.75em;
             flex: 1;
-            margin: 0 .75em;
+            margin: 0 .35em;
             &.list-item-none{
                 border: none;
                 line-height: 0;
@@ -490,6 +540,17 @@ const setNumChange = val => {
                         animation: none;
                     }
                 }
+            }
+            .tip-wrong{
+                position: absolute;
+                left:0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(244, 227, 172, 0.6);
+                color:#c9a631;
+                line-height: 1.6em;
+                font-size: 18rpx;
+                padding: 0 .5em;
             }
 
             @keyframes guang-biao-shan-shuo {
@@ -781,11 +842,9 @@ const setNumChange = val => {
                         }
                     }
 
-                    .set-sys-switch-l {}
-
-                    .set-sys-switch-c {}
-
-                    .set-sys-switch-r {}
+                    // .set-sys-switch-l {}
+                    // .set-sys-switch-c {}
+                    // .set-sys-switch-r {}
                 }
 
             }
