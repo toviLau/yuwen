@@ -24,8 +24,19 @@ async function setup(){
 </script>
 <script setup>
 import { onMounted, ref, watch, reactive } from 'vue';
-// const { miniProgram } = uni.getAccountInfoSync()
-// console.log(miniProgram, '=========');
+
+// new Promise(resolve=>{
+//     const { miniProgram:version } = uni.getAccountInfoSync()
+//     resolve(version)
+// }).then(()=>{
+
+// })
+// // console.log(miniProgram, '=========');
+onMounted(()=>{
+    // const { miniProgram:version } = uni.getAccountInfoSync
+    // console.log(miniProgram, '=========');
+})
+console.log(uni);
 
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
