@@ -64,7 +64,7 @@
                     <div class="pan-item pan-set">
                         <div class="pan-set-btn" @click="showConfig(true)"></div>
                     </div>
-                    <div class="fen-item fen-new" @click="createList(true)">做新题</div>
+                    <div class="fen-item fen-new" @click="[createList(true), playSound(musicArr['dian2_mp3'])]">做新题</div>
                 </div>
             </div>
             <div class="set-sys" v-if="setConfig.status">
@@ -173,6 +173,7 @@ const setConfig = reactive(
 watch(setConfig, ()=>{
     playSound(musicArr['dian2_mp3'])
 })
+
 const totalNum = ref(storageConf.totalNum) // 题目数量
 const keyboard = ref(storageConf.keyboard) // 键盘类型
 const showIdx = ref(storageConf.showIdx) // 显示序号
@@ -255,7 +256,7 @@ function contTime(isStop = false) {
 function edit() {
     if (score.value === 100) return
     submited.value = 0;
-    curidx.value = "";
+    curidx.value = numlist.findIndex(res=>[undefined, 0, ''].includes(res[4]))
     startTime.value = startTime.value + ((Date.now() - subEnterTime.value).toString().replace(/\d{3}$/, '000') - 0 + 1000)
     contTime()
 }
@@ -277,6 +278,7 @@ const ckItem = (idx) => {
 const keyNum = (key) => {
     playSound(musicArr['dian2_mp3'])
     const _val = (numlist[curidx.value][3] || "") + '';
+    if(numlist[curidx.value][4] !== 1) numlist[curidx.value][4] = ''
     numlist[curidx.value][3] = key === "del"
         // 删除事件
         ? numlist[curidx.value][4] !== 1
@@ -322,15 +324,19 @@ const subEnter = () => {
     switch (true) {
         case score.value > 99:
             comment.value = commentArr[0];
+            playSound(musicArr['wa_mp3'])
             break;
         case score.value > 89:
             comment.value = commentArr[1];
+            playSound(musicArr['ao_mp3'])
             break;
         case score.value > 79:
             comment.value = commentArr[2];
+            playSound(musicArr['tantiao_mp3'])
             break;
         case score.value > 69:
             comment.value = commentArr[3];
+            playSound(musicArr['jiong_mp3'])
             break;
         default:
             comment.value = commentArr[4];
@@ -407,6 +413,7 @@ onShow(() => {
 })
 
 const playSound = name => {
+    
     const innerAudioContext = uni.createInnerAudioContext();
     Object.assign(innerAudioContext, {
         src: name,
