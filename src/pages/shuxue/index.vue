@@ -300,10 +300,12 @@ const subEnter = () => {
 
     // 对错判定
     numlist.map((res) => {
-        const _val = res[2] === 0 ? res[0] + res[1] : res[0] - res[1];
-        if (res[4] === '' && !['', undefined].includes(res[3])) res[5] = res[5] ? res[5] + 1 : 1 // 订正次数
+        const _val = res[2] === 0 ? res[0] + res[1] : res[0] - res[1];        
+        // 01运算数 2运算符 3用户答案 4对错 5订正次数
+        if(res[4] !== 0 && !['', undefined].includes(res[3]) && _val !== res[3]) {
+            res[5] = !['', undefined].includes(res[5]) ? res[5] + 1 : 0 // 订正次数
+        }
         if (!['', undefined].includes(res[3])) res[4] = _val === res[3] ? 1 : 0; // 1对,0错
-
     });
 
     const totleLen = numlist.length; // 总题数
@@ -368,13 +370,12 @@ function setNumFn(num) {
     setConfig.totalNum = num
 }
 
-// 键盘布局设置
-
 // 恢复默认
 const setNumDefault = () => {
     playSound(musicArr['dian2_mp3'])
     Object.assign(setConfig, defaultConf)
 }
+
 // 保存设置
 const saveConfig = val => {
     const _setConfig = { ...setConfig }
@@ -389,31 +390,33 @@ const saveConfig = val => {
         createList(false)
     }
 }
+// 取消设置
 const cleanConfig = () => {
     innerAudioContext.volume = getStorageData().bgmVolume / 20
     showConfig(false)
 }
-// 滑块更新
+// 题目数量滑块更新
 const setNumChange = val => {
     innerAudioContext.volume = setConfig.bgmVolume / 20
     setNumFn(Math.round(val / 10) * 10)
 }
 
+// 音量滑块更新
 const bgmVolumeChange = val => {
     setConfig.bgmVolume = val
     innerAudioContext.volume = val / 20
 }
-onUnload(() => {
-    innerAudioContext.destroy()
-})
+// onUnload(() => {
+//     innerAudioContext.destroy()
+// })
 onShow(() => {
     setTimeout(() => {
         innerAudioContext.volume = setConfig.bgmVolume / 20
     }, 10)
 })
 
+// 播放音频
 const playSound = name => {
-    
     const innerAudioContext = uni.createInnerAudioContext();
     Object.assign(innerAudioContext, {
         src: name,
