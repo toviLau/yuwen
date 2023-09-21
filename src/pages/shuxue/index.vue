@@ -294,16 +294,20 @@ const ckItem = (idx) => {
 const keyNum = (key) => {
     playSound({name: musicArr['dian2_mp3']})
     const _val = (numlist[curidx.value][3] || "") + '';
-    if(numlist[curidx.value][4] !== 1) numlist[curidx.value][4] = ''
+    // if(numlist[curidx.value][4] !== 1) numlist[curidx.value][4] = ''
+
     numlist[curidx.value][3] = key === "del"
         // 删除事件
         ? numlist[curidx.value][4] !== 1
-            ? _val.substring(0, _val.length - 1)
+            ? numlist[curidx.value][4] === 0 ? '' : _val.substring(0, _val.length - 1)
             : _val
         // 数字输入事件(最大3位数)
         : numlist[curidx.value][4] !== 1 && _val.length < 3
             ? _val + key - 0
             : _val - 0;
+    // 恢复下标4(对错判断)标识为:空 (错:0, 对:1, 无:'')
+    if(numlist[curidx.value][4] !== 1) numlist[curidx.value].splice(4, 1, '')
+    
 };
 
 // 查看得分事件
@@ -318,7 +322,11 @@ const subEnter = () => {
     numlist.map((res) => {
         const _val = res[2] === 0 ? res[0] + res[1] : res[0] - res[1];        
         // 01运算数 2运算符 3用户答案 4对错 5订正次数
-        if(res[4] !== 0 && !['', undefined].includes(res[3]) && _val !== res[3]) {
+        if(
+            res[4] !== 0 
+            && !['', undefined].includes(res[3])
+            // && _val !== res[3]
+        ) {
             res[5] = !['', undefined].includes(res[5]) ? res[5] + 1 : 0 // 订正次数
         }
         if (!['', undefined].includes(res[3])) res[4] = _val === res[3] ? 1 : 0; // 1对,0错
