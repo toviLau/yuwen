@@ -164,10 +164,15 @@ const setConfig = reactive(
     Object.assign(storageConf, {
         status: false, // 设置框显隐
     })
-) // 设置数据
-watch(setConfig, ()=>{
-    playSound({name: musicArr['dian2_mp3']})
-})
+)
+//  // 设置数据
+// watch(setConfig, res=>{
+//     // playSound({name: musicArr['dian2_mp3']})
+//     // bgm.src = musicArr['dian2_mp3']
+//     // console.log(res.bgmVolume);
+//     // bgm.volume = res.volume
+//     bgm.volume = res.bgmVolume / 20
+// })
 
 const totalNum = ref(storageConf.totalNum) // 题目数量
 const keyboard = ref(storageConf.keyboard) // 键盘类型
@@ -277,7 +282,7 @@ function edit() {
  * @param {number} idx // 索引号
  */
 const ckItem = (idx) => {
-    playSound({name: musicArr['dian1_mp3']})
+    if(submited.value === 0) playSound({name: musicArr['dian1_mp3']})
     curidx.value = idx;
     if (numlist[idx][4] === 0 && submited.value !== 1) numlist[idx][4] = ''
 };
@@ -382,6 +387,7 @@ function setNumFn(num) {
 const setNumDefault = () => {
     playSound({name: musicArr['dian2_mp3']})
     Object.assign(setConfig, defaultConf)
+    bgm.volume = setConfig.bgmVolume / 20
 }
 
 // 保存设置
@@ -635,7 +641,7 @@ onShow(() => {
         .pan-item,
         .fen-item {
             margin: 6rpx 0;
-            line-height: 2.4em;
+            line-height: 2.6em;
             text-align: center;
             box-shadow: 0 0 0 1rpx #cfcfcf;
             background-color: #f0f0f0;
@@ -650,6 +656,7 @@ onShow(() => {
                 color: #fcfcfc;
                 box-shadow: none;
                 flex: 1;
+                line-height: 1.8em;
 
             }
 
@@ -762,6 +769,7 @@ onShow(() => {
                 justify-content: space-evenly;
                 width: 96%;
                 margin: 0 auto;
+                
                 // .fen-item {
                 //   width: 16%;
                 //   margin: 1%;
