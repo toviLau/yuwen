@@ -60,11 +60,11 @@
                 <div class="score">{{ score }}</div>
                 <div class="comment">{{ comment }}</div>
                 <div class="fen-btns">
-                    <div class="fen-item fen-edit" @click="[edit(), playSound(musicArr['dian2_mp3'])]" :class="{ dsb: score === 100 }">去订正</div>
+                    <div class="fen-item fen-edit" @click="[edit(), playSound({name: musicArr['dian2_mp3']})]" :class="{ dsb: score === 100 }">去订正</div>
                     <div class="pan-item pan-set">
                         <div class="pan-set-btn" @click="showConfig(true)"></div>
                     </div>
-                    <div class="fen-item fen-new" @click="[createList(true), playSound(musicArr['dian2_mp3'])]">做新题</div>
+                    <div class="fen-item fen-new" @click="[createList(true), playSound({name: musicArr['dian2_mp3']})]">做新题</div>
                 </div>
             </div>
             <div class="set-sys" v-if="setConfig.status">
@@ -133,11 +133,6 @@ import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
 import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
 import { onReady, onShow, onHide, onUnload } from '@dcloudio/uni-app'
 
-// // 音效
-// import bgm from "../../assets/music/bgm-sxg.mp3";
-// import d1 from "../../assets/music/dian1.mp3";
-
-// 在main.js中添加以下代码
 const musics = import.meta.globEager('../../assets/music/*.mp3')
 const musicArr = reactive({})
 Object.keys(musics).forEach(key=>{
@@ -171,7 +166,7 @@ const setConfig = reactive(
     })
 ) // 设置数据
 watch(setConfig, ()=>{
-    playSound(musicArr['dian2_mp3'])
+    playSound({name: musicArr['dian2_mp3']})
 })
 
 const totalNum = ref(storageConf.totalNum) // 题目数量
@@ -195,6 +190,7 @@ uni.showShareMenu({
     path: '/pages/shuxue/index'
 });
 //#endif
+
 // 生成数据列表
 function createList(isInit = true) {
     function createData(num) {
@@ -224,6 +220,21 @@ function createList(isInit = true) {
     contTime()
 }
 createList(true);
+
+// 播放音频
+const playSound = ({name, loop=false, volume=storageConf.bgmVolume}) => {
+    const innerAudioContext = uni.createInnerAudioContext();
+    Object.assign(innerAudioContext, {
+        src: name,
+        volume: volume / 20,
+        autoplay: true,
+        loop
+    })
+    innerAudioContext.onEnded(() => {
+        innerAudioContext.destroy()
+    })
+    return innerAudioContext
+}
 
 /**
  * 计时操作
@@ -266,7 +277,7 @@ function edit() {
  * @param {number} idx // 索引号
  */
 const ckItem = (idx) => {
-    playSound(musicArr['dian1_mp3'])
+    playSound({name: musicArr['dian1_mp3']})
     curidx.value = idx;
     if (numlist[idx][4] === 0 && submited.value !== 1) numlist[idx][4] = ''
 };
@@ -276,7 +287,7 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyNum = (key) => {
-    playSound(musicArr['dian2_mp3'])
+    playSound({name: musicArr['dian2_mp3']})
     const _val = (numlist[curidx.value][3] || "") + '';
     if(numlist[curidx.value][4] !== 1) numlist[curidx.value][4] = ''
     numlist[curidx.value][3] = key === "del"
@@ -292,7 +303,7 @@ const keyNum = (key) => {
 
 // 查看得分事件
 const subEnter = () => {
-    playSound(musicArr['dian2_mp3'])
+    playSound({name: musicArr['dian2_mp3']})
     subEnterTime.value = Date.now()
     // 锁定提交状态
     submited.value = 1;
@@ -324,21 +335,21 @@ const subEnter = () => {
 
     // 评语等级
     switch (true) {
-        case score.value > 99:
+        case score.value > 99: // 100
             comment.value = commentArr[0];
-            playSound(musicArr['wa_mp3'])
+            playSound({name: musicArr['wa_mp3']})
             break;
-        case score.value > 89:
+        case score.value > 89: // 90+
             comment.value = commentArr[1];
-            playSound(musicArr['ao_mp3'])
+            playSound({name: musicArr['ao_mp3']})
             break;
-        case score.value > 79:
+        case score.value > 79: // 80+
             comment.value = commentArr[2];
-            playSound(musicArr['tantiao_mp3'])
+            playSound({name: musicArr['tantiao_mp3']})
             break;
-        case score.value > 69:
+        case score.value > 69: // 70+
             comment.value = commentArr[3];
-            playSound(musicArr['jiong_mp3'])
+            playSound({name: musicArr['jiong_mp3']})
             break;
         default:
             comment.value = commentArr[4];
@@ -350,17 +361,14 @@ const subEnter = () => {
 };
 
 // BGM
-const innerAudioContext = uni.createInnerAudioContext();
-
-Object.assign(innerAudioContext, {
-    src: musicArr['bgm-sxg_mp3'],
-    volume: storageConf.bgmVolume / 20 || 0.8,
-    autoplay: true,
-    loop: true
+const bgm = playSound({name: musicArr['bgm-sxg_mp3'], loop:true})
+onUnload(() => {
+    bgm.destroy()
 })
+
 // 设置窗口显隐
 const showConfig = (val = false) => {
-    playSound(musicArr['dian2_mp3'])
+    playSound({name: musicArr['dian2_mp3']})
     if (val) Object.assign(setConfig, getStorageData())
     setConfig.status = val
 }
@@ -372,7 +380,7 @@ function setNumFn(num) {
 
 // 恢复默认
 const setNumDefault = () => {
-    playSound(musicArr['dian2_mp3'])
+    playSound({name: musicArr['dian2_mp3']})
     Object.assign(setConfig, defaultConf)
 }
 
@@ -383,60 +391,37 @@ const saveConfig = val => {
     uni.setStorageSync('config', _setConfig)
     keyboard.value = setConfig.keyboard
     showIdx.value = setConfig.showIdx
-    innerAudioContext.volume = setConfig.bgmVolume / 20
+    bgm.volume = setConfig.bgmVolume / 20
     showConfig(false)
     if (totalNum.value !== setConfig.totalNum) {
         totalNum.value = setConfig.totalNum
         createList(false)
     }
 }
+
 // 取消设置
 const cleanConfig = () => {
-    innerAudioContext.volume = getStorageData().bgmVolume / 20
+    bgm.volume = getStorageData().bgmVolume / 20
     showConfig(false)
 }
+
 // 题目数量滑块更新
 const setNumChange = val => {
-    innerAudioContext.volume = setConfig.bgmVolume / 20
+    bgm.volume = setConfig.bgmVolume / 20
     setNumFn(Math.round(val / 10) * 10)
 }
 
 // 音量滑块更新
 const bgmVolumeChange = val => {
     setConfig.bgmVolume = val
-    innerAudioContext.volume = val / 20
+    bgm.volume = val / 20
 }
-// onUnload(() => {
-//     innerAudioContext.destroy()
-// })
+
 onShow(() => {
     setTimeout(() => {
-        innerAudioContext.volume = setConfig.bgmVolume / 20
+        bgm.volume = setConfig.bgmVolume / 20
     }, 10)
 })
-
-// 播放音频
-const playSound = name => {
-    const innerAudioContext = uni.createInnerAudioContext();
-    Object.assign(innerAudioContext, {
-        src: name,
-        volume: storageConf.bgmVolume / 20 || 0.8,
-        autoplay: true
-        
-    })
-    innerAudioContext.onEnded(() => {
-        innerAudioContext.destroy()
-    })
-}
-
-// innerAudioContext.src = 'https://bjetxgzv.cdn.bspapp.com/VKCEYUGU-hello-uniapp/2cc220e0-c27a-11ea-9dfb-6da8e309e0d8.mp3'
-// innerAudioContext.onPlay(() => {
-//   console.log('开始播放');
-// });
-// innerAudioContext.onError((res) => {
-//   console.log(res.errMsg);
-//   console.log(res.errCode);
-// });
 </script>
 
 <style lang="less">
@@ -499,7 +484,7 @@ const playSound = name => {
                 line-height: 1.6em;
                 margin-right: 0.35em;
                 font-size: 18rpx;
-                background-image: linear-gradient(180deg, #e9e9e9, #fcfcfc);
+                background-image: linear-gradient(180deg, #e9e9e9, transparent);
                 margin-left: -0.6em;
             }
 
@@ -583,6 +568,10 @@ const playSound = name => {
                         animation: none;
                     }
                 }
+                .list-item-idx{
+                    background-image: linear-gradient(0deg, rgba(182, 170, 250, 0.35), transparent);
+                    color: rgba(182, 170, 250, 0.6);
+                }                
             }
 
             .tip-wrong {
@@ -646,7 +635,7 @@ const playSound = name => {
         .pan-item,
         .fen-item {
             margin: 6rpx 0;
-            line-height: 2em;
+            line-height: 2.4em;
             text-align: center;
             box-shadow: 0 0 0 1rpx #cfcfcf;
             background-color: #f0f0f0;
