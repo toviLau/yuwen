@@ -115,13 +115,18 @@
                         <div class="set-sys-db-list-left">运算规则：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.opType }">加减运算</div>
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.opType }">加减运算
+                                </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
                                     <zeroSwitch :size="20" v-model="setConfig.opType" inactiveColor="#f9f9f9"
                                         activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.opType }">四则运算</div>
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.opType }">四则运算
+                                </div>
                             </div>
+                            <!-- <dlabel class="label cur">
+                                <checkbox value="cb" :checked="false" style="transform:scale(0.7);margin-left: .5em;" />混合
+                            </dlabel> -->
                         </div>
                     </div>
                     <div class="set-sys-db-list">
@@ -218,7 +223,7 @@ function createList(isInit = true) {
         for (let i = 0; i < num; i++) {
             const numArr = new Array(6) // [数字1,数字2, 运算符, 用户运算结果, 结果对错判定, 订正次数]
             numArr[2] = Math.floor(Math.random() * (opType.value ? 4 : 2) + 0) // 运算符 0:+, 1:- 2:* 3:/
-            switch(numArr[2]){
+            switch (numArr[2]) {
                 case 0: // '+'
                     numArr[0] = random(8, "10-90")
                     numArr[1] = random(8, `10-${100 - numArr[0]}`)
@@ -236,7 +241,7 @@ function createList(isInit = true) {
                         numArr[1] = random(8, "10-99")
                         numArr[0] = random(8, `${numArr[1]}-99`)
                         numArr[0] = numArr[0] - numArr[0] % numArr[1] // 除法只做了可以整除, 小数万一有无限小数就不好判定了
-                        if(
+                        if (
                             numArr[1] === 0 // 被除数为0, 小学阶段无意义
                             || numArr[0] === 0 // 排除商为0，此条可以删除 
                             || numArr[0] === numArr[1] // 排除商为1，此条可以删除
@@ -260,6 +265,7 @@ function createList(isInit = true) {
     curidx.value = "";
     startTime.value = Date.now()
     contTime()
+    curidx.value = 0;
 }
 createList(true);
 
@@ -271,7 +277,7 @@ createList(true);
  * @param volume 音量大小(1-20)
  * @return 当前媒体实例对象
  */
-const playSound = ({ name:src, loop = false, volume = storageConf.bgmVolume }) => {
+const playSound = ({ name: src, loop = false, volume = storageConf.bgmVolume }) => {
     const innerAudioContext = uni.createInnerAudioContext();
     Object.assign(innerAudioContext, {
         src,
@@ -342,10 +348,10 @@ const ckItem = (idx) => {
  */
 const keyNum = (key) => {
     playSound({ name: musicArr['dian2_mp3'] })
-    if(
+    if (
         numlist[curidx.value][4] === 1  // 已判断题正确
-        || key ==='del' && ['', undefined].includes(numlist[curidx.value][4]) // 内容为空时册除
-    ) return 
+        || key === 'del' && ['', undefined].includes(numlist[curidx.value][4]) // 内容为空时册除
+    ) return
     const _val = (numlist[curidx.value][3] || "") + '';
     // if(numlist[curidx.value][4] !== 1) numlist[curidx.value][4] = ''
 
@@ -458,19 +464,22 @@ const setNumDefault = () => {
 // 保存设置事件
 const saveConfig = () => {
     showConfig(false)
-
+    
     // 配置存 stroage
     const _setConfig = { ...setConfig }
     delete _setConfig.status
     uni.setStorageSync('config', _setConfig)
-
+    
     // 应用配置信息
     keyboard.value = setConfig.keyboard
-    opType.value = setConfig.opType
     showIdx.value = setConfig.showIdx
     bgm.volume = setConfig.bgmVolume / 20
-
-    if(opType.value !== setConfig.opType) createList(true) // 运算规则类型变动重新生成列表
+    
+    if (opType.value !== setConfig.opType) {
+        opType.value = setConfig.opType
+        createList(true) // 运算规则类型变动重新生成列表
+    }
+    // 运算规则设置反了
     if (totalNum.value !== setConfig.totalNum) {
         totalNum.value = setConfig.totalNum
         createList(false)
@@ -899,7 +908,7 @@ onUnload(() => {
             .set-sys-db-list {
                 display: flex;
                 align-items: center;
-                width: 80%;
+                width: 90%;
                 padding: .2em;
                 font-size: 26rpx;
                 line-height: 2.25em;
@@ -911,7 +920,12 @@ onUnload(() => {
                 }
 
                 .set-sys-db-list-right {
+                    display: flex;
                     flex: 1;
+                }
+
+                .cur {
+                    color: #55a4f3;
                 }
 
                 .set-sys-switch {
@@ -919,6 +933,7 @@ onUnload(() => {
                     align-items: center;
                     color: #c0c0c0;
                     font-size: 20rpx;
+                    margin-right: 1em;
 
                     :deep(.uni-switch-input) {
                         background-color: #55a4f3 !important;
@@ -937,16 +952,13 @@ onUnload(() => {
                     .set-sys-switch-item {
                         line-height: 30rpx;
 
-                        &.cur {
-                            color: #55a4f3;
-                            // font-weight: bolder;
-                        }
                     }
 
                     // .set-sys-switch-l {}
-                    .set-sys-switch-c { 
+                    .set-sys-switch-c {
                         margin: 0 .5em;
                     }
+
                     // .set-sys-switch-r {}
                 }
 
@@ -1003,5 +1015,4 @@ onUnload(() => {
             }
         }
     }
-}
-</style>
+}</style>
