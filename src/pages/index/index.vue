@@ -9,8 +9,8 @@
 <template>
     <view class="page">
         <view class="content">
-            <navigator class="list" open-type="navigate" url="/pages/yuwen/index">语文拼音练习</navigator>
-            <navigator class="list" open-type="navigate" url="/pages/shuxue/index">数学100以内加减法</navigator>
+            <navigator class="list" open-type="navigate" url="/pages/yuwen/index">语文：拼音练习</navigator>
+            <navigator class="list" open-type="navigate" url="/pages/shuxue/index">数学：四则运算训练</navigator>
         </view>
         <div class="foot-line">好好学习 天天向上 ver:{{ (version || '0.0.2').match(/^\d+(\.\d+){2}/)[0] }}</div>
     </view>
@@ -73,13 +73,13 @@ uni.showShareMenu({
     background-color: #fcfcfc;
 
     .list {
-        width: 10em;
+        width: 11em;
         height: 3em;
         line-height: 3em;
+        font-size: 28rpx;
         background-color: #f0f0f0;
         border-radius: 5rpx;
         text-align: center;
-
     }
 }
 

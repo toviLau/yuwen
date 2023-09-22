@@ -4,12 +4,12 @@
 	{
 		"path": "pages/index/index",
 		"style": {
-			"navigationBarTitleText": "四小二(8)班"
+			"navigationBarTitleText": "定南县四小二(8)班"
 		}
 	},{
 		"path": "pages/shuxue/index",
 		"style": {
-			"navigationBarTitleText": "数学：100以内加减法"
+			"navigationBarTitleText": "数学：四则运算练习"
 		}
 	},{
 		"path": "pages/yuwen/index",
