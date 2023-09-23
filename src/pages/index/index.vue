@@ -12,31 +12,14 @@
             <navigator class="list" open-type="navigate" url="/pages/yuwen/index">语文：拼音练习</navigator>
             <navigator class="list" open-type="navigate" url="/pages/shuxue/index">数学：四则运算训练</navigator>
         </view>
+        <!-- <div class="foot-line">好好学习 天天向上 {{ version }}</div> -->
         <div class="foot-line">好好学习 天天向上 ver:{{ (version || '0.0.2').match(/^\d+(\.\d+){2}/)[0] }}</div>
     </view>
 </template>
 
-<script >
-async function setup(){
-    // const { miniProgram: { version } } = uni.getAccountInfoSync()
-    const { miniProgram } = uni.getAccountInfoSync()
-}
-</script>
 <script setup>
 import { onMounted, ref, watch, reactive } from 'vue';
-
-// new Promise(resolve=>{
-//     const { miniProgram:version } = uni.getAccountInfoSync()
-//     resolve(version)
-// }).then(()=>{
-
-// })
-// // console.log(miniProgram, '=========');
-onMounted(()=>{
-    // const { miniProgram:version } = uni.getAccountInfoSync
-    // console.log(miniProgram, '=========');
-})
-console.log(uni);
+const { miniProgram:{version} } = uni.getAccountInfoSync()
 
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
@@ -47,13 +30,6 @@ uni.showShareMenu({
 });
 // #endif
 
-// const system = reactive({})
-// uni.getSystemInfo({
-//     success: res => {
-//         Object.assign(system, res)
-//         console.log(system, '====');
-//     }
-// })
 </script>
 
 <style lang="less">

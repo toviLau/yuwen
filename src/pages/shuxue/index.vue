@@ -255,10 +255,8 @@ function createList(isInit = true) {
                     break;
                 case 3: // '/'
                     const initF = () => {
-                        // random(8, `${difficulty.value ? 10 : 1}-${difficulty.value ? 50 : 10}`)
-                        // random(8, `${difficulty.value ? '10-50' : '1-10'}`)
                         numArr[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
-                        numArr[0] = random(8, `${numArr[1]}-99`)
+                        numArr[0] = random(8, `${numArr[1]}-${difficulty.value ? '999' : '99'}`)
                         numArr[0] = numArr[0] - numArr[0] % numArr[1] // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         if (
                             numArr[1] === 0 // 被除数为0, 小学阶段无意义
