@@ -129,6 +129,21 @@
                             </dlabel> -->
                         </div>
                     </div>
+                    <div class="set-sys-db-list" v-if="setConfig.opType">
+                        <div class="set-sys-db-list-left">难度：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="set-sys-switch">
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">简单
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-c">
+                                    <zeroSwitch :size="20" v-model="setConfig.difficulty" inactiveColor="#f9f9f9"
+                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">困难
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">背景音量：</div>
                         <div class="set-sys-db-list-right">
@@ -174,6 +189,7 @@ const defaultConf = { // 默认配置
     totalNum: 50, // 题目数量
     keyboard: true, // 键盘类型[false:简单, true:九宫格]
     showIdx: false, // 显示序号
+    difficulty: false, // 困难度
     bgmVolume: 10, // 背景音乐音量
     opType: false, // 运算规则 0:+-,1:+-*/
 }
@@ -190,7 +206,7 @@ const totalNum = ref(storageConf.totalNum) // 题目数量
 const keyboard = ref(storageConf.keyboard) // 键盘类型
 const showIdx = ref(storageConf.showIdx) // 显示序号
 const opType = ref(storageConf.opType) // 运算类型
-
+const difficulty = ref(storageConf.difficulty) // 困难度
 //  // 设置数据
 // watch(setConfig, res=>{
 //     // playSound({name: musicArr['dian2_mp3']})
@@ -233,12 +249,15 @@ function createList(isInit = true) {
                     numArr[0] = random(8, `${numArr[1]}-99`)
                     break;
                 case 2: // '*'
-                    numArr[0] = random(8, "10-50")
-                    numArr[1] = numArr[0] > 20 ? random(8, `10-20`) : random(8, "10-80")
+                    numArr[0] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
+                    numArr[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
+                    // numArr[1] = numArr[0] > 20 ? random(8, `1-30`) : random(8, `${difficulty.value ? '20-30' : '1-10'}`)
                     break;
                 case 3: // '/'
                     const initF = () => {
-                        numArr[1] = random(8, "10-99")
+                        // random(8, `${difficulty.value ? 10 : 1}-${difficulty.value ? 50 : 10}`)
+                        // random(8, `${difficulty.value ? '10-50' : '1-10'}`)
+                        numArr[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
                         numArr[0] = random(8, `${numArr[1]}-99`)
                         numArr[0] = numArr[0] - numArr[0] % numArr[1] // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         if (
@@ -350,7 +369,7 @@ const keyNum = (key) => {
     playSound({ name: musicArr['dian2_mp3'] })
     if (
         numlist[curidx.value][4] === 1  // 已判断题正确
-        || key === 'del' && ['', undefined].includes(numlist[curidx.value][4]) // 内容为空时册除
+        || key === 'del' && ['', undefined].includes(numlist[curidx.value][3]) // 内容为空时册除
     ) return
     const _val = (numlist[curidx.value][3] || "") + '';
     // if(numlist[curidx.value][4] !== 1) numlist[curidx.value][4] = ''
@@ -464,22 +483,24 @@ const setNumDefault = () => {
 // 保存设置事件
 const saveConfig = () => {
     showConfig(false)
-    
+
     // 配置存 stroage
     const _setConfig = { ...setConfig }
     delete _setConfig.status
     uni.setStorageSync('config', _setConfig)
-    
+
     // 应用配置信息
     keyboard.value = setConfig.keyboard
+    
     showIdx.value = setConfig.showIdx
     bgm.volume = setConfig.bgmVolume / 20
-    
-    if (opType.value !== setConfig.opType) {
+
+    if (opType.value !== setConfig.opType || difficulty.value !== setConfig.difficulty) {
         opType.value = setConfig.opType
+        difficulty.value = setConfig.difficulty // 难度变动
         createList(true) // 运算规则类型变动重新生成列表
     }
-    // 运算规则设置反了
+    // 数量变动
     if (totalNum.value !== setConfig.totalNum) {
         totalNum.value = setConfig.totalNum
         createList(false)
@@ -1015,4 +1036,5 @@ onUnload(() => {
             }
         }
     }
-}</style>
+}
+</style>
