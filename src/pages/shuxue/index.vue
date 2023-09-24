@@ -4,41 +4,45 @@
             <div class="top-left">日期: {{ date('Y-m-d') }}</div>
             <div class="top-right">用时: {{ startTimed }}</div>
         </div>
-        <div class="list">
-            <div class="list-item" v-for="(v, i) in numlist" :key="i" @click="ckItem(i)" :class="{
-                'cur-item': i === curidx && submited === 0,
-                right: v[2] === 1,
-                wrong: v[2] === 0 && !['', undefined].includes(v[1]),
-            }">
-                <div class="edited" v-if="v[3] > 0">{{ v[3] }}</div>
-                <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
-                <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
-                {{
-                    !Array.isArray(v[0][0]) ? `${v[0][0]}` : `${v[0][0][0]}${["+", "-", '×', '÷'][v[0][0][2]]}${v[0][0][1]}`
-                }}{{
-                    `${["+", "-", '×', '÷'][v[0][2]]}`
-                }}{{
-                    !Array.isArray(v[0][1])
-                    ? `${v[0][1]}`
-                    : `${v[0][1][2] === 1
-                        ? '('
-                        : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')'
-                            : ''
-                    }`
-                }}{{ `=` }}{{
-                    curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : ""
-                }}
-                <div v-show="v[2] === 0">
-                    <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
-                    <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
-                    <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1]">这是加法哦，粗心当减(-)法算了么？</div>
-                    <div class="tip-wrong"
-                        v-if="numlist[i][1] === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9">忘记进位了吧?
+        <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
+            <div class="list">
+                <div class="list-item" v-for="(v, i) in numlist" :key="i" @click="ckItem(i)" :class="{
+                    'cur-item': i === curidx && submited === 0,
+                    cursor1: cursorType === false,
+                    cursor2: cursorType === true,
+                    right: v[2] === 1,
+                    wrong: v[2] === 0 && !['', undefined].includes(v[1]),
+                }">
+                    <div class="edited" v-if="v[3] > 0">{{ v[3] }}</div>
+                    <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
+                    <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
+                    {{
+                        !Array.isArray(v[0][0]) ? `${v[0][0]}` : `${v[0][0][0]}${["+", "-", '×', '÷'][v[0][0][2]]}${v[0][0][1]}`
+                    }}{{
+                        `${["+", "-", '×', '÷'][v[0][2]]}`
+                    }}{{
+                        !Array.isArray(v[0][1])
+                        ? `${v[0][1]}`
+                        : `${v[0][1][2] === 1
+                            ? '('
+                            : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')'
+                                : ''
+                        }`
+                    }}{{ `=` }}{{
+                        curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : ""
+                    }}
+                    <div v-show="v[2] === 0">
+                        <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
+                        <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
+                        <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1]">这是加法哦，粗心当减(-)法算了么？</div>
+                        <div class="tip-wrong"
+                            v-if="numlist[i][1] === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9">忘记进位了吧?
+                        </div>
                     </div>
                 </div>
+                <div class="list-item list-item-none" v-for="i in 10" :key="i" />
             </div>
-            <div class="list-item list-item-none" v-for="i in 10" :key="i" />
-        </div>
+        </scroll-view>
         <div class="footer" v-show="curidx !== undefined"
             v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
                 dsb:
@@ -98,32 +102,6 @@
                         </div>
                     </div>
                     <div class="set-sys-db-list">
-                        <div class="set-sys-db-list-left">显示序号：</div>
-                        <div class="set-sys-db-list-right">
-                            <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.showIdx" inactiveColor="#f9f9f9"
-                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#dcdcdc" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="set-sys-db-list">
-                        <div class="set-sys-db-list-left">键盘布局：</div>
-                        <div class="set-sys-db-list-right">
-                            <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">简约
-                                </div>
-                                <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.keyboard" inactiveColor="#f9f9f9"
-                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
-                                </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">九宫格
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">运算规则：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
@@ -153,6 +131,51 @@
                                         activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">困难
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divider-line">这是一条纯洁的分隔线</div>
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">显示序号：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="set-sys-switch">
+                                <div class="set-sys-switch-item set-sys-switch-c">
+                                    <zeroSwitch :size="20" v-model="setConfig.showIdx" inactiveColor="#f9f9f9"
+                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#dcdcdc" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">键盘布局：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="set-sys-switch">
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">简约
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-c">
+                                    <zeroSwitch :size="20" v-model="setConfig.keyboard" inactiveColor="#f9f9f9"
+                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">九宫格
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">光标提示符：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="set-sys-switch">
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.cursorType }">
+                                    {{ `下划线 _` }}
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-c">
+
+                                    <zeroSwitch :size="20" v-model="setConfig.cursorType" inactiveColor="#f9f9f9"
+                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.cursorType }">
+                                    {{ `竖线 |` }}
                                 </div>
                             </div>
                         </div>
@@ -199,11 +222,12 @@ const startTimed = ref('') // 已用时
 const subEnterTime = ref('') // 提交时间
 const contTimeId = ref() // 计时定时器 ID
 const defaultConf = { // 默认配置
-    totalNum: 50, // 题目数量
-    keyboard: true, // 键盘类型[false:简单, true:九宫格]
     showIdx: false, // 显示序号
-    difficulty: false, // 困难度
+    keyboard: true, // 键盘类型[false:简单, true:九宫格]
     bgmVolume: 10, // 背景音乐音量
+    cursorType: false, // 光标类型 false:_, true:|
+    difficulty: false, // 困难度
+    totalNum: 50, // 题目数量
     opType: false, // 运算规则 0:+-,1:+-*/
     isMixed: 1 // 是否混合运算
 }
@@ -222,36 +246,32 @@ const showIdx = ref(storageConf.showIdx) // 显示序号
 const opType = ref(storageConf.opType) // 运算类型
 const difficulty = ref(storageConf.difficulty) // 困难度
 const isMixed = ref(storageConf.isMixed) // 是否混合运算
-
+const cursorType = ref(storageConf.cursorType) // 是否混合运算
+const scrollTop = ref(0) // 滚动位置
 // 自动当前滚动条为光标为可见高度
-const autoCurItemPosition = ()=>{
-    const $ = selector => document.querySelector(selector)
-    const _curItem = $(".cur-item")
-    const _list = $(".list")
-    const { top: _curItem_top, height: _curItem_height } = _curItem.getBoundingClientRect()
-    const { bottom: _list_bottom, height: _list_height } = _list.getBoundingClientRect()
-
-    if (_curItem_top + _curItem_height > _list_bottom - _curItem_height * 1.25) {
-        _list.scrollTop = _list.scrollTop + _list_height * 0.5 + _curItem_height * 0.5
-    }
+const autoCurItemPosition = () => {
+    uni.createSelectorQuery().select('.scroll-view').boundingClientRect(({ top: scroll_top, height: scroll_height }) => {
+        uni.createSelectorQuery().select('.list').boundingClientRect(({ height: list_height, top: list_top }) => {
+            uni.createSelectorQuery().select('.cur-item').boundingClientRect(({ top: curItem_top, height: curItem_height }) => {
+                // console.log({ scroll_top, scroll_height, list_height, list_top, curItem_top, curItem_height });
+                if (curItem_top + curItem_height > scroll_height) {
+                    scrollTop.value = Math.abs(list_top) + scroll_height -  curItem_height*2
+                }
+            }).exec();
+        }).exec();
+    }).exec();
 }
-watch(keyboard, ()=>{   
-    autoCurItemPosition() 
+
+watch(keyboard, () => {
+    autoCurItemPosition()
 })
-//  // 设置数据
-// watch(setConfig, res=>{
-//     // playSound({name: musicArr['dian2_mp3']})
-//     // bgm.src = musicArr['dian2_mp3']
-//     // console.log(res.bgmVolume);
-//     // bgm.volume = res.volume
-//     bgm.volume = res.bgmVolume / 20
-// })
-// onShow(()=>{
-//     startTime.value = startTime.value + ((Date.now() - subEnterTime.value).toString().replace(/\d{3}$/, '000') - 0 + 1000)
-// })
-// onHide(()=>{
-//     subEnterTime.value = Date.now()
-// })
+
+watch(cursorType, () => {
+    setConfig.cursorType = cursorType.value
+})
+watch(setConfig, () => {
+    cursorType.value = setConfig.cursorType
+})
 
 // #ifdef MP-WEIXIN
 // 条件编译--仅微信
@@ -329,7 +349,6 @@ function createList(isInit = true) {
             const mData = mergeData(createExpression(), createExpression(2))
             const _createExpression = createExpression()
             numArr[0] = isMixed.value[0] ? mData : _createExpression
-            // console.log(numArr[0]);
             _numlist.push(numArr);
         }
 
@@ -466,7 +485,7 @@ const keyNum = (key) => {
         case 'next':
             const _curidx = curidx.value + 1
             curidx.value = _curidx > numlist.length - 1 ? curidx.value : _curidx
-            
+
             autoCurItemPosition()
             break;
 
@@ -583,6 +602,7 @@ function setNumFn(num) {
 const setNumDefault = () => {
     playSound({ name: musicArr['dian2_mp3'] })
     Object.assign(setConfig, defaultConf)
+    cursorType.value = setConfig.cursorType
     bgm.volume = setConfig.bgmVolume / 20
 }
 
@@ -598,10 +618,10 @@ const saveConfig = () => {
     // 应用配置信息
     keyboard.value = setConfig.keyboard
     showIdx.value = setConfig.showIdx
+    cursorType.value = setConfig.cursorType
     bgm.volume = setConfig.bgmVolume / 20
 
     // 运算规则 或 难度变动 列表都要重新生成
-    console.log(isMixed.value[0], setConfig.isMixed[0]);
     if (opType.value !== setConfig.opType || difficulty.value !== setConfig.difficulty || isMixed.value[0] !== setConfig.isMixed[0]) {
         opType.value = setConfig.opType // 运算规则变动
         difficulty.value = setConfig.difficulty // 难度变动
@@ -618,13 +638,19 @@ const saveConfig = () => {
 
 // 取消设置事件
 const cleanConfig = () => {
-    bgm.volume = getStorageData().bgmVolume / 20
+    const {
+        bgmVolume: volume,
+        cursorType: cursor
+    } = getStorageData()
+
+    bgm.volume = volume / 20
+    cursorType.value = cursor
     showConfig(false)
 }
 
 // 题目数量滑块更新
 const setNumChange = val => {
-    bgm.volume = setConfig.bgmVolume / 20
+    // bgm.volume = setConfig.bgmVolume / 20
     setNumFn(Math.round(val / 10) * 10)
 }
 
@@ -665,16 +691,20 @@ onUnload(() => {
         // .top-right {}
     }
 
-    //   height: 100vh;
+    .scroll-view {
+        flex: 1;
+        overflow: auto;
+    }
+
     .list {
         display: flex;
         align-content: flex-start;
-        flex: 1;
         overflow: auto;
         flex-wrap: wrap;
         padding: 0.25em .1em;
 
         .list-item {
+            @item-primary-color: #b6aafa;
             border-bottom: 1px solid #ccc;
             font-size: 30rpx;
             line-height: 2.95em;
@@ -774,7 +804,7 @@ onUnload(() => {
             }
 
             &.cur-item {
-                box-shadow: 0 0 0 4rpx #b6aafa;
+                box-shadow: 0 0 0 4rpx @item-primary-color;
                 border-bottom: none;
                 border-radius: 5rpx;
 
@@ -791,8 +821,8 @@ onUnload(() => {
                 }
 
                 .list-item-idx {
-                    background-image: linear-gradient(0deg, rgba(182, 170, 250, 0.35), transparent);
-                    color: rgba(182, 170, 250, 0.6);
+                    background-image: linear-gradient(0deg, ligthen(@item-primary-color, 0.1%), transparent);
+                    color: darken(@item-primary-color, 1.5%);
                 }
             }
 
@@ -809,16 +839,16 @@ onUnload(() => {
             }
 
             @keyframes guang-biao-shan-shuo {
-                45% {
+                40% {
                     opacity: 0;
                 }
 
-                60%,
-                70% {
+                50%,
+                80% {
                     opacity: 1;
                 }
 
-                85% {
+                90% {
                     opacity: 0;
                 }
             }
@@ -826,10 +856,24 @@ onUnload(() => {
             &:after {
                 content: "";
                 display: inline-block;
-                width: 0.5em;
-                border-bottom: 5rpx #ccc solid;
-                margin-bottom: -1.125em;
                 opacity: 0;
+            }
+
+            &.cursor1 {
+                &:after {
+                    width: 0.5em;
+                    border-bottom: 5rpx lighten(@item-primary-color, 2%) solid;
+                    margin-bottom: -1.125em;
+                }
+            }
+
+            &.cursor2 {
+                &:after {
+                    height: 1em;
+                    border-left: 5rpx lighten(@item-primary-color, 2%) solid;
+                    margin-bottom: 0;
+                    margin-left: .125em;
+                }
             }
         }
     }
@@ -838,6 +882,7 @@ onUnload(() => {
         box-shadow: 0 0 15px #ececec;
         padding: 0.5em 0;
         position: relative;
+        border-top: 1px solid #e9e9e9;
 
         .pan {
             display: flex;
@@ -849,9 +894,10 @@ onUnload(() => {
 
                 &>.pan-item:not(.pan-enter),
                 .pan-del {
-                    background-image: linear-gradient(0deg, #f0f0f0, #f9f9f9);
                     // background-color: #f6f6f6;
+                    background-image: linear-gradient(0deg, #f0f0f0, #fcfcfc);
                     color: #ccc;
+                    box-shadow: 0 0 0 1rpx #f9f9f9;
                     // filter: grayscale(.8) ;
                 }
             }
@@ -907,6 +953,7 @@ onUnload(() => {
                 background-image: linear-gradient(0deg, #f0f0f0, #f9f9f9);
                 // background-color: #f6f6f6;
                 color: #ccc;
+                box-shadow: 0 0 0 1rpx #e0e0e0;
                 // filter: grayscale(.8) ;
             }
         }
@@ -1019,6 +1066,27 @@ onUnload(() => {
             display: flex;
             flex-direction: column;
 
+            .divider-line {
+                @c: #e9e9e9;
+                width: 100%;
+                align-items: center;
+                display: flex;
+                // flex-direction: column;
+                font-size: 20rpx;
+                color: @c;
+                margin: 1em 0;
+                text-shadow: 3rpx 3rpx 0 #fcfcfc;
+
+                &:before,
+                &:after {
+                    content: '';
+                    height: 1rpx;
+                    flex: 1;
+                    background-color: @c;
+                    margin: 0 .5em;
+                    box-shadow: 3rpx 2rpx 0 #fcfcfc;
+                }
+            }
 
             .set-sys-title {
                 background-image: linear-gradient(180deg, #e0e0e0, #fcfcfc);
