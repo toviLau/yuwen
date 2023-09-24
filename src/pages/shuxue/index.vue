@@ -51,7 +51,11 @@
                 <div class="pan-item" v-for="i in 9" @click="keyNum(i)" :key="i">
                     {{ i }}
                 </div>
+                <div class="pan-item dsb" v-if="keyboard">.</div> <!-- 九宫格键盘补位 -->
                 <div class="pan-item" @click="keyNum(0)">0</div>
+                <div class="pan-item dsb" v-if="!keyboard">.</div> <!-- 简约键盘补位 -->
+                <div class="pan-item" @click="keyNum('next')">下一题</div>
+
                 <div class="pan-footer">
                     <div class="pan-item pan-enter" @click="subEnter()">查看得分</div>
                     <div class="pan-item pan-set">
@@ -218,6 +222,22 @@ const showIdx = ref(storageConf.showIdx) // 显示序号
 const opType = ref(storageConf.opType) // 运算类型
 const difficulty = ref(storageConf.difficulty) // 困难度
 const isMixed = ref(storageConf.isMixed) // 是否混合运算
+
+// 自动当前滚动条为光标为可见高度
+const autoCurItemPosition = ()=>{
+    const $ = selector => document.querySelector(selector)
+    const _curItem = $(".cur-item")
+    const _list = $(".list")
+    const { top: _curItem_top, height: _curItem_height } = _curItem.getBoundingClientRect()
+    const { bottom: _list_bottom, height: _list_height } = _list.getBoundingClientRect()
+
+    if (_curItem_top + _curItem_height > _list_bottom - _curItem_height * 1.25) {
+        _list.scrollTop = _list.scrollTop + _list_height * 0.5 + _curItem_height * 0.5
+    }
+}
+watch(keyboard, ()=>{   
+    autoCurItemPosition() 
+})
 //  // 设置数据
 // watch(setConfig, res=>{
 //     // playSound({name: musicArr['dian2_mp3']})
@@ -242,6 +262,7 @@ uni.showShareMenu({
     path: '/pages/shuxue/index'
 });
 //#endif
+
 
 /**
  * 生成数据列表
@@ -434,18 +455,38 @@ const keyNum = (key) => {
         || key === 'del' && ['', undefined].includes(numlist[curidx.value][1]) // 册除事件 并 内容为空时
     ) return
     const _val = (numlist[curidx.value][1] || "") + '';
+    if (numlist[curidx.value][2] === 1) return
 
-    numlist[curidx.value][1] = key === "del"
-        // 删除事件
-        ? numlist[curidx.value][2] !== 1
-            ? numlist[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
-            : _val
-        // 数字输入事件(最大4位数)
-        : numlist[curidx.value][2] !== 1 && _val.length < 4
-            ? _val + key - 0
-            : _val - 0;
+    switch (key) {
+        case 'del': // 删除事件
+            // 如果提交后已判错, 删除是全部,其它情况单个从右到左删除
+            numlist[curidx.value][1] = numlist[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
+            break;
+
+        case 'next':
+            const _curidx = curidx.value + 1
+            curidx.value = _curidx > numlist.length - 1 ? curidx.value : _curidx
+            
+            autoCurItemPosition()
+            break;
+
+        default: // 默认数字输入事件
+            numlist[curidx.value][1] = _val.length < 4 ? _val + key - 0 : _val - 0;
+            break;
+    }
     // 恢复下标4(对错判断)标识为:空 (错:0, 对:1, 无:'')
-    if (numlist[curidx.value][2] !== 1) numlist[curidx.value].splice(2, 1, '')
+    numlist[curidx.value].splice(2, 1, '')
+
+    // if (numlist[curidx.value][2] !== 1) numlist[curidx.value].splice(2, 1, '')
+    // numlist[curidx.value][1] = key === "del"
+    //     // 删除事件
+    //     ? numlist[curidx.value][2] !== 1
+    //         ? numlist[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
+    //         : _val
+    //     // 数字输入事件(最大4位数)
+    //     : numlist[curidx.value][2] !== 1 && _val.length < 4
+    //         ? _val + key - 0
+    //         : _val - 0;
 };
 
 // 计算表达式答案
@@ -802,13 +843,16 @@ onUnload(() => {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-evenly;
+            background-color: #f9f9f9;
 
             &.dsb {
 
                 &>.pan-item:not(.pan-enter),
                 .pan-del {
-                    background-color: #f6f6f6;
+                    background-image: linear-gradient(0deg, #f0f0f0, #f9f9f9);
+                    // background-color: #f6f6f6;
                     color: #ccc;
+                    // filter: grayscale(.8) ;
                 }
             }
         }
@@ -819,19 +863,24 @@ onUnload(() => {
             line-height: 2.6em;
             text-align: center;
             box-shadow: 0 0 0 1rpx #cfcfcf;
-            background-color: #f0f0f0;
+            // background-color: #f0f0f0;
+            background-image: linear-gradient(0deg, #e6e6e6, #f6f6f6);
             border-radius: 5rpx;
-            color: #666;
+            color: #606060;
+            font-weight: bolder;
 
             &.pan-enter,
             &.pan-del,
             &.fen-new,
             &.fen-edit {
                 // width: 36%;
+                border: 1px solid;
+                background-image: none;
                 color: #fcfcfc;
                 box-shadow: none;
                 flex: 1;
                 line-height: 1.8em;
+                border-color: #e9e9e9 !important;
 
             }
 
@@ -853,10 +902,17 @@ onUnload(() => {
             &:active {
                 opacity: 0.618;
             }
+
+            &.dsb {
+                background-image: linear-gradient(0deg, #f0f0f0, #f9f9f9);
+                // background-color: #f6f6f6;
+                color: #ccc;
+                // filter: grayscale(.8) ;
+            }
         }
 
         .easyKeyboard .pan-item {
-            width: 18%;
+            width: 15%;
         }
 
         .pan-item {
@@ -870,6 +926,7 @@ onUnload(() => {
         .pan-footer {
             width: 96%;
             display: flex;
+            margin-top: .5em;
         }
 
         .pan-set {
@@ -1017,7 +1074,7 @@ onUnload(() => {
                         align-items: center;
 
                         :deep(.checklist-text) {
-                            font-size: 16rpx;
+                            font-size: 20rpx;
 
                         }
                     }
