@@ -12,14 +12,15 @@
             <navigator class="list" open-type="navigate" url="/pages/yuwen/index">语文：拼音练习</navigator>
             <navigator class="list" open-type="navigate" url="/pages/shuxue/index">数学：四则运算训练</navigator>
         </view>
-        <!-- <div class="foot-line">好好学习 天天向上 {{ version }}</div> -->
-        <div class="foot-line">好好学习 天天向上 ver:{{ (version || '0.0.2').match(/^\d+(\.\d+){2}/)[0] }}</div>
+        <view class="foot-line">好好学习 天天向上 ver:{{ version }}</view>
     </view>
 </template>
 
 <script setup>
 import { onMounted, ref, watch, reactive } from 'vue';
-const { miniProgram:{version} } = uni.getAccountInfoSync()
+const { miniProgram } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : { }
+const version = (miniProgram?.version || '0.0.3').match(/^\d+(\.\d+){2}/)[0]
+// const { miniProgram: { version } } = uni?.getAccountInfoSync() || { miniProgram: { version: '0.0.22.0' } }
 
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
@@ -82,5 +83,6 @@ uni.showShareMenu({
         height: 1rpx;
         margin: 0 .35em;
     }
-}</style>
+}
+</style>
 

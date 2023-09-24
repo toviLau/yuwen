@@ -49,6 +49,7 @@
     "@dcloudio/uni-mp-weixin": "3.0.0-alpha-3060420220922001",
     "@dcloudio/uni-quickapp-webview": "3.0.0-alpha-3060420220922001",
     "date-php": "^1.7.18",
+    "default-passive-events": "^2.0.0",
     "less": "^4.1.3",
     "vue": "^3.2.37",
     "vue-i18n": "^9.1.9"
