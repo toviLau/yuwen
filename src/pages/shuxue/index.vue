@@ -187,6 +187,10 @@
                                 :value="setConfig.bgmVolume" :max="20" @change="bgmVolumeChange" class="set-slider" />
                         </div>
                     </div>
+                    <div class="declare"> 
+                        <div>个人版非商用，不采集个人信息。所有数据仅存在您个人本地</div>
+                        <div>如果清除微信缓存,您保存的数据就会丢失</div>
+                    </div>
                     <div class="btns">
                         <div class="set-btn set-btn-submit" @click="saveConfig()">保存</div>
                         <div class="set-btn set-btn-clean" @click="cleanConfig()">取消</div>
@@ -248,18 +252,24 @@ const difficulty = ref(storageConf.difficulty) // 困难度
 const isMixed = ref(storageConf.isMixed) // 是否混合运算
 const cursorType = ref(storageConf.cursorType) // 是否混合运算
 const scrollTop = ref(0) // 滚动位置
+
 // 自动当前滚动条为光标为可见高度
-const autoCurItemPosition = () => {
-    uni.createSelectorQuery().select('.scroll-view').boundingClientRect(({ top: scroll_top, height: scroll_height }) => {
-        uni.createSelectorQuery().select('.list').boundingClientRect(({ height: list_height, top: list_top }) => {
-            uni.createSelectorQuery().select('.cur-item').boundingClientRect(({ top: curItem_top, height: curItem_height }) => {
-                // console.log({ scroll_top, scroll_height, list_height, list_top, curItem_top, curItem_height });
-                if (curItem_top + curItem_height > scroll_height) {
-                    scrollTop.value = Math.abs(list_top) + scroll_height -  curItem_height*2
-                }
-            }).exec();
-        }).exec();
-    }).exec();
+const autoCurItemPosition = async () => {
+    function createSelectorQuery(selector) {
+        return new Promise(resolve => {
+            uni.createSelectorQuery().select(selector).boundingClientRect(({ top, bottom, left, right, height }) => {
+                resolve({ top, bottom, left, right, height })
+            }).exec()
+        })
+    }
+    const { top: scrollT, height: scrollH } = await createSelectorQuery('.scroll-view')
+    const { top: listTop, height: listHeight } = await createSelectorQuery('.list')
+    const { top: curItemTop, height: curItemHeight } = await createSelectorQuery('.cur-item')
+    scrollTop.value = curItemTop < 0
+        ? Math.abs(listTop) + curItemTop - curItemHeight * 2
+        : curItemTop + curItemHeight > scrollH
+            ? Math.abs(listTop) + scrollH - curItemHeight * 2
+            : scrollTop.value || 0
 }
 
 watch(keyboard, () => {
@@ -1221,6 +1231,14 @@ onUnload(() => {
                 color: #fff;
             }
 
+            .declare{
+                font-size: 22rpx;
+                line-height: 1.35em;
+                font-weight: normal;
+                margin: .5em .75em -1.25em .75em;
+                text-align: center;
+                color: #dfdfdf;
+            }
             .btns {
                 display: flex;
                 margin-top: 1em;
