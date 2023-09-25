@@ -92,7 +92,6 @@ function random (cType = 1, cLen = 1, customize = '') {
                 ? unDupArr(customize.split(splitExp))
                 : unDupArr(customize.split('')) // 拆成数组并滤重
             for (let i = 0; i < len; i++) {
-                // for(let item of chars){
                 areaIdx = Math.floor(Math.random() * chars.length - 1)
                 res += chars[areaIdx]
             }
@@ -107,6 +106,72 @@ function random (cType = 1, cLen = 1, customize = '') {
     }
     return res
 }
+
+/**
+ * 合并两数据
+ * @param {array} data1 [数1,数2, 运算符]
+ * @param {array} data2 [数1,数2, 运算符]
+ * @return [[数1-1,数1-2, 运算符],数2, 运算符] || [数1,[数2-1,数2-2, 运算符], 运算符]
+ */
+function mergeData(data1, data2) {
+    const idx = Math.random() > 0.5 ? 1 : 0
+    data2[idx] = data1
+    if (data2[2] === 1) {
+        const _data1 = data2[0] - 0 || expressionResult(data2[0])
+        const _data2 = data2[1] - 0 || expressionResult(data2[1])
+        const _tmp = data2.pop()
+        if (_data1 < _data2) data2.reverse()
+        data2.push(_tmp)
+    }
+    return data2
+}
+
+/**
+ * 计算表达式答案
+ * @param {array} data [数1, 数2, 运算符]
+ */ 
+function expressionResult(data) {
+    const _tmp = [
+        Array.isArray(data[0]) ? expressionResult(data[0]) : data[0],
+        Array.isArray(data[1]) ? expressionResult(data[1]) : data[1]
+    ]
+    switch (data[2]) {
+        case 0:
+            return _tmp[0] + _tmp[1]
+        case 1:
+            return _tmp[0] - _tmp[1]
+        case 2:
+            return _tmp[0] * _tmp[1]
+        case 3:
+            return _tmp[0] / _tmp[1]
+    }
+}
+
+/**
+ * 播放音频
+ * @author ToviLau 46134256@qq.com
+ * @param name {string} 音频地址
+ * @param loop {boolean} 是否循环播放
+ * @param volume 音量大小(1-20)
+ * @return 当前媒体实例对象
+ */
+function playSound ({ name: src, loop = false, volume = 10 }) {
+    const innerAudioContext = uni.createInnerAudioContext();
+    Object.assign(innerAudioContext, {
+        src,
+        volume: volume / 20,
+        autoplay: true,
+        loop
+    })
+    innerAudioContext.onEnded(() => {
+        innerAudioContext.destroy()
+    })
+    return innerAudioContext
+}
+
 export {
-    random
+    random,
+    mergeData,
+    playSound,
+    expressionResult
 }

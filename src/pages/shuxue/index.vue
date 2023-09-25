@@ -203,7 +203,12 @@
 
 <script setup>
 import { onMounted, ref, reactive, watch } from "vue";
-import { random } from "../../module/tools";
+import { 
+    random,
+    mergeData,
+    playSound as playAudio,
+    expressionResult
+} from "../../module/tools";
 import date from 'date-php'
 import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
 import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
@@ -253,7 +258,7 @@ const isMixed = ref(storageConf.isMixed) // 是否混合运算
 const cursorType = ref(storageConf.cursorType) // 是否混合运算
 const scrollTop = ref(0) // 滚动位置
 
-// 自动当前滚动条为光标为可见高度
+// 滚动条将当前光标自动滚动到可视区域内
 const autoCurItemPosition = async () => {
     function createSelectorQuery(selector) {
         return new Promise(resolve => {
@@ -293,7 +298,6 @@ uni.showShareMenu({
 });
 //#endif
 
-
 /**
  * 生成数据列表
  * @author ToviLau 46134256@qq.com
@@ -307,7 +311,7 @@ function createList(isInit = true) {
      */
     function createData(num) {
         if (isInit) numlist.length = 0
-        const _numlist = []
+
         // 随机生成运算符 0:'+' | 1:'-' | 2:'*' | 3:'/'
         const createOperator = (operator) => Math.floor(Math.random() * (operator || (opType.value ? 4 : 2)) + 0)
 
@@ -326,29 +330,29 @@ function createList(isInit = true) {
                     break;
 
                 case 2: // '*'
-                    _expression[0] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
-                    _expression[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
+                    _expression[0] = random(8, difficulty.value ? '10-50' : '1-10')
+                    _expression[1] = random(8, difficulty.value ? '10-50' : '1-10')
                     break;
 
                 case 3: // '/'
-                    const initF = () => {
+                    const divisionFn = () => {
                         _expression[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
                         _expression[0] = random(8, `${_expression[1]}-${difficulty.value ? '999' : '99'}`)
-                        // Todo: 小数与混合模式支持后期再说
+                        // Todo: 小数支持后期再说
                         _expression[0] = _expression[0] - _expression[0] % _expression[1] // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         if (
                             _expression[1] === 0 // 被除数为0, 小学阶段无意义
                             || _expression[0] === 0 // 排除商为0，此条可以删除 
                             || _expression[0] === _expression[1] // 排除商为1，此条可以删除
-                        ) initF()
+                        ) divisionFn()
                     }
-                    initF()
+                    divisionFn()
                     break;
             }
             return _expression.concat(_getOperator)
         }
 
-        for (let i = 0; i < num; i++) {
+        const _numlist = new Array(num).fill(undefined).map(res=>{
             // [
             //     [ 数字1 || [ 数字1, 数字2, 运算符 ], 数字2 || [ 数字1, 数字2, 运算符 ], 运算符 ],
             //     用户运算结果,
@@ -359,27 +363,9 @@ function createList(isInit = true) {
             const mData = mergeData(createExpression(), createExpression(2))
             const _createExpression = createExpression()
             numArr[0] = isMixed.value[0] ? mData : _createExpression
-            _numlist.push(numArr);
-        }
-
-        /**
-         * 合并两数据
-         * @param {array} data1 [数1,数2, 运算符]
-         * @param {array} data2 [数1,数2, 运算符]
-         * @return [[数1-1,数1-2, 运算符],数2, 运算符] || [数1,[数2-1,数2-2, 运算符], 运算符]
-         */
-        function mergeData(data1, data2) {
-            const idx = Math.random() > 0.5 ? 1 : 0
-            data2[idx] = data1
-            if (data2[2] === 1) {
-                const _data1 = data2[0] - 0 || expressionResult(data2[0])
-                const _data2 = data2[1] - 0 || expressionResult(data2[1])
-                const _tmp = data2.pop()
-                if (_data1 < _data2) data2.reverse()
-                data2.push(_tmp)
-            }
-            return data2
-        }
+            return numArr
+        })
+        
 
         numlist.push(..._numlist)
     }
@@ -399,27 +385,8 @@ function createList(isInit = true) {
 }
 createList(true);
 
-/**
- * 播放音频
- * @author ToviLau 46134256@qq.com
- * @param name {string} 音频地址
- * @param loop {boolean} 是否循环播放
- * @param volume 音量大小(1-20)
- * @return 当前媒体实例对象
- */
-const playSound = ({ name: src, loop = false, volume = storageConf.bgmVolume }) => {
-    const innerAudioContext = uni.createInnerAudioContext();
-    Object.assign(innerAudioContext, {
-        src,
-        volume: volume / 20,
-        autoplay: true,
-        loop
-    })
-    innerAudioContext.onEnded(() => {
-        innerAudioContext.destroy()
-    })
-    return innerAudioContext
-}
+// playSound 中转方法
+const playSound = ({ name, loop, volume = storageConf?.bgmVolume || 10 }) => playAudio({ name, loop, volume })
 
 // BGM
 const bgm = playSound({ name: musicArr['bgm-sxg_mp3'], loop: true })
@@ -492,7 +459,7 @@ const keyNum = (key) => {
             numlist[curidx.value][1] = numlist[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
             break;
 
-        case 'next':
+        case 'next': // 下一题
             const _curidx = curidx.value + 1
             curidx.value = _curidx > numlist.length - 1 ? curidx.value : _curidx
 
@@ -505,36 +472,7 @@ const keyNum = (key) => {
     }
     // 恢复下标4(对错判断)标识为:空 (错:0, 对:1, 无:'')
     numlist[curidx.value].splice(2, 1, '')
-
-    // if (numlist[curidx.value][2] !== 1) numlist[curidx.value].splice(2, 1, '')
-    // numlist[curidx.value][1] = key === "del"
-    //     // 删除事件
-    //     ? numlist[curidx.value][2] !== 1
-    //         ? numlist[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
-    //         : _val
-    //     // 数字输入事件(最大4位数)
-    //     : numlist[curidx.value][2] !== 1 && _val.length < 4
-    //         ? _val + key - 0
-    //         : _val - 0;
 };
-
-// 计算表达式答案
-function expressionResult(data) {
-    const _tmp = [
-        Array.isArray(data[0]) ? expressionResult(data[0]) : data[0],
-        Array.isArray(data[1]) ? expressionResult(data[1]) : data[1]
-    ]
-    switch (data[2]) {
-        case 0:
-            return _tmp[0] + _tmp[1]
-        case 1:
-            return _tmp[0] - _tmp[1]
-        case 2:
-            return _tmp[0] * _tmp[1]
-        case 3:
-            return _tmp[0] / _tmp[1]
-    }
-}
 
 // 查看得分事件
 const subEnter = () => {
@@ -672,6 +610,7 @@ const bgmVolumeChange = val => {
 
 onShow(() => {
     setTimeout(() => {
+        // debugger
         bgm.volume = setConfig.bgmVolume / 20
     }, 10)
 })
@@ -920,7 +859,7 @@ onUnload(() => {
             text-align: center;
             box-shadow: 0 0 0 1rpx #cfcfcf;
             // background-color: #f0f0f0;
-            background-image: linear-gradient(0deg, #e6e6e6, #f6f6f6);
+            background-image: linear-gradient(0deg, #dfdfdf, #f6f6f6);
             border-radius: 5rpx;
             color: #606060;
             font-weight: bolder;
