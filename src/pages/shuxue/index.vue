@@ -281,10 +281,12 @@ watch(keyboard, () => {
     autoCurItemPosition()
 })
 
+
 watch(cursorType, () => {
     setConfig.cursorType = cursorType.value
 })
 watch(setConfig, () => {
+    playSound({ name: musicArr['dian2_mp3'] })
     cursorType.value = setConfig.cursorType
 })
 
