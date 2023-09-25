@@ -108,8 +108,8 @@
                                 <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.opType }">加减运算
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.opType" inactiveColor="#f9f9f9"
-                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                    <zeroSwitch :size="20" v-model="setConfig.opType" inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.opType }">四则运算
                                 </div>
@@ -127,8 +127,8 @@
                                 <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">简单
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.difficulty" inactiveColor="#f9f9f9"
-                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                    <zeroSwitch :size="20" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">困难
                                 </div>
@@ -141,8 +141,8 @@
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.showIdx" inactiveColor="#f9f9f9"
-                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#dcdcdc" />
+                                    <zeroSwitch :size="20" v-model="setConfig.showIdx" inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#cfcfcf" />
                                 </div>
                             </div>
                         </div>
@@ -154,8 +154,8 @@
                                 <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">简约
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.keyboard" inactiveColor="#f9f9f9"
-                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                    <zeroSwitch :size="20" v-model="setConfig.keyboard" inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">九宫格
                                 </div>
@@ -171,8 +171,8 @@
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
 
-                                    <zeroSwitch :size="20" v-model="setConfig.cursorType" inactiveColor="#f9f9f9"
-                                        activeColor="#f9f9f9" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                    <zeroSwitch :size="20" v-model="setConfig.cursorType" inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.cursorType }">
                                     {{ `竖线 |` }}
@@ -281,10 +281,12 @@ watch(keyboard, () => {
     autoCurItemPosition()
 })
 
+
 watch(cursorType, () => {
     setConfig.cursorType = cursorType.value
 })
 watch(setConfig, () => {
+    playSound({ name: musicArr['dian2_mp3'] })
     cursorType.value = setConfig.cursorType
 })
 
@@ -630,9 +632,8 @@ onUnload(() => {
     .top {
         font-size: 26rpx;
         padding: 0 1em;
-        color: #666;
-        // background-color: #f9f9f9;
-        background-color: #e9e9e9;
+        color: var(--c-safegray);
+        background-color: var(--c-safegray-hlight);
         display: flex;
         justify-content: space-between;
         line-height: 1.5em;
@@ -654,7 +655,7 @@ onUnload(() => {
 
         .list-item {
             @item-primary-color: #b6aafa;
-            border-bottom: 1px solid #ccc;
+            border-bottom: 1px solid var(--c-safegray-hlight);
             font-size: 30rpx;
             line-height: 2.95em;
             // width: 42%;
@@ -665,7 +666,7 @@ onUnload(() => {
             display: flex;
             align-items: center;
             text-align: center;
-            color: #333;
+            color: var(--c-safegray-hdark);
             min-width: 9.75em;
             flex: 1;
             margin: 0 .5em;
@@ -676,15 +677,15 @@ onUnload(() => {
             }
 
             .list-item-idx {
-                border: 1px solid #f0f0f0;
+                border: 1px solid var(--c-safegray-hlight);
                 border-radius: 5rpx;
-                color: #ccc;
+                color: var(--c-safegray-lighter);
                 padding: 0 0.3em;
                 width: 1.8em;
                 line-height: 1.6em;
                 margin-right: 0.35em;
                 font-size: 18rpx;
-                background-image: linear-gradient(180deg, #e9e9e9, transparent);
+                background-image: linear-gradient(180deg, var(--c-safegray-hlight), transparent);
                 margin-left: -0.6em;
             }
 
@@ -702,9 +703,8 @@ onUnload(() => {
             }
 
             .edited {
-
-                background-color: #ececec;
-                color: #c3c3c3;
+                background-color: var(--c-gray-hlighter);
+                color: var(--c-safegray-light);
 
                 &::before {
                     content: '已订正：'
@@ -716,8 +716,8 @@ onUnload(() => {
             }
 
             .wait-edited {
-                background-color: #ed5d46;
-                color: #f0f0f0;
+                background-color: var(--color-R);
+                color: var(--c-safegray-hlight);
 
                 &::before {
                     content: '尚未订正'
@@ -754,7 +754,7 @@ onUnload(() => {
 
             &.cur-item { 
                 box-shadow: 0 0 0 4rpx @item-primary-color;
-                border-bottom: none;
+                // border-bottom: none;
                 border-radius: 5rpx;
 
                 &:after {
@@ -762,7 +762,7 @@ onUnload(() => {
                 }
 
                 &.right {
-                    box-shadow: 0 0 0 4rpx #cfcfcf;
+                    box-shadow: 0 0 0 4rpx var(--c-safegray-light);
 
                     &:after {
                         animation: none;
@@ -780,8 +780,8 @@ onUnload(() => {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background-color: rgba(244, 227, 172, 0.6);
-                color: #c9a631;
+                background-color: #c9a63153;
+                color: var(--color-Y);
                 line-height: 1.6em;
                 font-size: 18rpx;
                 padding: 0 .5em;
@@ -828,25 +828,25 @@ onUnload(() => {
     }
 
     .footer {
-        box-shadow: 0 0 15px #ececec;
+        box-shadow: 0 0 15px var(--c-safegray-lighter);
         padding: 0.5em 0;
         position: relative;
-        border-top: 1px solid #e9e9e9;
+        border-top: 1px solid var(--c-safegray-lighter);
+        background-color: var(--c-safegray-hlighter);
 
         .pan {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-evenly;
-            background-color: #f9f9f9;
 
             &.dsb {
 
                 &>.pan-item:not(.pan-enter),
                 .pan-del {
-                    // background-color: #f6f6f6;
-                    background-image: linear-gradient(0deg, #f0f0f0, #fcfcfc);
-                    color: #ccc;
-                    box-shadow: 0 0 0 1rpx #f9f9f9;
+                    background-image: linear-gradient(0deg, var(--c-safegray-hlight), var(--c-safegray-hlighter));
+                    background-color: transparent;
+                    color: var(--c-safegray-lighter);
+                    box-shadow: 0 0 0 1rpx var(--c-safegray-hlight);
                     // filter: grayscale(.8) ;
                 }
             }
@@ -857,53 +857,50 @@ onUnload(() => {
             margin: 6rpx 0;
             line-height: 2.6em;
             text-align: center;
-            box-shadow: 0 0 0 1rpx #cfcfcf;
-            // background-color: #f0f0f0;
-            background-image: linear-gradient(0deg, #dfdfdf, #f6f6f6);
+            box-shadow: 0 0 0 1rpx var(--c-safegray-lighter);
+            background-image: linear-gradient(0deg, var(--c-gray-hlight), var(--c-safegray-hlighter));
             border-radius: 5rpx;
-            color: #606060;
+            color: var(--c-safegray-dark);
             font-weight: bolder;
-
-            &.pan-enter,
-            &.pan-del,
-            &.fen-new,
-            &.fen-edit {
-                // width: 36%;
-                border: 1px solid;
-                background-image: none;
-                color: #fcfcfc;
-                box-shadow: none;
-                flex: 1;
-                line-height: 1.8em;
-                border-color: #e9e9e9 !important;
-
-            }
-
-            &.pan-del,
-            &.fen-new {
-                background-color: #ed5d46;
-            }
-
-            &.pan-enter,
-            &.fen-edit {
-                background-color: #2ce02c;
-
-                &.dsb {
-                    background-color: #e6e6e6;
-                    color: #999;
-                }
-            }
-
             &:active {
                 opacity: 0.618;
             }
-
+    
             &.dsb {
                 background-image: linear-gradient(0deg, #f0f0f0, #f9f9f9);
-                // background-color: #f6f6f6;
                 color: #ccc;
                 box-shadow: 0 0 0 1rpx #e0e0e0;
-                // filter: grayscale(.8) ;
+            }
+
+        }
+
+        .pan-enter,
+        .pan-del,
+        .fen-new,
+        .fen-edit {
+            // width: 36%;
+            border: 1px solid;
+            background-image: none;
+            color: var(--c-safegray-hlight);
+            box-shadow: none;
+            flex: 1;
+            line-height: 1.8em;
+            border-color: var(--c-gray-hlighter) !important;
+
+        }
+
+        .pan-del,
+        .fen-new {
+            background-color: var(--color-R);
+        }
+
+        .pan-enter,
+        .fen-edit {
+            background-color: var(--color-G);
+
+            &.dsb {
+                background-color: var(--c-safegray-hlighter);
+                color: var(--c-safegray);
             }
         }
 
@@ -944,8 +941,8 @@ onUnload(() => {
 
         .fen {
             .fen-title {
-                background-image: linear-gradient(180deg, #e0e0e0, #fcfcfc);
-                color: #333;
+                background-image: linear-gradient(180deg, var(--c-gray-hlight), var(--c-safegray-hlighter));
+                color: var(--c-safegray-darker);
                 margin-top: -0.5em;
                 line-height: 2.2em;
                 padding: 0 1em;
@@ -954,7 +951,7 @@ onUnload(() => {
 
                 .fen-title-right {
                     font-size: 22rpx;
-                    color: #999
+                    color: var(--c-safegray)
                 }
             }
 
@@ -963,7 +960,7 @@ onUnload(() => {
                 font-size: 62rpx;
                 line-height: 1.25em;
                 margin-top: 0.125em;
-                color: #ed5d46;
+                color: var(--color-Y);
                 position: relative;
 
                 &:after,
@@ -973,7 +970,7 @@ onUnload(() => {
                     left: 50%;
                     top: 50%;
                     height: .06em;
-                    background-color: #ed5d46;
+                    background-color: var(--color-Y);
                 }
 
                 &:after {
@@ -1011,7 +1008,7 @@ onUnload(() => {
         .set-sys {
             width: 100%;
             color: #333;
-            background-color: #fff;
+            background-color: var(--c-safegray-hlighter);
             display: flex;
             flex-direction: column;
 
@@ -1021,10 +1018,10 @@ onUnload(() => {
                 align-items: center;
                 display: flex;
                 // flex-direction: column;
-                font-size: 20rpx;
+                font-size: 26rpx;
                 color: @c;
-                margin: 1em 0;
-                text-shadow: 3rpx 3rpx 0 #fcfcfc;
+                margin: .75em 0;
+                text-shadow: 3rpx 3rpx 0 var(--c-safegray-hlighter);
 
                 &:before,
                 &:after {
@@ -1033,12 +1030,12 @@ onUnload(() => {
                     flex: 1;
                     background-color: @c;
                     margin: 0 .5em;
-                    box-shadow: 3rpx 2rpx 0 #fcfcfc;
+                    box-shadow: 3rpx 2rpx 0 var(--c-safegray-hlighter);
                 }
             }
 
             .set-sys-title {
-                background-image: linear-gradient(180deg, #e0e0e0, #fcfcfc);
+                background-image: linear-gradient(180deg, var(--c-safegray-lighter), var(--c-safegray-hlighter));
                 margin-top: -0.5em;
                 line-height: 2.5em;
                 padding: 0 1em;
@@ -1052,7 +1049,7 @@ onUnload(() => {
                     justify-content: center;
 
                     .rest-default {
-                        color: #999;
+                        color: var(--c-safegray);
                         font-size: 26rpx;
                     }
                 }
@@ -1101,12 +1098,12 @@ onUnload(() => {
 
                         :deep(.checklist-box) {
                             .checklist-text {
-                                color: #c0c0c0 !important;
+                                color: var(--c-safegray-lighter) !important;
                             }
 
                             &.is-checked {
                                 .checklist-text {
-                                    color: #55a4f3 !important;
+                                    color: var(--color-B) !important;
                                 }
                             }
                         }
@@ -1114,18 +1111,18 @@ onUnload(() => {
                 }
 
                 .cur {
-                    color: #55a4f3;
+                    color: var(--color-B);
                 }
 
                 .set-sys-switch {
                     display: flex;
                     align-items: center;
-                    color: #c0c0c0;
+                    color: var(--c-safegray-lighter);
                     font-size: 20rpx;
                     margin-right: 1em;
 
                     :deep(.uni-switch-input) {
-                        background-color: #55a4f3 !important;
+                        background-color: var(--color-B) !important;
                         transform: scale(0.7) !important;
                     }
 
@@ -1158,7 +1155,7 @@ onUnload(() => {
             }
 
             :deep(.hao-slider-block) {
-                background-color: #55a4f3 !important;
+                background-color: var(--color-B) !important;
                 width: 2.2em !important;
                 // padding: 0 8rpx;
                 text-align: center;
@@ -1171,12 +1168,12 @@ onUnload(() => {
             }
 
             .declare{
-                font-size: 22rpx;
+                font-size: 24rpx;
                 line-height: 1.35em;
                 font-weight: normal;
-                margin: .5em .75em -1.25em .75em;
+                margin: .5em 0 -1.1em;
                 text-align: center;
-                color: #dfdfdf;
+                color: var(--c-gray-hlighter);
             }
             .btns {
                 display: flex;
@@ -1185,29 +1182,23 @@ onUnload(() => {
 
 
                 .set-btn {
-                    margin: 6rpx 0;
+                    // margin: 6rpx 0;
                     line-height: 1.8em;
                     text-align: center;
-                    box-shadow: 0 0 0 1rpx #cfcfcf;
-                    background-color: #f0f0f0;
-                    border-radius: 5rpx;
-                    color: #666;
-
-                    color: #fcfcfc;
                     box-shadow: none;
                     flex: 1;
-                    line-height: 1.8em;
+                    line-height: 2em;
 
                 }
 
                 .set-btn-submit {
-                    background-color: #55a4f3;
-                    color: #f0f0f0;
+                    background-color: var(--color-B);
+                    color: var(--c-safegray-hlighter);
                 }
 
                 .set-btn-clean {
-                    background-color: #e6e6e6;
-                    color: #999;
+                    background-color: var(--c-safegray-hlight);
+                    color: var(--c-safegray);
                 }
             }
         }
