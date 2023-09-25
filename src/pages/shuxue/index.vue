@@ -188,7 +188,7 @@
                         </div>
                     </div>
                     <div class="declare"> 
-                        <div>个人版非商用，不采集个人信息。所有数据仅存在您个人本地</div>
+                        <div>个人版非商用，不采集个人信息。所有数据仅存在本地</div>
                         <div>如果清除微信缓存,您保存的数据就会丢失</div>
                     </div>
                     <div class="btns">
@@ -752,7 +752,7 @@ onUnload(() => {
                 }
             }
 
-            &.cur-item {
+            &.cur-item { 
                 box-shadow: 0 0 0 4rpx @item-primary-color;
                 border-bottom: none;
                 border-radius: 5rpx;
