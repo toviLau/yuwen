@@ -19,7 +19,7 @@
 <script setup>
 import { onMounted, ref, watch, reactive } from 'vue';
 const { miniProgram } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : { }
-const version = (miniProgram?.version || '0.0.3').match(/^\d+(\.\d+){2}/)[0]
+const version = (miniProgram?.version || '0.0.1').match(/^\d+(\.\d+){2}/)[0]
 // const { miniProgram: { version } } = uni?.getAccountInfoSync() || { miniProgram: { version: '0.0.22.0' } }
 
 // #ifdef MP-WEIXIN

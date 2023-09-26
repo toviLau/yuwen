@@ -19,18 +19,18 @@
                     {{
                         !Array.isArray(v[0][0]) ? `${v[0][0]}` : `${v[0][0][0]}${["+", "-", '×', '÷'][v[0][0][2]]}${v[0][0][1]}`
                     }}{{
-    `${["+", "-", '×', '÷'][v[0][2]]}`
-}}{{
-    !Array.isArray(v[0][1])
-    ? `${v[0][1]}`
-    : `${v[0][1][2] === 1
-        ? '('
-        : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')'
-            : ''
-    }`
-}}{{ `=` }}{{
-    curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : ""
-}}
+                        `${["+", "-", '×', '÷'][v[0][2]]}`
+                    }}{{
+                        !Array.isArray(v[0][1])
+                        ? `${v[0][1]}`
+                        : `${v[0][1][2] === 1
+                            ? '('
+                            : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')'
+                                : ''
+                        }`
+                    }}{{ `=` }}{{
+                        curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : ""
+                    }}
                     <div v-show="v[2] === 0">
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
@@ -291,6 +291,7 @@ watch(cursorType, () => {
 watch(setConfig, () => {
     playSound({ name: musicArr['dian2_mp3'] })
     cursorType.value = setConfig.cursorType
+    showIdx.value = setConfig.showIdx
 })
 
 // #ifdef MP-WEIXIN
@@ -603,12 +604,16 @@ const saveConfig = () => {
 const cleanConfig = () => {
     const {
         bgmVolume: volume,
-        cursorType: cursor
+        cursorType: cursor,
+        showIdx: _showIdx
     } = getStorageData()
 
     bgm.volume = volume / 20
     cursorType.value = cursor
+    showIdx.value = _showIdx
+    setConfig.showIdx = _showIdx
     showConfig(false)
+
 }
 
 // 题目数量滑块更新
