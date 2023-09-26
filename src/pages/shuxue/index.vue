@@ -52,13 +52,14 @@
             }">
             <div class="pan" :class="{ dsb: numlist[curidx][2] === 1, easyKeyboard: !keyboard }"
                 v-if="submited === 0 && curidx !== '' && !setConfig.status">
-                <div class="pan-item" v-for="i in 9" @click="keyNum(i)" :key="i">
-                    {{ i }}
-                </div>
-                <div class="pan-item dsb" v-if="keyboard">.</div> <!-- 九宫格键盘补位 -->
-                <div class="pan-item" @click="keyNum(0)">0</div>
-                <div class="pan-item dsb" v-if="!keyboard">.</div> <!-- 简约键盘补位 -->
-                <div class="pan-item" @click="keyNum('next')">下一题</div>
+                <template v-for="item in keyboardCode"  :key="item.idx+item.value">
+                    <div class="pan-item" :class="{
+                        dsb: item.code === '.'
+                    }" @click="keyNum(item.value)"
+                        v-if="keyboard && item.fullKey || !keyboard && item.easyKey">
+                        <div class="pan-item-container">{{ item.code }}</div> 
+                    </div>
+                </template>
 
                 <div class="pan-footer">
                     <div class="pan-item pan-enter" @click="subEnter()">查看得分</div>
@@ -187,9 +188,11 @@
                                 :value="setConfig.bgmVolume" :max="20" @change="bgmVolumeChange" class="set-slider" />
                         </div>
                     </div>
-                    <div class="declare"> 
-                        <div>个人版非商用，不采集个人信息。所有数据仅存在本地</div>
-                        <div>如果清除微信缓存,您保存的数据就会丢失</div>
+                    <div class="declare divider-line">
+                        <div>
+                            <div>个人版非商用，不采集个人信息。所有数据仅存储在本地</div>
+                            <div>如果清除微信缓存,您保存的数据就会丢失</div>
+                        </div>
                     </div>
                     <div class="btns">
                         <div class="set-btn set-btn-submit" @click="saveConfig()">保存</div>
@@ -203,7 +206,7 @@
 
 <script setup>
 import { onMounted, ref, reactive, watch } from "vue";
-import { 
+import {
     random,
     mergeData,
     playSound as playAudio,
@@ -354,7 +357,7 @@ function createList(isInit = true) {
             return _expression.concat(_getOperator)
         }
 
-        const _numlist = new Array(num).fill(undefined).map(res=>{
+        const _numlist = new Array(num).fill(undefined).map(res => {
             // [
             //     [ 数字1 || [ 数字1, 数字2, 运算符 ], 数字2 || [ 数字1, 数字2, 运算符 ], 运算符 ],
             //     用户运算结果,
@@ -367,7 +370,7 @@ function createList(isInit = true) {
             numArr[0] = isMixed.value[0] ? mData : _createExpression
             return numArr
         })
-        
+
 
         numlist.push(..._numlist)
     }
@@ -386,6 +389,41 @@ function createList(isInit = true) {
     curidx.value = 0;
 }
 createList(true);
+const keyboardCodeArr = new Array(9).fill({ easyKey: 1, fullKey: 1 }).map((item, idx) => {
+    return Object.assign({}, item, {
+        idx,
+        code: idx + 1,
+        value: idx + 1,
+    })
+})
+keyboardCodeArr.splice(5, 0, {
+    easyKey: 1,
+    fullKey: 0,
+    idx: keyboardCodeArr.length,
+    code: '.',
+    value: '.'
+})
+keyboardCodeArr.push({
+    easyKey: 0,
+    fullKey: 1,
+    idx: keyboardCodeArr.length,
+    code: '.',
+    value: '.'
+}, {
+    easyKey: 1,
+    fullKey: 1,
+    idx: keyboardCodeArr.length + 1,
+    code: '0',
+    value: '0'
+}, {
+    easyKey: 1,
+    fullKey: 1,
+    idx: keyboardCodeArr.length + 2,
+    code: '下一题',
+    value: 'next'
+})
+
+const keyboardCode = reactive(keyboardCodeArr)
 
 // playSound 中转方法
 const playSound = ({ name, loop, volume = storageConf?.bgmVolume || 10 }) => playAudio({ name, loop, volume })
@@ -447,6 +485,7 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyNum = (key) => {
+    if (key === '.') return
     playSound({ name: musicArr['dian2_mp3'] })
     if (
         numlist[curidx.value][2] === 1  // 已判定当前题为正确
@@ -456,6 +495,8 @@ const keyNum = (key) => {
     if (numlist[curidx.value][2] === 1) return
 
     switch (key) {
+        case '.': // 删除事件
+            return
         case 'del': // 删除事件
             // 如果提交后已判错, 删除是全部,其它情况单个从右到左删除
             numlist[curidx.value][1] = numlist[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
@@ -752,7 +793,7 @@ onUnload(() => {
                 }
             }
 
-            &.cur-item { 
+            &.cur-item {
                 box-shadow: 0 0 0 4rpx @item-primary-color;
                 // border-bottom: none;
                 border-radius: 5rpx;
@@ -828,11 +869,11 @@ onUnload(() => {
     }
 
     .footer {
-        box-shadow: 0 0 15px var(--c-safegray-lighter);
+        box-shadow: 0 0 15px var(--c-gray-hlight);
         padding: 0.5em 0;
         position: relative;
-        border-top: 1px solid var(--c-safegray-lighter);
-        background-color: var(--c-safegray-hlighter);
+        border-top: 1rpx solid var(--c-safegray-hlight);
+        background-color: var(--c-safegray-hlight);
 
         .pan {
             display: flex;
@@ -847,7 +888,21 @@ onUnload(() => {
                     background-color: transparent;
                     color: var(--c-safegray-lighter);
                     box-shadow: 0 0 0 1rpx var(--c-safegray-hlight);
+                    
                     // filter: grayscale(.8) ;
+                }
+            }
+
+            &:not(.easyKeyboard) > :nth-child(11){
+                // flex-grow: 0;
+                .pan-item-container{
+                    margin-left: calc(-100% - 20rpx) ;
+                    // line-height: calc(2.6em * 2 + 12rpx)
+                }
+            }
+            &:not(.easyKeyboard) > :nth-child(10){
+                .pan-item-container{
+                    display: none;
                 }
             }
         }
@@ -855,23 +910,30 @@ onUnload(() => {
         .pan-item,
         .fen-item {
             margin: 6rpx 0;
-            line-height: 2.6em;
+            position: relative;
             text-align: center;
-            box-shadow: 0 0 0 1rpx var(--c-safegray-lighter);
-            background-image: linear-gradient(0deg, var(--c-gray-hlight), var(--c-safegray-hlighter));
-            border-radius: 5rpx;
-            color: var(--c-safegray-dark);
-            font-weight: bolder;
-            &:active {
-                opacity: 0.618;
-            }
-    
-            &.dsb {
-                background-image: linear-gradient(0deg, #f0f0f0, #f9f9f9);
-                color: #ccc;
-                box-shadow: 0 0 0 1rpx #e0e0e0;
+            .pan-item-container{
+                box-shadow: 0 0 4rpx var(--c-safegray);
+                background-image: linear-gradient(0deg, var(--c-safegray-hlight), var(--c-safegray-hlighter));
+                color: var(--c-safegray-dark);
+                border-radius: 5rpx;
+                font-weight: bolder;
+                line-height: 2.6em;
             }
 
+            &:active:not(.dsb) {
+                opacity: 0.618;
+            }
+
+            &.dsb .pan-item-container {
+                // background-image: linear-gradient(0deg, var(--c-safegray-hlight), var(--c-safegray-hlighter));
+                background-image: none;
+                color: #ccc;
+                background-color: var(--c-safegray-hlight);
+                box-sizing: border-box;
+                border: 1px solid;
+                border-color: var(--c-safegray-light)  var(--c-safegray-light)  var(--c-safegray-hlighter) var(--c-safegray-hlighter);
+            }
         }
 
         .pan-enter,
@@ -904,10 +966,23 @@ onUnload(() => {
             }
         }
 
-        .easyKeyboard .pan-item {
-            width: 15%;
+        .easyKeyboard {
+            .pan-item {
+                width: 15%;
+            }
+            > :nth-child(12){
+                .pan-item-container{
+                    margin-top: calc(-2.6em - 12rpx) ;
+                    line-height: calc(2.6em * 2 + 12rpx)
+                }
+            }
+            > :nth-child(6){
+                .pan-item-container{
+                    display: none;
+                }
+            }
         }
-
+        
         .pan-item {
             width: 30%;
         }
@@ -960,7 +1035,7 @@ onUnload(() => {
                 font-size: 62rpx;
                 line-height: 1.25em;
                 margin-top: 0.125em;
-                color: var(--color-Y);
+                color: var(--color-R);
                 position: relative;
 
                 &:after,
@@ -970,7 +1045,7 @@ onUnload(() => {
                     left: 50%;
                     top: 50%;
                     height: .06em;
-                    background-color: var(--color-Y);
+                    background-color: var(--color-R);
                 }
 
                 &:after {
@@ -1018,7 +1093,7 @@ onUnload(() => {
                 align-items: center;
                 display: flex;
                 // flex-direction: column;
-                font-size: 26rpx;
+                font-size: 24rpx;
                 color: @c;
                 margin: .75em 0;
                 text-shadow: 3rpx 3rpx 0 var(--c-safegray-hlighter);
@@ -1167,7 +1242,7 @@ onUnload(() => {
                 color: #fff;
             }
 
-            .declare{
+            .declare {
                 font-size: 24rpx;
                 line-height: 1.35em;
                 font-weight: normal;
@@ -1175,6 +1250,7 @@ onUnload(() => {
                 text-align: center;
                 color: var(--c-gray-hlighter);
             }
+
             .btns {
                 display: flex;
                 margin-top: 1em;
