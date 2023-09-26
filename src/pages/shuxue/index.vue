@@ -19,18 +19,18 @@
                     {{
                         !Array.isArray(v[0][0]) ? `${v[0][0]}` : `${v[0][0][0]}${["+", "-", '×', '÷'][v[0][0][2]]}${v[0][0][1]}`
                     }}{{
-                        `${["+", "-", '×', '÷'][v[0][2]]}`
-                    }}{{
-                        !Array.isArray(v[0][1])
-                        ? `${v[0][1]}`
-                        : `${v[0][1][2] === 1
-                            ? '('
-                            : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')'
-                                : ''
-                        }`
-                    }}{{ `=` }}{{
-                        curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : ""
-                    }}
+    `${["+", "-", '×', '÷'][v[0][2]]}`
+}}{{
+    !Array.isArray(v[0][1])
+    ? `${v[0][1]}`
+    : `${v[0][1][2] === 1
+        ? '('
+        : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')'
+            : ''
+    }`
+}}{{ `=` }}{{
+    curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : ""
+}}
                     <div v-show="v[2] === 0">
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
@@ -52,12 +52,11 @@
             }">
             <div class="pan" :class="{ dsb: numlist[curidx][2] === 1, easyKeyboard: !keyboard }"
                 v-if="submited === 0 && curidx !== '' && !setConfig.status">
-                <template v-for="item in keyboardCode"  :key="item.idx+item.value">
+                <template v-for="item in keyboardCode" :key="item.idx">
                     <div class="pan-item" :class="{
-                        dsb: item.code === '.'
-                    }" @click="keyNum(item.value)"
-                        v-if="keyboard && item.fullKey || !keyboard && item.easyKey">
-                        <div class="pan-item-container">{{ item.code }}</div> 
+                        dsb: item.value === '.'
+                    }" @click="keyNum(item.value)" v-if="keyboard && item.fullKey || !keyboard && item.easyKey">
+                        <div class="pan-item-container">{{ item.name }}</div>
                     </div>
                 </template>
 
@@ -210,7 +209,8 @@ import {
     random,
     mergeData,
     playSound as playAudio,
-    expressionResult
+    expressionResult,
+    createKeyboardCode
 } from "../../module/tools";
 import date from 'date-php'
 import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
@@ -389,41 +389,7 @@ function createList(isInit = true) {
     curidx.value = 0;
 }
 createList(true);
-const keyboardCodeArr = new Array(9).fill({ easyKey: 1, fullKey: 1 }).map((item, idx) => {
-    return Object.assign({}, item, {
-        idx,
-        code: idx + 1,
-        value: idx + 1,
-    })
-})
-keyboardCodeArr.splice(5, 0, {
-    easyKey: 1,
-    fullKey: 0,
-    idx: keyboardCodeArr.length,
-    code: '.',
-    value: '.'
-})
-keyboardCodeArr.push({
-    easyKey: 0,
-    fullKey: 1,
-    idx: keyboardCodeArr.length,
-    code: '.',
-    value: '.'
-}, {
-    easyKey: 1,
-    fullKey: 1,
-    idx: keyboardCodeArr.length + 1,
-    code: '0',
-    value: '0'
-}, {
-    easyKey: 1,
-    fullKey: 1,
-    idx: keyboardCodeArr.length + 2,
-    code: '下一题',
-    value: 'next'
-})
-
-const keyboardCode = reactive(keyboardCodeArr)
+const keyboardCode = reactive(createKeyboardCode())
 
 // playSound 中转方法
 const playSound = ({ name, loop, volume = storageConf?.bgmVolume || 10 }) => playAudio({ name, loop, volume })
@@ -503,8 +469,14 @@ const keyNum = (key) => {
             break;
 
         case 'next': // 下一题
+            if (curidx.value >= numlist.length - 1) return
             const _curidx = curidx.value + 1
-            curidx.value = _curidx > numlist.length - 1 ? curidx.value : _curidx
+            // 查找没有做的 与 结果非正确的题
+            const _nextIdx = numlist[_curidx][2] === 1
+                ? numlist.findIndex((res, idx) => res[2] !== 1 && idx > _curidx)
+                : _curidx
+            // const _curidx = numlist.findIndex((res, idx) => res[2]===0)
+            curidx.value = _nextIdx > numlist.length - 1 ? curidx.value : _nextIdx
 
             autoCurItemPosition()
             break;
@@ -869,11 +841,12 @@ onUnload(() => {
     }
 
     .footer {
-        box-shadow: 0 0 15px var(--c-gray-hlight);
+        box-shadow: 0 0 2px var(--c-gray-hlight);
+        border: 1rpx solid var(--c-gray-hlighter);
         padding: 0.5em 0;
         position: relative;
         border-top: 1rpx solid var(--c-safegray-hlight);
-        background-color: var(--c-safegray-hlight);
+        background-color: var(--c-safegray-hlighter);
 
         .pan {
             display: flex;
@@ -888,22 +861,43 @@ onUnload(() => {
                     background-color: transparent;
                     color: var(--c-safegray-lighter);
                     box-shadow: 0 0 0 1rpx var(--c-safegray-hlight);
-                    
+
                     // filter: grayscale(.8) ;
                 }
             }
 
-            &:not(.easyKeyboard) > :nth-child(11){
-                // flex-grow: 0;
-                .pan-item-container{
-                    margin-left: calc(-100% - 20rpx) ;
-                    // line-height: calc(2.6em * 2 + 12rpx)
+            &:not(.easyKeyboard) {
+                :nth-child(10) {
+                    .pan-item-container {
+                        display: none;
+                    }
+                }
+
+                :nth-child(11) {
+                    .pan-item-container {
+                        margin-left: calc(-100% - 20rpx);
+                    }
                 }
             }
-            &:not(.easyKeyboard) > :nth-child(10){
-                .pan-item-container{
-                    display: none;
+
+            &.easyKeyboard {
+                .pan-item {
+                    width: 15%;
                 }
+
+                :nth-child(6) {
+                    .pan-item-container {
+                        display: none;
+                    }
+                }
+
+                :nth-child(12) {
+                    .pan-item-container {
+                        margin-top: calc(-2.6em - 12rpx);
+                        line-height: calc(2.6em * 2 + 12rpx)
+                    }
+                }
+
             }
         }
 
@@ -912,13 +906,14 @@ onUnload(() => {
             margin: 6rpx 0;
             position: relative;
             text-align: center;
-            .pan-item-container{
+
+            .pan-item-container {
                 box-shadow: 0 0 4rpx var(--c-safegray);
-                background-image: linear-gradient(0deg, var(--c-safegray-hlight), var(--c-safegray-hlighter));
+                background-image: linear-gradient(0deg, var(--c-gray-hlighter), var(--c-safegray-hlighter));
                 color: var(--c-safegray-dark);
                 border-radius: 5rpx;
                 font-weight: bolder;
-                line-height: 2.6em;
+                line-height: 3em;
             }
 
             &:active:not(.dsb) {
@@ -926,13 +921,12 @@ onUnload(() => {
             }
 
             &.dsb .pan-item-container {
-                // background-image: linear-gradient(0deg, var(--c-safegray-hlight), var(--c-safegray-hlighter));
                 background-image: none;
                 color: #ccc;
                 background-color: var(--c-safegray-hlight);
                 box-sizing: border-box;
                 border: 1px solid;
-                border-color: var(--c-safegray-light)  var(--c-safegray-light)  var(--c-safegray-hlighter) var(--c-safegray-hlighter);
+                border-color: var(--c-safegray-light) var(--c-safegray-light) var(--c-safegray-hlighter) var(--c-safegray-hlighter);
             }
         }
 
@@ -941,13 +935,14 @@ onUnload(() => {
         .fen-new,
         .fen-edit {
             // width: 36%;
+            border-radius: 5rpx;
             border: 1px solid;
             background-image: none;
             color: var(--c-safegray-hlight);
             box-shadow: none;
             flex: 1;
-            line-height: 1.8em;
-            border-color: var(--c-gray-hlighter) !important;
+            line-height: 2.2em;
+            border-color: var(--color-W) !important;
 
         }
 
@@ -961,28 +956,11 @@ onUnload(() => {
             background-color: var(--color-G);
 
             &.dsb {
-                background-color: var(--c-safegray-hlighter);
+                background-color: var(--c-safegray-hlight);
                 color: var(--c-safegray);
             }
         }
 
-        .easyKeyboard {
-            .pan-item {
-                width: 15%;
-            }
-            > :nth-child(12){
-                .pan-item-container{
-                    margin-top: calc(-2.6em - 12rpx) ;
-                    line-height: calc(2.6em * 2 + 12rpx)
-                }
-            }
-            > :nth-child(6){
-                .pan-item-container{
-                    display: none;
-                }
-            }
-        }
-        
         .pan-item {
             width: 30%;
         }

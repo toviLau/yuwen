@@ -168,9 +168,64 @@ function playSound({ name: src, loop = false, volume = 10 }) {
     return innerAudioContext;
 }
 
+// 生成键盘按键数据
+function createKeyboardCode() {
+    /**
+     * {
+     *    easyKey: 简约模式下显示,
+     *    fullKey: 九宫模式下显示,
+     *    idx: id,
+     *    name: 键名,
+     *    value: 键值
+     * }
+     */
+
+    // 1-9 数字
+    const keyboardCodeArr = new Array(9).fill({ easyKey: 1, fullKey: 1 }).map((item, idx) => {
+        return Object.assign({}, item, {
+            idx: random(7, 16),
+            name: idx + 1,
+            value: idx + 1,
+        })
+    })
+
+    //  简约模式下的 "."
+    keyboardCodeArr.splice(5, 0, {
+        easyKey: 1,
+        fullKey: 0,
+        idx: random(7, 16),
+        name: '.',
+        value: '.'
+    })
+
+    keyboardCodeArr.push({
+        //  九宫模式下的 "."
+        easyKey: 0,
+        fullKey: 1,
+        idx: random(7, 16),
+        name: '.',
+        value: '.'
+    }, {
+        //数字 0
+        easyKey: 1,
+        fullKey: 1,
+        idx: random(7, 16),
+        name: 0,
+        value: 0
+    }, {
+        easyKey: 1,
+        fullKey: 1,
+        idx: random(7, 16),
+        name: '下一题',
+        value: 'next'
+    })
+    return keyboardCodeArr
+}
+
 export {
     random,
     mergeData,
     playSound,
-    expressionResult
+    expressionResult,
+    createKeyboardCode
 };
