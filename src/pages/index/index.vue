@@ -1,11 +1,9 @@
 <!--
  * @Author: ToviLau 46134256@qq.com
  * @Date: 2023-09-14 19:06:05
- * @LastEditors: ToviLau 46134256@qq.com
- * @LastEditTime: 2023-09-19 22:29:51
- * @FilePath: /yuwen/src/pages/index/index.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-09-27 15:59:53
+ -->
 <template>
     <view class="page">
         <view class="content">
@@ -15,11 +13,10 @@
         <view class="foot-line">好好学习 天天向上 ver:{{ version }}</view>
     </view>
 </template>
-
 <script setup>
 import { onMounted, ref, watch, reactive } from 'vue';
-const { miniProgram } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : { }
-const version = (miniProgram?.version || '0.0.1').match(/^\d+(\.\d+){2}/)[0]
+const { miniProgram } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {}
+const version = (miniProgram?.version || '0.0.2').match(/^\d+(\.\d+){2}/)[0]
 // const { miniProgram: { version } } = uni?.getAccountInfoSync() || { miniProgram: { version: '0.0.22.0' } }
 
 // #ifdef MP-WEIXIN

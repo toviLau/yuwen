@@ -898,8 +898,8 @@ onUnload(() => {
 
                 :nth-child(12) {
                     .pan-item-container {
-                        margin-top: calc(-2.6em - 12rpx);
-                        line-height: calc(2.6em * 2 + 12rpx)
+                        margin-top: calc(-3em - 12rpx);
+                        line-height: calc(3em * 2 + 12rpx)
                     }
                 }
 
