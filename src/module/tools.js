@@ -1,3 +1,4 @@
+import Bignumber from 'BigNumber.js'
 /**
  * 产生随机字符
  * @author  toviLau tovi@nutfun.com
@@ -134,38 +135,45 @@ function expressionResult(data) {
         Array.isArray(data[0]) ? expressionResult(data[0]) : data[0] - 0,
         Array.isArray(data[1]) ? expressionResult(data[1]) : data[1] - 0,
     ];
+
+    const BN = new Bignumber(_tmp[0])
     switch (data[2]) {
         case 0:
-            return _tmp[0] + _tmp[1];
+            return BN.plus(_tmp[1]).toFixed(5) - 0;
         case 1:
-            return _tmp[0] - _tmp[1];
+            return BN.minus(_tmp[1]).toFixed(5) - 0;
         case 2:
-            return _tmp[0] * _tmp[1];
+            return BN.multipliedBy(_tmp[1]).toFixed(5) - 0;
         case 3:
-            return _tmp[0] / _tmp[1];
+            return BN.dividedBy(_tmp[1]).toFixed(5) - 0;
     }
 }
 
 /**
  * 播放音频
  * @author ToviLau 46134256@qq.com
- * @param name {string} 音频地址
- * @param loop {boolean} 是否循环播放
- * @param volume 音量大小(1-20)
+ * @param {string} name 音频地址
+ * @param {boolean} loop 是否循环播放
+ * @param {number} volume 音量大小(1-20)
+ * @param {string} instanceName 实例名称
  * @return 当前媒体实例对象
  */
-function playSound({ name: src, loop = false, volume = 10 }) {
-    const innerAudioContext = uni.createInnerAudioContext();
-    Object.assign(innerAudioContext, {
+function playSound({ src, loop = false, volume = 10, instanceName }) {
+    const _instanceName = 'tovi_' + (instanceName || random(6, 8))
+    Object[_instanceName] = Object[_instanceName] || uni.createInnerAudioContext();
+    Object.assign(Object[_instanceName], {
         src,
         volume: volume / 20,
         autoplay: true,
         loop,
     });
-    innerAudioContext.onEnded(() => {
-        innerAudioContext.destroy();
+    Object[_instanceName].onEnded(() => {
+        setTimeout(() => {
+            Object[_instanceName].destroy();
+            delete Object[_instanceName]
+        }, instanceName ? 500 : 100)
     });
-    return innerAudioContext;
+    return Object[_instanceName];
 }
 
 // 生成键盘按键数据

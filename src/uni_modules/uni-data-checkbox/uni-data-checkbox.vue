@@ -80,14 +80,16 @@
 				default: false
 			},
 			value: {
-				type: [Array, String, Number],
+				type: [Array, String, Number, Boolean],
+				// type: [Array, String, Number], 
 				default () {
 					return ''
 				}
 			},
 			// TODO vue3
 			modelValue: {
-				type: [Array, String, Number],
+				type: [Array, String, Number, Boolean],
+				// type: [Array, String, Number],
 				default() {
 					return '';
 				}

@@ -18,19 +18,15 @@
                     <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
                     {{
                         !Array.isArray(v[0][0]) ? `${v[0][0]}` : `${v[0][0][0]}${["+", "-", '×', '÷'][v[0][0][2]]}${v[0][0][1]}`
-                    }}{{
-                        `${["+", "-", '×', '÷'][v[0][2]]}`
-                    }}{{
-                        !Array.isArray(v[0][1])
-                        ? `${v[0][1]}`
-                        : `${v[0][1][2] === 1
-                            ? '('
-                            : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')'
-                                : ''
-                        }`
-                    }}{{ `=` }}{{
-                        curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : ""
-                    }}
+                    }}{{ ["+", "-", '×', '÷'][v[0][2]] }}{{
+    !Array.isArray(v[0][1]) ? `${v[0][1]}` : `${v[0][1][2] === 1
+        ? '('
+        : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')' : ''
+}`
+}}{{
+    Array.isArray(v[0][3]) ? '≈' : '='
+}}{{ curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : "" }}
+                    <div class="tip-wrong" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
                     <div v-show="v[2] === 0">
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
@@ -45,17 +41,15 @@
         </scroll-view>
         <div class="footer" v-show="curidx !== undefined"
             v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
-                dsb:
-                    curidx &&
-                    (numlist[curidx][1] === undefined ? '' : numlist[curidx][1] + '')
-                        .length > 2,
+                dsb: curidx && (numlist[curidx][1] === undefined ? '' : numlist[curidx][1] + '').length > 2,
             }">
-            <div class="pan" :class="{ dsb: numlist[curidx][2] === 1, easyKeyboard: !keyboard }"
-                v-if="submited === 0 && curidx !== '' && !setConfig.status">
+            <div class="pan" :class="{
+                dsb: numlist[curidx][2] === 1, easyKeyboard: !keyboard,
+                'has-decimal': hasDecimal
+            }" v-if="submited === 0 && curidx !== '' && !setConfig.status">
                 <template v-for="item in keyboardCode" :key="item.idx">
-                    <div class="pan-item" :class="{
-                        dsb: item.value === '.'
-                    }" @click="keyNum(item.value)" v-if="keyboard && item.fullKey || !keyboard && item.easyKey">
+                    <div class="pan-item" @click="keyClick(item.value)"
+                        v-if="keyboard && item.fullKey || !keyboard && item.easyKey">
                         <div class="pan-item-container">{{ item.name }}</div>
                     </div>
                 </template>
@@ -65,7 +59,7 @@
                     <div class="pan-item pan-set">
                         <div class="pan-set-btn" @click="showConfig(true)"></div>
                     </div>
-                    <div class="pan-item pan-del" @click="keyNum('del')">⇐</div>
+                    <div class="pan-item pan-del" @click="keyClick('del')">⇐</div>
                 </div>
             </div>
             <div class="fen" v-if="submited === 1 && !setConfig.status">
@@ -76,12 +70,12 @@
                 <div class="score">{{ score }}</div>
                 <div class="comment">{{ comment }}</div>
                 <div class="fen-btns">
-                    <div class="fen-item fen-edit" @click="[edit(), playSound({ name: musicArr['dian2_mp3'] })]"
+                    <div class="fen-item fen-edit" @click="[edit(), playSound({ src: musicArr['dian2_mp3'] })]"
                         :class="{ dsb: score === 100 }">去订正</div>
                     <div class="pan-item pan-set">
                         <div class="pan-set-btn" @click="showConfig(true)"></div>
                     </div>
-                    <div class="fen-item fen-new" @click="[createList(true), playSound({ name: musicArr['dian2_mp3'] })]">
+                    <div class="fen-item fen-new" @click="[createList(true), playSound({ src: musicArr['dian2_mp3'] })]">
                         做新题
                     </div>
                 </div>
@@ -121,7 +115,7 @@
                         </div>
                     </div>
                     <div class="set-sys-db-list" v-if="setConfig.opType">
-                        <div class="set-sys-db-list-left">难度：</div>
+                        <div class="set-sys-db-list-left">困难度：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
                                 <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">简单
@@ -131,6 +125,22 @@
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">困难
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">启用小数：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="lv2 has-next">
+                                <div class="set-sys-switch">
+                                    <zeroSwitch :size="20" v-model="setConfig.hasDecimal" inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#cfcfcf" />
+                                </div>
+                                <div class="lv2-next" v-if="setConfig.hasDecimal">
+                                    <div class="lv2-label">最多有效位数:</div>
+                                    <hao-slider :step="1" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="1" :max="3"
+                                        :value="setConfig.decimalLen" @change="setDecimalLenChange" class="set-slider" />
                                 </div>
                             </div>
                         </div>
@@ -208,7 +218,7 @@ import { onMounted, ref, reactive, watch } from "vue";
 import {
     random,
     mergeData,
-    playSound as playAudio,
+    playSound,
     expressionResult,
     createKeyboardCode
 } from "../../module/tools";
@@ -241,7 +251,9 @@ const defaultConf = { // 默认配置
     difficulty: false, // 困难度
     totalNum: 50, // 题目数量
     opType: false, // 运算规则 0:+-,1:+-*/
-    isMixed: 1 // 是否混合运算
+    isMixed: false, // 是否混合运算
+    hasDecimal: false, // 启用小数
+    decimalLen: 2,
 }
 const getStorageData = () => { // 读取设置缓存
     return Object.assign({}, defaultConf, uni.getStorageSync('config'));
@@ -253,12 +265,14 @@ const setConfig = reactive( // 配制项
     })
 )
 const totalNum = ref(storageConf.totalNum) // 题目数量
-const keyboard = ref(storageConf.keyboard) // 键盘类型
+const keyboard = ref(storageConf.keyboard) // 键盘类型 false: 简约, true: 九宫格
 const showIdx = ref(storageConf.showIdx) // 显示序号
 const opType = ref(storageConf.opType) // 运算类型
 const difficulty = ref(storageConf.difficulty) // 困难度
 const isMixed = ref(storageConf.isMixed) // 是否混合运算
 const cursorType = ref(storageConf.cursorType) // 是否混合运算
+const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
+const decimalLen = ref(storageConf.decimalLen) // 小数位数
 const scrollTop = ref(0) // 滚动位置
 
 // 滚动条将当前光标自动滚动到可视区域内
@@ -289,7 +303,7 @@ watch(cursorType, () => {
     setConfig.cursorType = cursorType.value
 })
 watch(setConfig, () => {
-    playSound({ name: musicArr['dian2_mp3'] })
+    playSound({ src: musicArr['dian2_mp3'], instanceName: 'set-config' })
     cursorType.value = setConfig.cursorType
     showIdx.value = setConfig.showIdx
 })
@@ -355,7 +369,32 @@ function createList(isInit = true) {
                     divisionFn()
                     break;
             }
-            return _expression.concat(_getOperator)
+            // 开启小数处理,添加小数位
+            if (hasDecimal.value) _expression.forEach((item, idx) => {
+                _expression[idx] = item + Math.random().toFixed(decimalLen.value).match(/\.\d+/)[0] - 0
+            })
+
+            const _tmp = _expression.concat(_getOperator)
+
+
+            const expressionSucc = expressionResult(_tmp) // 表达试结果
+
+            const getDecimalArr = val => {
+                const _decimalMatch = val.toString().match(/\.\d+/) // 小数值匹配
+                const _decimal = _decimalMatch ? _decimalMatch[0] : '' // 小数位值
+                const _decimalLen = _decimal.toString().substring(1).length // 真实小数位数
+                return { decimalValue: _decimal - 0, decimalLength: _decimalLen }
+            }
+            const { /*decimalValue,*/ decimalLength } = getDecimalArr(expressionSucc)
+            if (decimalLength > decimalLen.value) {
+                const expressionSuccFixed = expressionSucc.toFixed(decimalLen.value)
+                const { /*decimalValue: decimalFixedValue,*/ decimalLength: decimalFixedLength } = getDecimalArr(expressionSucc.toFixed(decimalLen.value))
+                _tmp[3] = [expressionSuccFixed - 0, decimalFixedLength]
+            } else {
+                _tmp[3] = expressionSucc
+            }
+            console.log(_tmp);
+            return _tmp
         }
 
         const _numlist = new Array(num).fill(undefined).map(res => {
@@ -392,16 +431,13 @@ function createList(isInit = true) {
 createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
-// playSound 中转方法
-const playSound = ({ name, loop, volume = storageConf?.bgmVolume || 10 }) => playAudio({ name, loop, volume })
-
 // BGM
-const bgm = playSound({ name: musicArr['bgm-sxg_mp3'], loop: true })
+const bgm = playSound({ src: musicArr['bgm-sxg_mp3'], loop: true, instanceName: 'BGM' })
 
 /**
  * 计时操作
  * @author ToviLau 46134256@qq.com
- * @param {boolean} isStop true: 何止计时, false: 开始计时
+ * @param {boolean} isStop true: 停止计时, false: 开始计时
  */
 function contTime(isStop = false) {
     if (isStop) {
@@ -441,7 +477,7 @@ function edit() {
  * @param {number} idx // 索引号
  */
 const ckItem = (idx) => {
-    if (submited.value === 0) playSound({ name: musicArr['dian1_mp3'] })
+    if (submited.value === 0) playSound({ src: musicArr['dian1_mp3'] })
     curidx.value = idx;
     if (numlist[idx][2] === 0 && submited.value !== 1) numlist[idx][2] = ''
 };
@@ -451,9 +487,8 @@ const ckItem = (idx) => {
  * @author ToviLau 46134256@qq.com
  * @param {string|number} key // 键盘数字 || 或del
  */
-const keyNum = (key) => {
-    if (key === '.') return
-    playSound({ name: musicArr['dian2_mp3'] })
+const keyClick = (key) => {
+    playSound({ src: musicArr['dian2_mp3'] })
     if (
         numlist[curidx.value][2] === 1  // 已判定当前题为正确
         || key === 'del' && ['', undefined].includes(numlist[curidx.value][1]) // 册除事件 并 内容为空时
@@ -462,8 +497,6 @@ const keyNum = (key) => {
     if (numlist[curidx.value][2] === 1) return
 
     switch (key) {
-        case '.': // 删除事件
-            return
         case 'del': // 删除事件
             // 如果提交后已判错, 删除是全部,其它情况单个从右到左删除
             numlist[curidx.value][1] = numlist[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
@@ -482,8 +515,9 @@ const keyNum = (key) => {
             autoCurItemPosition()
             break;
 
+        case '.': // 删除事件
         default: // 默认数字输入事件
-            numlist[curidx.value][1] = _val.length < 4 ? _val + key - 0 : _val - 0;
+            numlist[curidx.value][1] = _val.length < 9 ? _val + key : _val;
             break;
     }
     // 恢复下标4(对错判断)标识为:空 (错:0, 对:1, 无:'')
@@ -492,7 +526,7 @@ const keyNum = (key) => {
 
 // 查看得分事件
 const subEnter = () => {
-    playSound({ name: musicArr['dian2_mp3'] })
+    playSound({ src: musicArr['dian2_mp3'] })
     subEnterTime.value = Date.now()
     // 锁定提交状态
     submited.value = 1;
@@ -500,10 +534,10 @@ const subEnter = () => {
 
     // 对错判定
     numlist.map((res) => {
-        let _val = expressionResult(res[0])
-
+        // let _val = expressionResult(res[0])
+        const _val = res[0][3][0]
         if ([''].includes(res[2]) && !['', undefined].includes(res[1])) res[3] = !['', undefined].includes(res[3]) ? res[3] + 1 : 0 // 订正次数
-        if (!['', undefined].includes(res[1])) res[2] = _val === res[1] ? 1 : 0; // 1对,0错
+        if (!['', undefined].includes(res[1])) res[2] = _val === res[1] - 0 ? 1 : 0; // 1对,0错
     });
 
     const totleLen = numlist.length; // 总题数
@@ -524,24 +558,24 @@ const subEnter = () => {
     switch (true) {
         case score.value > 99: // 100
             comment.value = commentArr[0];
-            playSound({ name: musicArr['wa_mp3'] })
+            playSound({ src: musicArr['wa_mp3'] })
             break;
         case score.value > 89: // 90+
             comment.value = commentArr[1];
-            playSound({ name: musicArr['ao_mp3'] })
+            playSound({ src: musicArr['ao_mp3'] })
             break;
         case score.value > 79: // 80+
             comment.value = commentArr[2];
-            playSound({ name: musicArr['tantiao_mp3'] })
+            playSound({ src: musicArr['tantiao_mp3'] })
             break;
         case score.value > 69: // 70+
             comment.value = commentArr[3];
-            playSound({ name: musicArr['jiong_mp3'] })
+            playSound({ src: musicArr['jiong_mp3'] })
             break;
         default:
             comment.value = commentArr[4];
-            playSound({ name: musicArr['wrong_mp3'] }).onEnded(() => {
-                playSound({ name: musicArr['ou-no_mp3'] })
+            playSound({ src: musicArr['wrong_mp3'] }).onEnded(() => {
+                playSound({ src: musicArr['ou-no_mp3'] })
             })
     }
 
@@ -552,7 +586,7 @@ const subEnter = () => {
 
 // 设置窗口显隐
 const showConfig = (val = false) => {
-    playSound({ name: musicArr['dian2_mp3'] })
+    playSound({ src: musicArr['dian2_mp3'] })
     if (val) Object.assign(setConfig, getStorageData())
     setConfig.status = val
 }
@@ -564,7 +598,7 @@ function setNumFn(num) {
 
 // 恢复默认
 const setNumDefault = () => {
-    playSound({ name: musicArr['dian2_mp3'] })
+    playSound({ src: musicArr['dian2_mp3'] })
     Object.assign(setConfig, defaultConf)
     cursorType.value = setConfig.cursorType
     bgm.volume = setConfig.bgmVolume / 20
@@ -586,10 +620,17 @@ const saveConfig = () => {
     bgm.volume = setConfig.bgmVolume / 20
 
     // 运算规则 或 难度变动 列表都要重新生成
-    if (opType.value !== setConfig.opType || difficulty.value !== setConfig.difficulty || isMixed.value[0] !== setConfig.isMixed[0]) {
+    if (opType.value !== setConfig.opType
+        || difficulty.value !== setConfig.difficulty
+        || isMixed.value[0] !== setConfig.isMixed[0]
+        || hasDecimal.value !== setConfig.hasDecimal
+        || decimalLen.value !== setConfig.decimalLen
+    ) {
         opType.value = setConfig.opType // 运算规则变动
         difficulty.value = setConfig.difficulty // 难度变动
         isMixed.value = setConfig.isMixed
+        hasDecimal.value = setConfig.hasDecimal
+        decimalLen.value = setConfig.decimalLen
         createList(true) // 运算规则类型变动重新生成列表
     }
 
@@ -621,6 +662,9 @@ const setNumChange = val => {
     // bgm.volume = setConfig.bgmVolume / 20
     setNumFn(Math.round(val / 10) * 10)
 }
+const setDecimalLenChange = val => {
+    setConfig.decimalLen = val
+}
 
 // 音量滑块更新
 const bgmVolumeChange = val => {
@@ -630,7 +674,6 @@ const bgmVolumeChange = val => {
 
 onShow(() => {
     setTimeout(() => {
-        // debugger
         bgm.volume = setConfig.bgmVolume / 20
     }, 10)
 })
@@ -685,9 +728,10 @@ onUnload(() => {
             align-items: center;
             text-align: center;
             color: var(--c-safegray-hdark);
-            min-width: 9.75em;
-            flex: 1;
-            margin: 0 .5em;
+            min-width: 48%;
+            flex: 1 0 auto;
+            margin: 0 1%;
+            box-sizing: border-box;
 
             &.list-item-none {
                 border: none;
@@ -788,8 +832,8 @@ onUnload(() => {
                 }
 
                 .list-item-idx {
-                    background-image: linear-gradient(0deg, ligthen(@item-primary-color, 0.1%), transparent);
-                    color: darken(@item-primary-color, 1.5%);
+                    background-image: linear-gradient(0deg, ligthen(@item-primary-color, 0.15%), transparent);
+                    color: darken(@item-primary-color, 11.5%);
                 }
             }
 
@@ -798,7 +842,7 @@ onUnload(() => {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background-color: #c9a63153;
+                background-color: #c9a63122;
                 color: var(--color-Y);
                 line-height: 1.6em;
                 font-size: 18rpx;
@@ -872,15 +916,17 @@ onUnload(() => {
             }
 
             &:not(.easyKeyboard) {
-                :nth-child(10) {
-                    .pan-item-container {
-                        display: none;
+                &:not(.has-decimal) {
+                    :nth-child(10) {
+                        .pan-item-container {
+                            display: none;
+                        }
                     }
-                }
 
-                :nth-child(11) {
-                    .pan-item-container {
-                        margin-left: calc(-100% - 20rpx);
+                    :nth-child(11) {
+                        .pan-item-container {
+                            margin-left: calc(-100% - 20rpx);
+                        }
                     }
                 }
             }
@@ -890,17 +936,20 @@ onUnload(() => {
                     width: 15%;
                 }
 
-                :nth-child(6) {
-                    .pan-item-container {
-                        display: none;
+                &:not(.has-decimal) {
+                    :nth-child(6) {
+                        .pan-item-container {
+                            display: none;
+                        }
                     }
-                }
 
-                :nth-child(12) {
-                    .pan-item-container {
-                        margin-top: calc(-3em - 12rpx);
-                        line-height: calc(3em * 2 + 12rpx)
+                    :nth-child(12) {
+                        .pan-item-container {
+                            margin-top: calc(-3em - 12rpx);
+                            line-height: calc(3em * 2 + 12rpx)
+                        }
                     }
+
                 }
 
             }
@@ -940,14 +989,14 @@ onUnload(() => {
         .fen-new,
         .fen-edit {
             // width: 36%;
-            border-radius: 5rpx;
-            border: 1px solid;
+            border-radius: 4rpx;
             background-image: none;
-            color: var(--c-safegray-hlight);
+            color: var(--c-safegray-hlighter);
             box-shadow: none;
             flex: 1;
             line-height: 2.2em;
-            border-color: var(--color-W) !important;
+            box-shadow: 4rpx 2rpx 6rpx var(--c-safegray-lighter);
+            // border: none !important;
 
         }
 
@@ -1204,6 +1253,33 @@ onUnload(() => {
                     }
 
                     // .set-sys-switch-r {}
+                }
+
+                .lv2 {
+                    flex: 1;
+                    display: flex;
+
+                    &.has-next {
+                        .lv2-next {
+                            // background-color: var(--c-safegray-hlight);
+                            // box-shadow: 2rpx 1rpx 1rpx var(--c-safegray-light) inset, -3rpx -2rpx 1rpx var(--c-safegray-hlighter) inset;
+                            color: var(--c-safegray-dark);
+                            flex: 1;
+                            display: flex;
+                            align-items: center;
+                            // margin-left: 1em;
+                            padding-left: .5em;
+                            padding-right: 2.5em;
+                            border-radius: 6rpx;
+
+                            .lv2-label {
+                                flex-shrink: 0;
+                                margin-right: 1em;
+                                font-size: 24rpx;
+                            }
+                        }
+                    }
+
                 }
 
             }
