@@ -14,6 +14,7 @@ export default {
 
 <style>
 @import url('./module/css/base.less');
+@import url('./assets/font/icon/iconfont.css');
 page {
     display: flex;
     height: 100%;
