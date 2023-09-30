@@ -4,7 +4,7 @@
             <div class="top-left">日期: {{ date('Y-m-d') }}</div>
             <div class="top-right">用时: {{ startTimed }}</div>
             <!-- <span class="top-audio" @click="">
-                <div class="iconfont icon-audio "></div>
+                <div class="iconfont icon-audio pause"></div>
             </span> -->
         </div>
         <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
@@ -20,11 +20,10 @@
                     <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
                     <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
                     {{
-                        renderExpression(v[0])
-                    }}{{
-    `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && numlist[i][1] !== undefined ?
-        numlist[i][1] : ""}`
-}}
+                        renderExpression(v[0]) +
+                        `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && numlist[i][1] !== undefined ?
+                            numlist[i][1] : ""}`
+                    }}
                     <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
                     <div v-show="v[2] === 0">
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
@@ -104,14 +103,15 @@
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
                                     <zeroSwitch :size="20" v-model="setConfig.opType" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" @change="opTypeChange"/>
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.opType }">四则运算
                                 </div>
                             </div>
-                            <div class="label cur">
+                            <div class="label">
                                 <uni-data-checkbox multiple v-model="setConfig.isMixed" selectedColor="#55a4f3"
-                                    class="label-ckd" :localdata="[{ 'value': 1, 'text': '混合' }]"></uni-data-checkbox>
+                                    class="label-ckd" :localdata="[{ 'value': 1, 'text': '混合' }]"
+                                    @change="mixedChange"></uni-data-checkbox>
                             </div>
                         </div>
                     </div>
@@ -130,6 +130,18 @@
                             </div>
                         </div>
                     </div>
+                    <!-- <div class="set-sys-db-list" vif="!setConfig.opType">
+                        <div class="set-sys-db-list-left">开启竖式：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="set-sys-switch">
+                                <div class="set-sys-switch-item set-sys-switch-c">
+                                    <zeroSwitch :size="20" v-model="setConfig.vertical" inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#cfcfcf"
+                                        @change="verticalChange" />
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">启用小数：</div>
                         <div class="set-sys-db-list-right">
@@ -224,6 +236,7 @@ import {
     createKeyboardCode
 } from "../../module/tools";
 import date from 'date-php'
+import Bignumber from 'BigNumber.js'
 import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
 // import uniNavBar from "../../uni_modules/uni-nav-bar/uni-nav-bar.vue"
 import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
@@ -256,7 +269,8 @@ const defaultConf = { // 默认配置
     isMixed: false, // 是否混合运算
     hasDecimal: false, // 启用小数
     vertical: false, // 开启竖式
-    decimalLen: 2,
+    decimalLen: 2, // 最大小数位
+    vertical: false // 开启竖式
 }
 const getStorageData = () => { // 读取设置缓存
     return Object.assign({}, defaultConf, uni.getStorageSync('config'));
@@ -273,10 +287,12 @@ const showIdx = ref(storageConf.showIdx) // 显示序号
 const opType = ref(storageConf.opType) // 运算类型
 const difficulty = ref(storageConf.difficulty) // 困难度
 const isMixed = ref(storageConf.isMixed) // 是否混合运算
-const cursorType = ref(storageConf.cursorType) // 是否混合运算
+const cursorType = ref(storageConf.cursorType) // 光标类型
 const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
 const decimalLen = ref(storageConf.decimalLen) // 小数位数
 const scrollTop = ref(0) // 滚动位置
+const vertical = ref(storageConf.vertical) // 开启竖式
+
 
 // 滚动条将当前光标自动滚动到可视区域内
 const autoCurItemPosition = async () => {
@@ -305,11 +321,29 @@ watch(keyboard, () => {
 watch(cursorType, () => {
     setConfig.cursorType = cursorType.value
 })
-watch(setConfig, () => {
+watch(setConfig, val => {
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2, instanceName: 'set-config' })
-    cursorType.value = setConfig.cursorType
-    showIdx.value = setConfig.showIdx
+    cursorType.value = val.cursorType
+    showIdx.value = val.showIdx
 })
+const mixedChange = ({detail:{value:val}}) => {
+    if(val) setConfig.vertical = false
+}
+const opTypeChange = val => {
+    if(val) setConfig.vertical = false
+}
+const verticalChange = val => {
+    if(val) {
+        setConfig.opType = false
+        setConfig.isMixed[0] = undefined
+    }
+}
+// watch(setConfig.vertical, val => {
+//     if (val.vertical) setConfig.isMixed[0] = undefined
+// })
+// watch(setConfig.isMixed[0], val => {
+//     if (!val.isMixed[0]) setConfig.vertical = false
+// })
 const getOperator = i => ["+", "-", '×', '÷'][i]
 
 const renderExpression = (data) => {
@@ -373,7 +407,14 @@ function createList(isInit = true) {
                     const divisionFn = () => {
                         _expression[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
                         _expression[0] = random(8, `${_expression[1]}-${difficulty.value ? '999' : '99'}`)
-                        _expression[0] = _expression[0] - _expression[0] % _expression[1] // 除法只做了可以整除, 小数万一有无限小数就不好判定了
+                        // modulo
+
+                        const BN = new Bignumber(_expression[0])
+                        const _bn = BN.modulo(_expression[1]) // 取模
+                        BN.minus(_bn)
+                        // debugger
+                        // _expression[0] = _expression[0] - _expression[0] % _expression[1] // 除法只做了可以整除, 小数万一有无限小数就不好判定了
+                        _expression[0] = BN.minus(_bn) // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         if (
                             _expression[1] === 0 // 被除数为0, 小学阶段无意义
                             || _expression[0] === 0 // 排除商为0，此条可以删除 
@@ -385,8 +426,8 @@ function createList(isInit = true) {
             }
             // 开启小数处理,添加小数位
             if (hasDecimal.value) _expression.forEach((item, idx) => {
-                const decimal = Math.random().toFixed(decimalLen.value) - 0
-                _expression[idx] = item + decimal
+                const decimal = Math.random()
+                _expression[idx] = (item + decimal - 0).toFixed(decimalLen.value) - 0
             })
 
             const _tmp = _expression.concat(_getOperator)
@@ -551,9 +592,9 @@ const subEnter = () => {
     // 对错判定
     numlist.map((res) => {
         // let _val = expressionResult(res[0])
-        const _val = res[0][3][0]
+        const _val = Array.isArray(res[0][3]) ? res[0][3][0] : res[0][3];
         if ([''].includes(res[2]) && !['', undefined].includes(res[1])) res[3] = !['', undefined].includes(res[3]) ? res[3] + 1 : 0 // 订正次数
-        debugger
+        // debugger
         if (!['', undefined].includes(res[1])) res[2] = _val === res[1] - 0 ? 1 : 0; // 1对,0错
     });
 
@@ -575,24 +616,24 @@ const subEnter = () => {
     switch (true) {
         case score.value > 99: // 100
             comment.value = commentArr[0];
-            playSound({ src: musicArr['wa_mp3'], volume: setConfig.bgmVolume / 1.5 })
+            playSound({ src: musicArr['wa_mp3'], volume: setConfig.bgmVolume })
             break;
         case score.value > 89: // 90+
             comment.value = commentArr[1];
-            playSound({ src: musicArr['ao_mp3'], volume: setConfig.bgmVolume / 1.5 })
+            playSound({ src: musicArr['ao_mp3'], volume: setConfig.bgmVolume })
             break;
         case score.value > 79: // 80+
             comment.value = commentArr[2];
-            playSound({ src: musicArr['tantiao_mp3'], volume: setConfig.bgmVolume / 1.5 })
+            playSound({ src: musicArr['tantiao_mp3'], volume: setConfig.bgmVolume })
             break;
         case score.value > 69: // 70+
             comment.value = commentArr[3];
-            playSound({ src: musicArr['jiong_mp3'], volume: setConfig.bgmVolume / 1.5 })
+            playSound({ src: musicArr['jiong_mp3'], volume: setConfig.bgmVolume })
             break;
         default:
             comment.value = commentArr[4];
-            playSound({ src: musicArr['wrong_mp3'], volume: setConfig.bgmVolume / 1.5 }).onEnded(() => {
-                playSound({ src: musicArr['ou-no_mp3'], volume: setConfig.bgmVolume / 1.5 })
+            playSound({ src: musicArr['wrong_mp3'], volume: setConfig.bgmVolume }).onEnded(() => {
+                playSound({ src: musicArr['ou-no_mp3'], volume: setConfig.bgmVolume })
             })
     }
 
@@ -617,7 +658,7 @@ function setNumFn(num) {
 const setNumDefault = () => {
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     Object.assign(setConfig, defaultConf)
-    cursorType.value = setConfig.cursorType
+    // cursorType.value = setConfig.cursorType
     bgm.volume = setConfig.bgmVolume / 20
 }
 
@@ -634,6 +675,7 @@ const saveConfig = () => {
     keyboard.value = setConfig.keyboard
     showIdx.value = setConfig.showIdx
     cursorType.value = setConfig.cursorType
+    vertical.value = setConfig.vertical
     bgm.volume = setConfig.bgmVolume / 20
 
     // 运算规则 或 难度变动 列表都要重新生成
@@ -663,13 +705,15 @@ const cleanConfig = () => {
     const {
         bgmVolume: volume,
         cursorType: cursor,
-        showIdx: _showIdx
+        showIdx: _showIdx,
+        vertical
     } = getStorageData()
 
     bgm.volume = volume / 20
     cursorType.value = cursor
     showIdx.value = _showIdx
     setConfig.showIdx = _showIdx
+    setConfig.vertical = vertical
     showConfig(false)
 
 }
@@ -728,19 +772,20 @@ onUnload(() => {
         .top-audio {
             // width: 1em;
             margin-left: 1em;
-            height: 1em;
+            height: 1.2em;
             display: flex;
 
             .icon-audio {
-                border: 1px solid var(--c-safegray-light);
+                border: 5rpx solid var(--c-safegray-dark);
                 text-align: center;
                 border-radius: 50%;
+                box-sizing: border-box;
                 width: 1.2em;
                 height: 1.2em;
+                line-height: 1.2em;
                 color: #fff;
                 background-color: var(--c-safegray-dark);
                 animation: audio-button 5s infinite linear;
-
 
                 @keyframes audio-button {
                     0% {
@@ -750,6 +795,28 @@ onUnload(() => {
                     100% {
                         transform: rotate(360deg);
                     }
+                }
+
+                &.pause {
+                    border-color: var(--color-R);
+                    animation: none;
+                    position: relative;
+
+                    &:after {
+                        content: '';
+                        width: 100%;
+                        height: 6rpx;
+                        background-color: var(--color-R);
+                        position: absolute;
+                        top: 50%;
+                        left: 0;
+                        margin-top: -3rpx;
+                        transform: rotate(-45deg);
+                        opacity: .816;
+
+                    }
+
+                    // box-shadow: 0 0 0 5rpx var(--color-R);
                 }
             }
         }
@@ -844,26 +911,30 @@ onUnload(() => {
                 position: relative;
 
                 &:before {
-                    content: "";
+                    font-family: "iconfont" !important;
+                    font-style: normal;
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
                     background: center/cover no-repeat;
                     position: absolute;
+                    line-height: 1em;
                     top: 50%;
-                    left: 40%;
+                    left: 48%;
                     opacity: 0.816;
+                    margin-top: -.5em;
+                    color: var(--color-R);
                 }
 
                 &.right:before {
-                    background-image: url("../../assets/right.svg");
-                    width: 4em;
-                    height: 4em;
-                    margin-top: -2em;
-                }
 
+                    content: "\e77e";
+                    font-size: 120rpx;
+                }
+                
                 &.wrong:before {
-                    background-image: url("../../assets/wrong.svg");
-                    width: 2em;
-                    height: 2em;
-                    margin-top: -1em;
+                    content: "\e77c";
+                    font-size: 60rpx;
+                    font-weight: bolder;
                 }
             }
 
