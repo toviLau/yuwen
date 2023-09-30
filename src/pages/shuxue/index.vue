@@ -3,6 +3,9 @@
         <div class="top">
             <div class="top-left">日期: {{ date('Y-m-d') }}</div>
             <div class="top-right">用时: {{ startTimed }}</div>
+            <!-- <span class="top-audio" @click="">
+                <div class="iconfont icon-audio "></div>
+            </span> -->
         </div>
         <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
             <div class="list">
@@ -17,16 +20,12 @@
                     <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
                     <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
                     {{
-                        !Array.isArray(v[0][0]) ? `${v[0][0]}` : `${v[0][0][0]}${["+", "-", '×', '÷'][v[0][0][2]]}${v[0][0][1]}`
-                    }}{{ ["+", "-", '×', '÷'][v[0][2]] }}{{
-    !Array.isArray(v[0][1]) ? `${v[0][1]}` : `${v[0][1][2] === 1
-        ? '('
-        : ''}${v[0][1][0]}${["+", "-", '×', '÷'][v[0][1][2]]}${v[0][1][1]}${v[0][1][2] === 1 ? ')' : ''
-}`
-}}{{
-    Array.isArray(v[0][3]) ? '≈' : '='
-}}{{ curidx !== undefined && numlist[i][1] !== undefined ? numlist[i][1] : "" }}
-                    <div class="tip-wrong" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
+                        renderExpression(v[0])
+                    }}{{
+    `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && numlist[i][1] !== undefined ?
+        numlist[i][1] : ""}`
+}}
+                    <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
                     <div v-show="v[2] === 0">
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
                         <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
@@ -57,7 +56,7 @@
                 <div class="pan-footer">
                     <div class="pan-item pan-enter" @click="subEnter()">查看得分</div>
                     <div class="pan-item pan-set">
-                        <div class="pan-set-btn" @click="showConfig(true)"></div>
+                        <span class="iconfont icon-set pan-set-btn" @click="showConfig(true)"></span>
                     </div>
                     <div class="pan-item pan-del" @click="keyClick('del')">⇐</div>
                 </div>
@@ -70,12 +69,14 @@
                 <div class="score">{{ score }}</div>
                 <div class="comment">{{ comment }}</div>
                 <div class="fen-btns">
-                    <div class="fen-item fen-edit" @click="[edit(), playSound({ src: musicArr['dian2_mp3'] })]"
+                    <div class="fen-item fen-edit"
+                        @click="[edit(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]"
                         :class="{ dsb: score === 100 }">去订正</div>
                     <div class="pan-item pan-set">
-                        <div class="pan-set-btn" @click="showConfig(true)"></div>
+                        <span class="iconfont icon-set pan-set-btn" @click="showConfig(true)"></span>
                     </div>
-                    <div class="fen-item fen-new" @click="[createList(true), playSound({ src: musicArr['dian2_mp3'] })]">
+                    <div class="fen-item fen-new"
+                        @click="[createList(true), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">
                         做新题
                     </div>
                 </div>
@@ -200,7 +201,7 @@
                     <div class="declare divider-line">
                         <div>
                             <div>个人版非商用，不采集个人信息。所有数据仅存储在本地</div>
-                            <div>如果清除微信缓存,您保存的数据就会丢失</div>
+                            <div>如果清除微信缓存,您保存的所有数据就会丢失</div>
                         </div>
                     </div>
                     <div class="btns">
@@ -224,6 +225,7 @@ import {
 } from "../../module/tools";
 import date from 'date-php'
 import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
+// import uniNavBar from "../../uni_modules/uni-nav-bar/uni-nav-bar.vue"
 import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
 import { onReady, onShow, onHide, onUnload } from '@dcloudio/uni-app'
 import uniDataCheckbox from '../../uni_modules/uni-data-checkbox/uni-data-checkbox.vue'
@@ -253,6 +255,7 @@ const defaultConf = { // 默认配置
     opType: false, // 运算规则 0:+-,1:+-*/
     isMixed: false, // 是否混合运算
     hasDecimal: false, // 启用小数
+    vertical: false, // 开启竖式
     decimalLen: 2,
 }
 const getStorageData = () => { // 读取设置缓存
@@ -303,11 +306,23 @@ watch(cursorType, () => {
     setConfig.cursorType = cursorType.value
 })
 watch(setConfig, () => {
-    playSound({ src: musicArr['dian2_mp3'], instanceName: 'set-config' })
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2, instanceName: 'set-config' })
     cursorType.value = setConfig.cursorType
     showIdx.value = setConfig.showIdx
 })
+const getOperator = i => ["+", "-", '×', '÷'][i]
 
+const renderExpression = (data) => {
+    const _data = [...data]
+    if (Array.isArray(_data[0])) _data[0] = renderExpression(_data[0])
+    if (Array.isArray(_data[1])) {
+        _data[1] = renderExpression(_data[1])
+        if (_data[2] === 1) {
+            _data[1] = ['(', _data[1], ')'].join('')
+        }
+    }
+    return `${_data[0]}${getOperator(_data[2])}${_data[1]}`
+}
 // #ifdef MP-WEIXIN
 // 条件编译--仅微信
 uni.showShareMenu({
@@ -358,7 +373,6 @@ function createList(isInit = true) {
                     const divisionFn = () => {
                         _expression[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
                         _expression[0] = random(8, `${_expression[1]}-${difficulty.value ? '999' : '99'}`)
-                        // Todo: 小数支持后期再说
                         _expression[0] = _expression[0] - _expression[0] % _expression[1] // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         if (
                             _expression[1] === 0 // 被除数为0, 小学阶段无意义
@@ -371,29 +385,11 @@ function createList(isInit = true) {
             }
             // 开启小数处理,添加小数位
             if (hasDecimal.value) _expression.forEach((item, idx) => {
-                _expression[idx] = item + Math.random().toFixed(decimalLen.value).match(/\.\d+/)[0] - 0
+                const decimal = Math.random().toFixed(decimalLen.value) - 0
+                _expression[idx] = item + decimal
             })
 
             const _tmp = _expression.concat(_getOperator)
-
-
-            const expressionSucc = expressionResult(_tmp) // 表达试结果
-
-            const getDecimalArr = val => {
-                const _decimalMatch = val.toString().match(/\.\d+/) // 小数值匹配
-                const _decimal = _decimalMatch ? _decimalMatch[0] : '' // 小数位值
-                const _decimalLen = _decimal.toString().substring(1).length // 真实小数位数
-                return { decimalValue: _decimal - 0, decimalLength: _decimalLen }
-            }
-            const { /*decimalValue,*/ decimalLength } = getDecimalArr(expressionSucc)
-            if (decimalLength > decimalLen.value) {
-                const expressionSuccFixed = expressionSucc.toFixed(decimalLen.value)
-                const { /*decimalValue: decimalFixedValue,*/ decimalLength: decimalFixedLength } = getDecimalArr(expressionSucc.toFixed(decimalLen.value))
-                _tmp[3] = [expressionSuccFixed - 0, decimalFixedLength]
-            } else {
-                _tmp[3] = expressionSucc
-            }
-            console.log(_tmp);
             return _tmp
         }
 
@@ -406,12 +402,32 @@ function createList(isInit = true) {
             // ]
             const numArr = new Array(4).fill(undefined)
             const mData = mergeData(createExpression(), createExpression(2))
-            const _createExpression = createExpression()
-            numArr[0] = isMixed.value[0] ? mData : _createExpression
+
+
+            // 获取小数位信息: 长度与小数值
+            const getDecimalArr = val => {
+                const _decimalMatch = val.toString().match(/\.\d+/) // 小数值匹配
+                const _decimal = _decimalMatch ? _decimalMatch[0] : '' // 小数位值
+                const _decimalLen = _decimal.toString().substring(1).length // 真实小数位数
+                const _decimalFixed = val.toFixed(decimalLen.value) - 0 // 四舍五入值
+                return {
+                    decimalValue: _decimal - 0,
+                    decimalFixed: _decimalFixed - 0,
+                    decimalLength: _decimalLen
+                }
+            }
+            numArr[0] = isMixed.value[0] ? mData : createExpression()
+            const expressionSucc = expressionResult(numArr[0])
+            const { /*decimalValue,*/ decimalLength } = getDecimalArr(expressionSucc)
+            if (decimalLength > decimalLen.value) { // 运算结果超出设定范围
+                const expressionSuccFixed = expressionSucc.toFixed(decimalLen.value)
+                const { /*decimalValue: decimalFixedValue,*/ decimalLength: decimalFixedLength } = getDecimalArr(expressionSucc.toFixed(decimalLen.value) - 0)
+                numArr[0][3] = [expressionSuccFixed - 0, decimalFixedLength]
+            } else {
+                numArr[0][3] = expressionSucc
+            }
             return numArr
         })
-
-
         numlist.push(..._numlist)
     }
     isInit
@@ -432,7 +448,7 @@ createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
 // BGM
-const bgm = playSound({ src: musicArr['bgm-sxg_mp3'], loop: true, instanceName: 'BGM' })
+const bgm = playSound({ src: musicArr['bgm-sxg_mp3'], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM' })
 
 /**
  * 计时操作
@@ -477,7 +493,7 @@ function edit() {
  * @param {number} idx // 索引号
  */
 const ckItem = (idx) => {
-    if (submited.value === 0) playSound({ src: musicArr['dian1_mp3'] })
+    if (submited.value === 0) playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })
     curidx.value = idx;
     if (numlist[idx][2] === 0 && submited.value !== 1) numlist[idx][2] = ''
 };
@@ -488,7 +504,7 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyClick = (key) => {
-    playSound({ src: musicArr['dian2_mp3'] })
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     if (
         numlist[curidx.value][2] === 1  // 已判定当前题为正确
         || key === 'del' && ['', undefined].includes(numlist[curidx.value][1]) // 册除事件 并 内容为空时
@@ -526,7 +542,7 @@ const keyClick = (key) => {
 
 // 查看得分事件
 const subEnter = () => {
-    playSound({ src: musicArr['dian2_mp3'] })
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     subEnterTime.value = Date.now()
     // 锁定提交状态
     submited.value = 1;
@@ -537,6 +553,7 @@ const subEnter = () => {
         // let _val = expressionResult(res[0])
         const _val = res[0][3][0]
         if ([''].includes(res[2]) && !['', undefined].includes(res[1])) res[3] = !['', undefined].includes(res[3]) ? res[3] + 1 : 0 // 订正次数
+        debugger
         if (!['', undefined].includes(res[1])) res[2] = _val === res[1] - 0 ? 1 : 0; // 1对,0错
     });
 
@@ -558,24 +575,24 @@ const subEnter = () => {
     switch (true) {
         case score.value > 99: // 100
             comment.value = commentArr[0];
-            playSound({ src: musicArr['wa_mp3'] })
+            playSound({ src: musicArr['wa_mp3'], volume: setConfig.bgmVolume / 1.5 })
             break;
         case score.value > 89: // 90+
             comment.value = commentArr[1];
-            playSound({ src: musicArr['ao_mp3'] })
+            playSound({ src: musicArr['ao_mp3'], volume: setConfig.bgmVolume / 1.5 })
             break;
         case score.value > 79: // 80+
             comment.value = commentArr[2];
-            playSound({ src: musicArr['tantiao_mp3'] })
+            playSound({ src: musicArr['tantiao_mp3'], volume: setConfig.bgmVolume / 1.5 })
             break;
         case score.value > 69: // 70+
             comment.value = commentArr[3];
-            playSound({ src: musicArr['jiong_mp3'] })
+            playSound({ src: musicArr['jiong_mp3'], volume: setConfig.bgmVolume / 1.5 })
             break;
         default:
             comment.value = commentArr[4];
-            playSound({ src: musicArr['wrong_mp3'] }).onEnded(() => {
-                playSound({ src: musicArr['ou-no_mp3'] })
+            playSound({ src: musicArr['wrong_mp3'], volume: setConfig.bgmVolume / 1.5 }).onEnded(() => {
+                playSound({ src: musicArr['ou-no_mp3'], volume: setConfig.bgmVolume / 1.5 })
             })
     }
 
@@ -586,7 +603,7 @@ const subEnter = () => {
 
 // 设置窗口显隐
 const showConfig = (val = false) => {
-    playSound({ src: musicArr['dian2_mp3'] })
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     if (val) Object.assign(setConfig, getStorageData())
     setConfig.status = val
 }
@@ -598,7 +615,7 @@ function setNumFn(num) {
 
 // 恢复默认
 const setNumDefault = () => {
-    playSound({ src: musicArr['dian2_mp3'] })
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     Object.assign(setConfig, defaultConf)
     cursorType.value = setConfig.cursorType
     bgm.volume = setConfig.bgmVolume / 20
@@ -673,9 +690,10 @@ const bgmVolumeChange = val => {
 }
 
 onShow(() => {
-    setTimeout(() => {
-        bgm.volume = setConfig.bgmVolume / 20
-    }, 10)
+    bgm.play();
+})
+onHide(() => {
+    bgm.destroy()
 })
 
 onUnload(() => {
@@ -696,10 +714,45 @@ onUnload(() => {
         color: var(--c-safegray);
         background-color: var(--c-safegray-hlight);
         display: flex;
-        justify-content: space-between;
         line-height: 1.5em;
-        // .top-left {}
-        // .top-right {}
+
+        .top-left,
+        .top-right {
+            flex: 1;
+        }
+
+        .top-right {
+            text-align: right;
+        }
+
+        .top-audio {
+            // width: 1em;
+            margin-left: 1em;
+            height: 1em;
+            display: flex;
+
+            .icon-audio {
+                border: 1px solid var(--c-safegray-light);
+                text-align: center;
+                border-radius: 50%;
+                width: 1.2em;
+                height: 1.2em;
+                color: #fff;
+                background-color: var(--c-safegray-dark);
+                animation: audio-button 5s infinite linear;
+
+
+                @keyframes audio-button {
+                    0% {
+                        transform: rotate(0deg);
+                    }
+
+                    100% {
+                        transform: rotate(360deg);
+                    }
+                }
+            }
+        }
     }
 
     .scroll-view {
@@ -718,7 +771,7 @@ onUnload(() => {
             @item-primary-color: #b6aafa;
             border-bottom: 1px solid var(--c-safegray-hlight);
             font-size: 30rpx;
-            line-height: 2.95em;
+            line-height: 3em;
             // width: 42%;
             padding-left: .6em;
             box-sizing: border-box;
@@ -728,9 +781,9 @@ onUnload(() => {
             align-items: center;
             text-align: center;
             color: var(--c-safegray-hdark);
-            min-width: 48%;
+            min-width: 46%;
             flex: 1 0 auto;
-            margin: 0 1%;
+            margin: 0 2%;
             box-sizing: border-box;
 
             &.list-item-none {
@@ -835,6 +888,10 @@ onUnload(() => {
                     background-image: linear-gradient(0deg, ligthen(@item-primary-color, 0.15%), transparent);
                     color: darken(@item-primary-color, 11.5%);
                 }
+
+                .active-show {
+                    display: block !important;
+                }
             }
 
             .tip-wrong {
@@ -847,6 +904,10 @@ onUnload(() => {
                 line-height: 1.6em;
                 font-size: 18rpx;
                 padding: 0 .5em;
+
+                &.active-show {
+                    display: none;
+                }
             }
 
             @keyframes guang-biao-shan-shuo {
@@ -995,6 +1056,7 @@ onUnload(() => {
             box-shadow: none;
             flex: 1;
             line-height: 2.2em;
+            height: 2.2em;
             box-shadow: 4rpx 2rpx 6rpx var(--c-safegray-lighter);
             // border: none !important;
 
@@ -1041,9 +1103,11 @@ onUnload(() => {
         }
 
         .pan-set-btn {
-            background: url(../../assets/set.svg) center/cover no-repeat;
-            width: 1.5em;
-            height: 1.5em;
+            // background: url(../../assets/set.svg) center/cover no-repeat;
+            // width: 1.5em;
+            // height: 1.5em;
+            font-size: 50rpx;
+            color: var(--c-safegray-dark)
         }
 
         .fen {

@@ -117,8 +117,8 @@ function mergeData(data1, data2) {
     const idx = Math.random() > 0.5 ? 1 : 0;
     data2[idx] = data1;
     if (data2[2] === 1) {
-        const _data1 = data2[0] - 0 || expressionResult(data2[0]);
-        const _data2 = data2[1] - 0 || expressionResult(data2[1]);
+        const _data1 = Array.isArray(data2[0]) ? expressionResult(data2[0]) :  data2[0] - 0;
+        const _data2 = Array.isArray(data2[1]) ? expressionResult(data2[1]) :  data2[1] - 0;
         const _tmp = data2.pop();
         if (_data1 < _data2) data2.reverse();
         data2.push(_tmp);
@@ -128,24 +128,26 @@ function mergeData(data1, data2) {
 
 /**
  * 计算表达式答案
- * @param {array} data [数1, 数2, 运算符] | [[数1, 数2, 运算符], 数2, 运算符] | [数1, [数1, 数2, 运算符], 运算符]
+ * @param {array} data [数1, 数2, 运算符, 运算结果]
  */
 function expressionResult(data) {
+    if (!Array.isArray(data)) return data
     const _tmp = [
-        Array.isArray(data[0]) ? expressionResult(data[0]) : data[0] - 0,
-        Array.isArray(data[1]) ? expressionResult(data[1]) : data[1] - 0,
+        expressionResult(data[0]),
+        expressionResult(data[1]),
     ];
-
+    
     const BN = new Bignumber(_tmp[0])
+
     switch (data[2]) {
         case 0:
-            return BN.plus(_tmp[1]).toFixed(5) - 0;
+            return BN.plus(_tmp[1]) - 0;
         case 1:
-            return BN.minus(_tmp[1]).toFixed(5) - 0;
+            return BN.minus(_tmp[1]) - 0;
         case 2:
-            return BN.multipliedBy(_tmp[1]).toFixed(5) - 0;
+            return BN.multipliedBy(_tmp[1]) - 0;
         case 3:
-            return BN.dividedBy(_tmp[1]).toFixed(5) - 0;
+            return BN.dividedBy(_tmp[1]) - 0;
     }
 }
 
@@ -159,21 +161,19 @@ function expressionResult(data) {
  * @return 当前媒体实例对象
  */
 function playSound({ src, loop = false, volume = 10, instanceName }) {
-    const _instanceName = 'tovi_' + (instanceName || random(6, 8))
+    const _instanceName = 'Tovi_' + (instanceName || random(6, 8))
     Object[_instanceName] = Object[_instanceName] || uni.createInnerAudioContext();
+    // const audio = uni.createInnerAudioContext();
     Object.assign(Object[_instanceName], {
         src,
-        volume: volume / 20,
+        volume: volume / (20-(volume/15)),
         autoplay: true,
         loop,
     });
     Object[_instanceName].onEnded(() => {
-        setTimeout(() => {
-            Object[_instanceName].destroy();
-            delete Object[_instanceName]
-        }, instanceName ? 500 : 100)
+        Object[_instanceName].destroy()
     });
-    return Object[_instanceName];
+    return Object[_instanceName]
 }
 
 // 生成键盘按键数据
