@@ -1,6 +1,6 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4271811 */
-  src: url('iconfont.ttf?t=1695931461570') format('truetype');
+  src: url('iconfont.ttf?t=1696149039406') format('truetype');
 }
 
 .iconfont {
@@ -9,6 +9,14 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-gitee:before {
+  content: "\e77f";
+}
+
+.icon-github:before {
+  content: "\e780";
 }
 
 .icon-set:before {

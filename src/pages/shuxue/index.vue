@@ -21,16 +21,30 @@
                     <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
                     {{
                         renderExpression(v[0]) +
-                        `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && numlist[i][1] !== undefined ?
-                            numlist[i][1] : ""}`
+                        `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && v[1] !== undefined ?
+                            v[1] : ""}`
                     }}
                     <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
                     <div v-show="v[2] === 0">
-                        <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
-                        <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
-                        <div class="tip-wrong" v-if="numlist[i][1] === v[0][0] - v[0][1]">这是加法哦，粗心当减(-)法算了么？</div>
-                        <div class="tip-wrong"
-                            v-if="numlist[i][1] === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9">忘记进位了吧?
+                        <div class="tip-wrong">
+                            {{
+                                v[1] - 0 === v[0][0] + v[0][1] 
+                                    ? '粗心了吧，是不是当成加(+)法算啦。'
+                                    : v[1] - 0 === v[0][0] - v[0][1] + 10
+                                        ? '粗心了吧，是不是当成加(+)法算啦。'
+                                        : v[1] - 0 === v[0][0] + v[0][1] 
+                                            ? '粗心了吧，是不是当成加(+)法算啦。'
+                                            : v[1] - 0 === v[0][0] + v[0][1]
+                                                ? '粗心了吧，是不是当成加(+)法算啦。'
+                                                :''
+                            }}
+                        </div>
+                        <div class="tip-wrong" v-if="v[1] - 0 === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
+                        <div class="tip-wrong" v-if="v[1] - 0 === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
+                        <div class="tip-wrong" v-if="v[1] - 0 === v[0][0] - v[0][1]">这是加法哦，粗心当减(-)法算了么？</div>
+                        <div class="tip-wrong" 
+                            v-if="v[1] - 0 === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9">
+                            忘记进位了吧?
                         </div>
                     </div>
                 </div>
@@ -357,14 +371,10 @@ const verticalChange = val => {
         setConfig.isMixed[0] = undefined
     }
 }
-// watch(setConfig.vertical, val => {
-//     if (val.vertical) setConfig.isMixed[0] = undefined
-// })
-// watch(setConfig.isMixed[0], val => {
-//     if (!val.isMixed[0]) setConfig.vertical = false
-// })
+// 获取运算符
 const getOperator = i => ["+", "-", '×', '÷'][i]
 
+// render 表达式
 const renderExpression = (data) => {
     const _data = [...data]
     if (Array.isArray(_data[0])) _data[0] = renderExpression(_data[0])
@@ -594,9 +604,11 @@ const keyClick = (key) => {
             autoCurItemPosition()
             break;
 
-        case '.': // 删除事件
+        case '.':
         default: // 默认数字输入事件
-            numlist[curidx.value][1] = _val.length < 9 ? _val + key : _val;
+            const _keyVal = _val.length < 9 ? _val + key : _val;
+            // _keyVal.replace(/^0$ || [^0.]\d+/)
+            numlist[curidx.value][1] = _keyVal.match(/^(0\.?|[1-9]\d*(\.?\d*))/)[0]
             break;
     }
     // 恢复下标4(对错判断)标识为:空 (错:0, 对:1, 无:'')
@@ -759,7 +771,7 @@ onShow(() => {
     bgm.play();
 })
 onHide(() => {
-    bgm.destroy()
+    bgm.pause()
 })
 
 onUnload(() => {
@@ -863,7 +875,7 @@ onUnload(() => {
             // font-size: 70%;
             line-height: 3em;
             // width: 42%;
-            padding-left: .3em;
+            padding-left: .5em;
             box-sizing: border-box;
             position: relative;
             overflow: hidden;
@@ -887,7 +899,7 @@ onUnload(() => {
                 color: var(--c-safegray-lighter);
                 padding: 0 0.2em;
                 width: 1.8em;
-                line-height: 1.6em;
+                line-height: 1.4em;
                 margin-right: 0.35em;
                 font-size: 18rpx;
                 background-image: linear-gradient(180deg, var(--c-safegray-hlight), transparent);
@@ -942,7 +954,7 @@ onUnload(() => {
                     position: absolute;
                     line-height: 1em;
                     top: 50%;
-                    left: 48%;
+                    left: 120rpx;
                     opacity: 0.816;
                     margin-top: -.5em;
                     color: var(--color-R);
@@ -1496,4 +1508,5 @@ onUnload(() => {
             }
         }
     }
-}</style>
+}
+</style>

@@ -10,14 +10,20 @@
             <navigator class="list" open-type="navigate" url="/pages/yuwen/index">语文：拼音练习</navigator>
             <navigator class="list" open-type="navigate" url="/pages/shuxue/index">数学：四则运算训练</navigator>
         </view>
-        <view class="foot-line">好好学习 天天向上 ver:{{ version }}</view>
+        <div class="footer">
+            <div class="footer-item">
+                &copy; Tovi 2023-present
+                <navigator class="about" open-type="navigate" url="/pages/about/index">@关于与反馈</navigator>
+            </div>
+            <div class="footer-item">好好学习 天天向上 ver:{{ version }}</div>
+
+        </div>
     </view>
 </template>
 <script setup>
 import { onMounted, ref, watch, reactive } from 'vue';
 const { miniProgram } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {}
 const version = (miniProgram?.version || '0.0.2').match(/^\d+(\.\d+){2}/)[0]
-// const { miniProgram: { version } } = uni?.getAccountInfoSync() || { miniProgram: { version: '0.0.22.0' } }
 
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
@@ -57,11 +63,6 @@ uni.showShareMenu({
     }
 }
 
-// .version{
-//     text-align: right;
-//     padding:0 1em;
-//     // color: #999
-// }
 .foot-line {
     @color: #e9e9e9;
     color: @color;
@@ -79,6 +80,24 @@ uni.showShareMenu({
         background-color: @color;
         height: 1rpx;
         margin: 0 .35em;
+    }
+}
+
+.footer {
+    background-color: var(--c-safegray-darker);
+    color: var(--c-safegray-hlighter);
+    text-align: center;
+    line-height: 2em;
+
+    .footer-item {
+        display: flex;
+        justify-content: center;
+    }
+
+    .about {
+        margin-left: 1em;
+        text-decoration: underline;
+
     }
 }
 </style>
