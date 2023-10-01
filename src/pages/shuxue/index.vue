@@ -25,26 +25,20 @@
                             v[1] : ""}`
                     }}
                     <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
+
                     <div v-show="v[2] === 0">
                         <div class="tip-wrong">
                             {{
-                                v[1] - 0 === v[0][0] + v[0][1] 
-                                    ? '粗心了吧，是不是当成加(+)法算啦。'
-                                    : v[1] - 0 === v[0][0] - v[0][1] + 10
-                                        ? '粗心了吧，是不是当成加(+)法算啦。'
-                                        : v[1] - 0 === v[0][0] + v[0][1] 
-                                            ? '粗心了吧，是不是当成加(+)法算啦。'
-                                            : v[1] - 0 === v[0][0] + v[0][1]
-                                                ? '粗心了吧，是不是当成加(+)法算啦。'
-                                                :''
+                                v[1] - 0 === v[0][0] + v[0][1]
+                                ? '粗心了吧，是不是当成加(+)法算啦。'
+                                : v[1] - 0 === v[0][0] - v[0][1] + 10
+                                    ? '忘记借位了吧？'
+                                    : v[1] - 0 === v[0][0] - v[0][1]
+                                        ? '这是加法哦，粗心当减(-)法算了么？'
+                                        : v[1] - 0 === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9
+                                            ? '忘记进位了吧?'
+                                            : ''
                             }}
-                        </div>
-                        <div class="tip-wrong" v-if="v[1] - 0 === v[0][0] + v[0][1]">粗心了吧，是不是当成加(+)法算啦。</div>
-                        <div class="tip-wrong" v-if="v[1] - 0 === v[0][0] - v[0][1] + 10">忘记借位了吧？</div>
-                        <div class="tip-wrong" v-if="v[1] - 0 === v[0][0] - v[0][1]">这是加法哦，粗心当减(-)法算了么？</div>
-                        <div class="tip-wrong" 
-                            v-if="v[1] - 0 === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9">
-                            忘记进位了吧?
                         </div>
                     </div>
                 </div>
@@ -280,8 +274,8 @@ Object.keys(musics).forEach(key => {
     const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, '$1_$2')
     musicArr[_key] = musics[key].default
 })
-// 数据列表:[[[数字1 || [数字1,数字2, 运算符], 数字2 || [数字1,数字2, 运算符], 运算符], 用户运算结果, 结果对错判定, 订正次数], ...]
-const numlist = reactive([]); // 数据列表:[[数字1,数字2, 运算符, 用户运算结果, 结果对错判定, 订正次数], ...]
+
+const numlist = reactive([]); // 数据列表:[[[数字1 || [数字1,数字2, 运算符], 数字2 || [数字1,数字2, 运算符], 运算符], 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
 const score = ref(0); // 得分
 const comment = ref(""); // 评语
@@ -324,7 +318,6 @@ const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
 const decimalLen = ref(storageConf.decimalLen) // 小数位数
 const scrollTop = ref(0) // 滚动位置
 const vertical = ref(storageConf.vertical) // 开启竖式
-
 
 // 滚动条将当前光标自动滚动到可视区域内
 const autoCurItemPosition = async () => {
@@ -402,17 +395,26 @@ uni.showShareMenu({
  * @param {string} isInit 是否初始化-重新生成数据
  */
 function createList(isInit = true) {
+    console.log(setConfig);
     /**
      * 需要创建的数据量
      * @author ToviLau 46134256@qq.com
      * @param {number} num  数量
      */
     function createData(num) {
-        if (isInit) numlist.length = 0
-
         // 随机生成运算符 0:'+' | 1:'-' | 2:'*' | 3:'/'
         const createOperator = (operator) => Math.floor(Math.random() * (operator || (opType.value ? 4 : 2)) + 0)
 
+        // 创建题
+        /**
+         * @Description  :  
+         * @Date         : 2023-10-01 21:22:15
+         * @Author       : ToviLau 46134256@qq.com
+         * @LastEditors  : ToviLau 46134256@qq.com
+         * @LastEditTime : Do not edit
+         * @param         {string} operator 运算符
+         * @return        算术题
+         */
         const createExpression = function (operator) {
             const _getOperator = createOperator(operator)
             const _expression = new Array(2).fill(undefined)
@@ -439,19 +441,16 @@ function createList(isInit = true) {
                     const divisionFn = () => {
                         _expression[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
                         _expression[0] = random(8, `${_expression[1]}-${difficulty.value ? '999' : '99'}`)
-                        // modulo
 
                         const BN = new Bignumber(_expression[0])
                         const _bn = BN.modulo(_expression[1]) // 取模
                         BN.minus(_bn)
-                        // debugger
-                        // _expression[0] = _expression[0] - _expression[0] % _expression[1] // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         _expression[0] = BN.minus(_bn) // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         if (
                             _expression[1] === 0 // 被除数为0, 小学阶段无意义
                             || _expression[0] === 0 // 排除商为0，此条可以删除 
                             || _expression[0] === _expression[1] // 排除商为1，此条可以删除
-                        ) divisionFn()
+                        ) divisionFn() // 不符合要求重新创建
                     }
                     divisionFn()
                     break;
@@ -461,10 +460,9 @@ function createList(isInit = true) {
                 const decimal = Math.random()
                 _expression[idx] = (item + decimal - 0).toFixed(decimalLen.value) - 0
             })
-
-            const _tmp = _expression.concat(_getOperator)
-            return _tmp
+            return _expression.concat(_getOperator)
         }
+        if (isInit) numlist.length = 0 // 初始化完全新建
 
         const _numlist = new Array(num).fill(undefined).map(res => {
             // [
@@ -503,11 +501,11 @@ function createList(isInit = true) {
         })
         numlist.push(..._numlist)
     }
-    isInit
-        ? createData(totalNum.value)
+    isInit  // 计算要创建的数量
+        ? createData(totalNum.value) // 与用户设定一制
         : totalNum.value > numlist.length
-            ? createData(totalNum.value - numlist.length)
-            : numlist.length = totalNum.value
+            ? createData(totalNum.value - numlist.length) // 增量创建
+            : numlist.length = totalNum.value // 直接删除多出的数据
 
     score.value = 0
 

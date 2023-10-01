@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-10-01 15:51:59
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-01 18:10:04
+ * @LastEditTime : 2023-10-01 19:13:22
 -->
 <template>
     <view class="page">
@@ -14,7 +14,7 @@
             <div class="divider-line">纯个人版小程序, 非商用无广告，不采集个人信息。</div>
             <div class="doc-item-h">建议反馈</div>
             <div class="doc-item">如果您有好的 idea 可以反馈给我，我将选择性采纳，反馈方式可以通过上面的开源社区，也可以通下方的二维码反馈给我。</div>
-            <image src="../../assets/about/me-wechat.png" alt="me wechat" show-menu-by-longpress class="me-wechat"></image>
+            <image src="../../assets/about/wechat.png" alt="me wechat" show-menu-by-longpress class="me-wechat"></image>
         </div>
     </view>
 </template>
