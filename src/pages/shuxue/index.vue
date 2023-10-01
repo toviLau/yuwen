@@ -281,7 +281,7 @@ const defaultConf = { // 默认配置
     keyboard: true, // 键盘类型[false:简单, true:九宫格]
     bgmVolume: 10, // 背景音乐音量
     cursorType: false, // 光标类型 false:_, true:|
-    difficulty: false, // 困难度
+    difficulty: true, // 困难度
     totalNum: 50, // 题目数量
     opType: false, // 运算规则 0:+-,1:+-*/
     isMixed: false, // 是否混合运算
