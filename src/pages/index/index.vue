@@ -84,10 +84,11 @@ uni.showShareMenu({
 }
 
 .footer {
-    background-color: var(--c-safegray-darker);
+    background-color: var(--c-safegray-hdarker);
     color: var(--c-safegray-hlighter);
     text-align: center;
-    line-height: 2em;
+    line-height: 1.6em;
+    font-size: 28rpx;
 
     .footer-item {
         display: flex;
