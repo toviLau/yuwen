@@ -161,19 +161,20 @@ function expressionResult(data) {
  * @return 当前媒体实例对象
  */
 function playSound({ src, loop = false, volume = 10, instanceName }) {
-    const _instanceName = 'Tovi_' + (instanceName || random(6, 8))
-    Object[_instanceName] = Object[_instanceName] || uni.createInnerAudioContext();
-    // const audio = uni.createInnerAudioContext();
-    Object.assign(Object[_instanceName], {
+    // const _instanceName = 'Tovi_' + (instanceName || random(6, 8))
+    // Object[_instanceName] = Object[_instanceName] || uni.createInnerAudioContext();
+    const audio = uni.createInnerAudioContext();
+    Object.assign(audio, {
         src,
         volume: volume / (20-(volume/15)),
         autoplay: true,
         loop,
     });
-    Object[_instanceName].onEnded(() => {
-        Object[_instanceName].destroy()
+    audio.onEnded(() => {
+        audio.destroy()
+        // delete audio
     });
-    return Object[_instanceName]
+    return audio
 }
 
 // 生成键盘按键数据

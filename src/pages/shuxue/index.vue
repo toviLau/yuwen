@@ -103,7 +103,8 @@
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
                                     <zeroSwitch :size="20" v-model="setConfig.opType" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" @change="opTypeChange"/>
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3"
+                                        @change="opTypeChange" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.opType }">四则运算
                                 </div>
@@ -115,21 +116,38 @@
                             </div>
                         </div>
                     </div>
-                    <div class="set-sys-db-list" v-if="setConfig.opType">
-                        <div class="set-sys-db-list-left">困难度：</div>
+                    <div class="set-sys-db-list" vif="setConfig.opType">
+                        <div class="set-sys-db-list-left">难易度：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">简单
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">
+                                    {{ setConfig.opType ? '简单' : '20以内' }}
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
                                     <zeroSwitch :size="20" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">困难
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">
+                                    {{ setConfig.opType ? '困难' : '100以内' }}
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <!-- <div class="set-sys-db-list" v-if="!setConfig.opType">
+                        <div class="set-sys-db-list-left">难易度：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="set-sys-switch">
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">20以内
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-c">
+                                    <zeroSwitch :size="20" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                </div>
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">100以内
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
                     <!-- <div class="set-sys-db-list" vif="!setConfig.opType">
                         <div class="set-sys-db-list-left">开启竖式：</div>
                         <div class="set-sys-db-list-right">
@@ -326,14 +344,15 @@ watch(setConfig, val => {
     cursorType.value = val.cursorType
     showIdx.value = val.showIdx
 })
-const mixedChange = ({detail:{value:val}}) => {
-    if(val) setConfig.vertical = false
+const mixedChange = ({ detail: { value: val } }) => {
+    if (val) setConfig.vertical = false
 }
 const opTypeChange = val => {
-    if(val) setConfig.vertical = false
+    if (val) setConfig.vertical = false
+    setConfig.difficulty = !val // false
 }
 const verticalChange = val => {
-    if(val) {
+    if (val) {
         setConfig.opType = false
         setConfig.isMixed[0] = undefined
     }
@@ -387,15 +406,18 @@ function createList(isInit = true) {
         const createExpression = function (operator) {
             const _getOperator = createOperator(operator)
             const _expression = new Array(2).fill(undefined)
+
+            const _expressionMax1 = !opType.value && !difficulty.value ? '1-15' : '10-90'
+            const _expressionMax2 = !opType.value && !difficulty.value ? '20' : '99'
             switch (_getOperator) {
                 case 0: // '+'
-                    _expression[0] = random(8, "10-90")
-                    _expression[1] = random(8, `10-${100 - _expression[0]}`)
+                    _expression[0] = random(8, _expressionMax1)
+                    _expression[1] = random(8, `10-${_expressionMax2 - _expression[0]}`)
                     break;
 
                 case 1: // '-'
-                    _expression[1] = random(8, "10-99")
-                    _expression[0] = random(8, `${_expression[1]}-99`)
+                    _expression[1] = random(8, _expressionMax1)
+                    _expression[0] = random(8, `${_expression[1]}-${_expressionMax2}`)
                     break;
 
                 case 2: // '*'
@@ -442,7 +464,7 @@ function createList(isInit = true) {
             //     订正次数
             // ]
             const numArr = new Array(4).fill(undefined)
-            const mData = mergeData(createExpression(), createExpression(2))
+            const mData = mergeData(createExpression(), createExpression())
 
 
             // 获取小数位信息: 长度与小数值
@@ -837,10 +859,11 @@ onUnload(() => {
         .list-item {
             @item-primary-color: #b6aafa;
             border-bottom: 1px solid var(--c-safegray-hlight);
-            font-size: 30rpx;
+            font-size: 28rpx;
+            // font-size: 70%;
             line-height: 3em;
             // width: 42%;
-            padding-left: .6em;
+            padding-left: .3em;
             box-sizing: border-box;
             position: relative;
             overflow: hidden;
@@ -862,7 +885,7 @@ onUnload(() => {
                 border: 1px solid var(--c-safegray-hlight);
                 border-radius: 5rpx;
                 color: var(--c-safegray-lighter);
-                padding: 0 0.3em;
+                padding: 0 0.2em;
                 width: 1.8em;
                 line-height: 1.6em;
                 margin-right: 0.35em;
@@ -930,7 +953,7 @@ onUnload(() => {
                     content: "\e77e";
                     font-size: 120rpx;
                 }
-                
+
                 &.wrong:before {
                     content: "\e77c";
                     font-size: 60rpx;
@@ -1473,5 +1496,4 @@ onUnload(() => {
             }
         }
     }
-}
-</style>
+}</style>
