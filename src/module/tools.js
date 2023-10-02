@@ -1,3 +1,9 @@
+/**
+ * @Author       : ToviLau 46134256@qq.com
+ * @Date         : 2023-09-26 07:04:50
+ * @LastEditors  : ToviLau 46134256@qq.com
+ * @LastEditTime : 2023-10-02 19:53:31
+ */
 import Bignumber from 'BigNumber.js'
 /**
  * 产生随机字符

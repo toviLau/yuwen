@@ -1,11 +1,20 @@
+<!--
+ * @Author       : ToviLau 46134256@qq.com
+ * @Date         : 2023-09-29 02:25:21
+ * @LastEditors  : ToviLau 46134256@qq.com
+ * @LastEditTime : 2023-10-02 21:31:25
+-->
 <template>
     <view class="content">
         <div class="top">
             <div class="top-left">日期: {{ date('Y-m-d') }}</div>
             <div class="top-right">用时: {{ startTimed }}</div>
-            <!-- <span class="top-audio" @click="">
-                <div class="iconfont icon-audio pause"></div>
-            </span> -->
+            <span class="top-audio" @click="">
+                <div class="iconfont icon-audio"
+                :class="{pause: bgmPause}"
+                @click="bgmPause = !bgmPause"
+                ></div>
+            </span>
         </div>
         <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
             <div class="list">
@@ -284,6 +293,7 @@ const startTime = ref(0) // 开始时间
 const startTimed = ref('') // 已用时
 const subEnterTime = ref('') // 提交时间
 const contTimeId = ref() // 计时定时器 ID
+const bgmPause = ref(false)
 const defaultConf = { // 默认配置
     showIdx: false, // 显示序号
     keyboard: true, // 键盘类型[false:简单, true:九宫格]
@@ -341,7 +351,6 @@ watch(keyboard, () => {
     autoCurItemPosition()
 })
 
-
 watch(cursorType, () => {
     setConfig.cursorType = cursorType.value
 })
@@ -350,19 +359,29 @@ watch(setConfig, val => {
     cursorType.value = val.cursorType
     showIdx.value = val.showIdx
 })
+watch(bgmPause, val=>{
+    val ? bgm.pause() : bgm.play()
+})
+
+// 混合模式改变
 const mixedChange = ({ detail: { value: val } }) => {
     if (val) setConfig.vertical = false
 }
+
+// 运算规则改变
 const opTypeChange = val => {
     if (val) setConfig.vertical = false
     setConfig.difficulty = !val // false
 }
+
+// TODO: 竖式
 const verticalChange = val => {
     if (val) {
         setConfig.opType = false
         setConfig.isMixed[0] = undefined
     }
 }
+
 // 获取运算符
 const getOperator = i => ["+", "-", '×', '÷'][i]
 
@@ -452,6 +471,7 @@ function createList(isInit = true) {
                     divisionFn()
                     break;
             }
+
             // 开启小数处理,添加小数位
             if (hasDecimal.value) _expression.forEach((item, idx) => {
                 const decimal = Math.random()
@@ -764,6 +784,8 @@ const setNumChange = val => {
     // bgm.volume = setConfig.bgmVolume / 20
     setNumFn(Math.round(val / 10) * 10)
 }
+
+// 最多有效位数变动
 const setDecimalLenChange = val => {
     setConfig.decimalLen = val
 }
@@ -812,7 +834,7 @@ onUnload(() => {
 
         .top-audio {
             // width: 1em;
-            margin-left: 1em;
+            margin-left: .5em;
             height: 1.2em;
             display: flex;
 
@@ -853,7 +875,7 @@ onUnload(() => {
                         left: 0;
                         margin-top: -3rpx;
                         transform: rotate(-45deg);
-                        opacity: .816;
+                        opacity: .618;
 
                     }
 

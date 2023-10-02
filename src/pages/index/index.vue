@@ -15,8 +15,7 @@
                 &copy; Tovi 2023-present
                 <navigator class="about" open-type="navigate" url="/pages/about/index">@关于与反馈</navigator>
             </div>
-            <div class="footer-item">好好学习 天天向上 ver:{{ version }}</div>
-
+            <div class="footer-item">好好学习 天天向上 version: {{ version }}</div>
         </div>
     </view>
 </template>
@@ -50,45 +49,47 @@ uni.showShareMenu({
     justify-content: space-evenly;
     align-items: center;
     flex: 1;
-    background-color: #fcfcfc;
+    background-color: var(--c-safegray-hlighter);
 
     .list {
         width: 11em;
         height: 3em;
         line-height: 3em;
         font-size: 28rpx;
-        background-color: #f0f0f0;
+        background-color: var(--c-safegray-hlight);
         border-radius: 5rpx;
         text-align: center;
     }
 }
 
-.foot-line {
-    @color: #e9e9e9;
-    color: @color;
-    display: flex;
-    align-items: center;
-    height: 2em;
-    padding: 0 5%;
-    margin-bottom: .5em;
-    font-size: 30rpx;
+// .foot-line {
+//     @color: #e9e9e9;
+//     color: @color;
+//     display: flex;
+//     align-items: center;
+//     height: 2em;
+//     padding: 0 5%;
+//     margin-bottom: .5em;
+//     font-size: 30rpx;
 
-    &::after,
-    &::before {
-        content: '';
-        flex: 1;
-        background-color: @color;
-        height: 1rpx;
-        margin: 0 .35em;
-    }
-}
+//     &::after,
+//     &::before {
+//         content: '';
+//         flex: 1;
+//         background-color: @color;
+//         height: 1rpx;
+//         margin: 0 .35em;
+//     }
+// }
 
 .footer {
     background-color: var(--c-safegray-hdarker);
-    color: var(--c-safegray-hlighter);
+    // background-image: linear-gradient(0deg, var(--c-safegray-hdarker), var(--c-safegray-darker));
+    color: var(--c-safegray-hlight);
     text-align: center;
     line-height: 1.6em;
     font-size: 28rpx;
+    padding: .5em 0;
 
     .footer-item {
         display: flex;
@@ -98,7 +99,6 @@ uni.showShareMenu({
     .about {
         margin-left: 1em;
         text-decoration: underline;
-
     }
 }
 </style>

@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-10-01 15:51:59
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-02 19:18:27
+ * @LastEditTime : 2023-10-02 19:40:15
 -->
 <template>
     <view class="page">
@@ -47,7 +47,8 @@ uni.showShareMenu({
         text-indent: 2em;
     }
     .doc-item-h{
-        font-size: 1.25em;
+        font-size: 1.1em;
+        font-weight: bolder;
         margin-top: 1em;
         color: var(--c-safegray-hdark);
     }
@@ -62,7 +63,8 @@ uni.showShareMenu({
         }
     }
     .me-wechat{
-        width: 80%;
+        width: 60vw;
+        height: 60vw;
         margin: 0 auto;
         display: block;
     }
