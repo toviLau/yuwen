@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-02 21:31:25
+ * @LastEditTime : 2023-10-03 00:18:38
 -->
 <template>
     <view class="content">
@@ -10,44 +10,59 @@
             <div class="top-left">日期: {{ date('Y-m-d') }}</div>
             <div class="top-right">用时: {{ startTimed }}</div>
             <span class="top-audio" @click="">
-                <div class="iconfont icon-audio"
-                :class="{pause: bgmPause}"
-                @click="bgmPause = !bgmPause"
-                ></div>
+                <div class="iconfont icon-audio" :class="{ pause: bgmPause }" @click="bgmPause = !bgmPause"></div>
             </span>
         </div>
         <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
             <div class="list">
-                <div class="list-item" v-for="(v, i) in numlist" :key="i" @click="ckItem(i)" :class="{
-                    'cur-item': !setConfig.status && i === curidx && submited === 0 ,
-                    cursor1: cursorType === false,
-                    cursor2: cursorType === true,
-                    right: v[2] === 1,
-                    wrong: v[2] === 0 && !['', undefined].includes(v[1]),
-                }">
-                    <div class="edited" v-if="v[3] > 0">{{ v[3] }}</div>
-                    <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
-                    <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
-                    {{
-                        renderExpression(v[0]) +
-                        `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && v[1] !== undefined ?
-                            v[1] : ""}`
-                    }}
-                    <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
+                <div class="list-item" v-for="(v, i) in numlist" :key="i" @click="ckItem(i)">
+                    <div class="list-item-li" :class="{
+                        'cur-item': !setConfig.status && i === curidx && submited === 0,
+                        cursor1: cursorType === false,
+                        cursor2: cursorType === true,
+                        right: v[2] === 1,
+                        wrong: v[2] === 0 && !['', undefined].includes(v[1]),
+                    }">
 
-                    <div v-show="v[2] === 0">
-                        <div class="tip-wrong">
-                            {{
-                                v[1] - 0 === v[0][0] + v[0][1]
-                                ? '粗心了吧，是不是当成加(+)法算啦。'
-                                : v[1] - 0 === v[0][0] - v[0][1] + 10
-                                    ? '忘记借位了吧？'
-                                    : v[1] - 0 === v[0][0] - v[0][1]
-                                        ? '这是加法哦，粗心当减(-)法算了么？'
-                                        : v[1] - 0 === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9
-                                            ? '忘记进位了吧?'
-                                            : ''
-                            }}
+                        <div class="edited" v-if="v[3] > 0">{{ v[3] }}</div>
+                        <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
+                        <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
+                        {{
+                            renderExpression(v[0]) +
+                            `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && v[1] !== undefined ?
+                                v[1] : ""}`
+                        }}
+                        <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
+
+                        <div v-show="v[2] === 0">
+                            <div class="tip-wrong">
+                                {{
+                                    v[1] - 0 === v[0][0] + v[0][1]
+                                    ? '粗心了吧，是不是当成加(+)法算啦。'
+                                    : v[1] - 0 === v[0][0] - v[0][1] + 10
+                                        ? '忘记借位了吧？'
+                                        : v[1] - 0 === v[0][0] - v[0][1]
+                                            ? '这是加法哦，粗心当减(-)法算了么？'
+                                            : v[1] - 0 === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9
+                                                ? '忘记进位了吧?'
+                                                : ''
+                                }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vertical" :class="{
+                        plus: v[0][2]===0,
+                        minus: v[0][2]===1
+                    }"> 
+                        <div class="vertical-li">
+                            <div class="vertical-li-nums" v-for="vItem in v[0][0].toString().split('')">{{ vItem }}</div>
+                        </div>
+                        <div class="vertical-li">
+                            <div class="vertical-li-nums" v-for="vItem in v[0][1].toString().split('')">{{ vItem }}</div>
+                        </div>
+
+                        <div class="vertical-li">
+                            <div class="vertical-li-nums" v-for="vItem in (v[1]||'  ').toString().split('')">{{ vItem }}</div>
                         </div>
                     </div>
                 </div>
@@ -165,7 +180,7 @@
                             </div>
                         </div>
                     </div> -->
-                    <!-- <div class="set-sys-db-list" vif="!setConfig.opType">
+                    <div class="set-sys-db-list" vif="!setConfig.opType">
                         <div class="set-sys-db-list-left">开启竖式：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
@@ -176,7 +191,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div> -->
+                    </div>
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">启用小数：</div>
                         <div class="set-sys-db-list-right">
@@ -359,7 +374,7 @@ watch(setConfig, val => {
     cursorType.value = val.cursorType
     showIdx.value = val.showIdx
 })
-watch(bgmPause, val=>{
+watch(bgmPause, val => {
     val ? bgm.pause() : bgm.play()
 })
 
@@ -902,186 +917,262 @@ onUnload(() => {
             border-bottom: 1px solid var(--c-safegray-hlight);
             font-size: 28rpx;
             // font-size: 70%;
-            line-height: 3em;
             // width: 42%;
-            padding-left: .5em;
-            box-sizing: border-box;
-            position: relative;
-            overflow: hidden;
             display: flex;
-            align-items: center;
-            text-align: center;
+            flex-direction: column;
+            // align-items: center;
+            // text-align: center;
             color: var(--c-safegray-hdark);
             min-width: 46%;
             flex: 1 0 auto;
             margin: 0 2%;
-            box-sizing: border-box;
 
-            &.list-item-none {
-                border: none;
-                line-height: 0;
-            }
-
-            .list-item-idx {
-                border: 1px solid var(--c-safegray-hlight);
-                border-radius: 5rpx;
-                color: var(--c-safegray-lighter);
-                padding: 0 0.2em;
-                width: 1.8em;
-                line-height: 1.4em;
-                margin-right: 0.35em;
-                font-size: 18rpx;
-                background-image: linear-gradient(180deg, var(--c-safegray-hlight), transparent);
-                margin-left: -0.6em;
-            }
-
-            .edited,
-            .wait-edited {
-                font-size: 16rpx;
-                line-height: 1em;
-                padding: 6rpx 1.25em 6rpx .75em;
-                // opacity: .8;
+            .list-item-li {
+                display: flex;
+                align-items: center;
                 text-align: center;
-                position: absolute;
-                left: 0;
-                top: 0;
-                border-radius: 0 0 16rpx 0;
-            }
-
-            .edited {
-                background-color: var(--c-gray-hlighter);
-                color: var(--c-safegray-light);
-
-                &::before {
-                    content: '已订正：'
-                }
-
-                &::after {
-                    content: ' 次'
-                }
-            }
-
-            .wait-edited {
-                background-color: var(--color-R);
-                color: var(--c-safegray-hlight);
-
-                &::before {
-                    content: '尚未订正'
-                }
-            }
-
-            &.right,
-            &.wrong {
+                line-height: 3em;
+                padding-left: .5em;
+                box-sizing: border-box;
                 position: relative;
+                overflow: hidden;
 
-                &:before {
-                    font-family: "iconfont" !important;
-                    font-style: normal;
-                    -webkit-font-smoothing: antialiased;
-                    -moz-osx-font-smoothing: grayscale;
-                    background: center/cover no-repeat;
-                    position: absolute;
-                    line-height: 1em;
-                    top: 50%;
-                    left: 120rpx;
-                    opacity: 0.816;
-                    margin-top: -.5em;
-                    color: var(--color-R);
-                }
-
-                &.right:before {
-
-                    content: "\e77e";
-                    font-size: 120rpx;
-                }
-
-                &.wrong:before {
-                    content: "\e77c";
-                    font-size: 60rpx;
-                    font-weight: bolder;
-                }
-            }
-
-            &.cur-item {
-                box-shadow: 0 0 0 4rpx @item-primary-color;
-                // border-bottom: none;
-                border-radius: 5rpx;
-
-                &:after {
-                    animation: guang-biao-shan-shuo 1.6s infinite;
-                }
-
-                &.right {
-                    box-shadow: 0 0 0 4rpx var(--c-safegray-light);
-
-                    &:after {
-                        animation: none;
-                    }
+                &.list-item-none {
+                    border: none;
+                    line-height: 0;
                 }
 
                 .list-item-idx {
-                    background-image: linear-gradient(0deg, ligthen(@item-primary-color, 0.15%), transparent);
-                    color: darken(@item-primary-color, 11.5%);
+                    border: 1px solid var(--c-safegray-hlight);
+                    border-radius: 5rpx;
+                    color: var(--c-safegray-lighter);
+                    padding: 0 0.2em;
+                    width: 1.8em;
+                    line-height: 1.4em;
+                    margin-right: 0.35em;
+                    font-size: 18rpx;
+                    background-image: linear-gradient(180deg, var(--c-safegray-hlight), transparent);
+                    margin-left: -0.6em;
                 }
 
-                .active-show {
-                    display: block !important;
+                .edited,
+                .wait-edited {
+                    font-size: 16rpx;
+                    line-height: 1em;
+                    padding: 6rpx 1.25em 6rpx .75em;
+                    // opacity: .8;
+                    text-align: center;
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    border-radius: 0 0 16rpx 0;
                 }
-            }
 
-            .tip-wrong {
-                position: absolute;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: #c9a63122;
-                color: var(--color-Y);
-                line-height: 1.6em;
-                font-size: 18rpx;
-                padding: 0 .5em;
+                .edited {
+                    background-color: var(--c-gray-hlighter);
+                    color: var(--c-safegray-light);
 
-                &.active-show {
-                    display: none;
+                    &::before {
+                        content: '已订正：'
+                    }
+
+                    &::after {
+                        content: ' 次'
+                    }
                 }
-            }
 
-            @keyframes guang-biao-shan-shuo {
-                40% {
+                .wait-edited {
+                    background-color: var(--color-R);
+                    color: var(--c-safegray-hlight);
+
+                    &::before {
+                        content: '尚未订正'
+                    }
+                }
+
+                &.right,
+                &.wrong {
+                    position: relative;
+
+                    &:before {
+                        font-family: "iconfont" !important;
+                        font-style: normal;
+                        -webkit-font-smoothing: antialiased;
+                        -moz-osx-font-smoothing: grayscale;
+                        background: center/cover no-repeat;
+                        position: absolute;
+                        line-height: 1em;
+                        top: 50%;
+                        left: 120rpx;
+                        opacity: 0.816;
+                        margin-top: -.5em;
+                        color: var(--color-R);
+                    }
+
+                    &.right:before {
+
+                        content: "\e77e";
+                        font-size: 120rpx;
+                    }
+
+                    &.wrong:before {
+                        content: "\e77c";
+                        font-size: 60rpx;
+                        font-weight: bolder;
+                    }
+                }
+
+                &.cur-item {
+                    box-shadow: 0 0 0 4rpx @item-primary-color;
+                    // border-bottom: none;
+                    border-radius: 5rpx;
+
+                    &:after {
+                        animation: guang-biao-shan-shuo 1.6s infinite;
+                    }
+
+                    &.right {
+                        box-shadow: 0 0 0 4rpx var(--c-safegray-light);
+
+                        &:after {
+                            animation: none;
+                        }
+                    }
+
+                    .list-item-idx {
+                        background-image: linear-gradient(0deg, ligthen(@item-primary-color, 0.15%), transparent);
+                        color: darken(@item-primary-color, 11.5%);
+                    }
+
+                    .active-show {
+                        display: block !important;
+                    }
+                }
+
+                .tip-wrong {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: #c9a63122;
+                    color: var(--color-Y);
+                    line-height: 1.6em;
+                    font-size: 18rpx;
+                    padding: 0 .5em;
+
+                    &.active-show {
+                        display: none;
+                    }
+                }
+
+                @keyframes guang-biao-shan-shuo {
+                    40% {
+                        opacity: 0;
+                    }
+
+                    50%,
+                    80% {
+                        opacity: 1;
+                    }
+
+                    90% {
+                        opacity: 0;
+                    }
+                }
+
+                &:after {
+                    content: "";
+                    display: inline-block;
                     opacity: 0;
                 }
 
-                50%,
-                80% {
-                    opacity: 1;
+                &.cursor1 {
+                    &:after {
+                        width: 0.5em;
+                        border-bottom: 5rpx lighten(@item-primary-color, 2%) solid;
+                        margin-bottom: -1.125em;
+                    }
                 }
 
-                90% {
-                    opacity: 0;
-                }
-            }
-
-            &:after {
-                content: "";
-                display: inline-block;
-                opacity: 0;
-            }
-
-            &.cursor1 {
-                &:after {
-                    width: 0.5em;
-                    border-bottom: 5rpx lighten(@item-primary-color, 2%) solid;
-                    margin-bottom: -1.125em;
+                &.cursor2 {
+                    &:after {
+                        height: 1em;
+                        border-left: 5rpx lighten(@item-primary-color, 2%) solid;
+                        margin-bottom: 0;
+                        margin-left: .125em;
+                    }
                 }
             }
 
-            &.cursor2 {
-                &:after {
-                    height: 1em;
-                    border-left: 5rpx lighten(@item-primary-color, 2%) solid;
-                    margin-bottom: 0;
-                    margin-left: .125em;
+            .vertical {
+                width: 7em;
+                // margin-left: 2em;
+                margin: .5em 0 .5em 2em;
+                .vertical-li {
+                    display: flex;
+                    justify-content: flex-end;
+                    padding-right: .5em;
+
+                    .vertical-li-nums {
+                        width: 2em;
+                        text-align: center;
+                        border: 1rpx solid var(--c-safegray-hlight);
+                        margin: -1rpx;
+                        height: 2em;
+                        line-height: 2em;
+                    }
+                    &:nth-child(2) {
+                        padding-bottom: .5em;
+                        position: relative;
+                        &:after {
+                            position: absolute;
+                            bottom: .25em;
+                            left: 0;
+                            right: -1em;
+                            content: '';
+                            display: block;
+                            width: 100%;
+                            // margin-top: .25em;
+                            border-top: 1rpx solid var(--c-safegray-dark);
+                        }
+                    }
+                    &:nth-child(3){
+                        .vertical-li-nums{
+                            border-color: var(--c-safegray-light);
+                        }
+                    }
                 }
+                &.plus,&.minus{
+                    .vertical-li:nth-child(2){
+                        position: relative;
+                        &:before{
+                            position: absolute;
+                            left: .5em;
+                            font-size: 1.25em;
+                        }
+                        // &:before,&:after{
+                        //     position: absolute;
+                        //     left: 1em;
+                        // }
+                    }
+                }
+                &.plus{
+                    .vertical-li:nth-child(2){
+                        &::before{
+                            content: '+';
+                        }
+                    }
+                }
+                &.minus{
+                    .vertical-li:nth-child(2){
+                        &::before{
+                            content: '-';
+                        }
+                    }
+                }
+
             }
+
         }
     }
 
