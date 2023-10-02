@@ -10,7 +10,7 @@
         <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
             <div class="list">
                 <div class="list-item" v-for="(v, i) in numlist" :key="i" @click="ckItem(i)" :class="{
-                    'cur-item': i === curidx && submited === 0,
+                    'cur-item': !setConfig.status && i === curidx && submited === 0 ,
                     cursor1: cursorType === false,
                     cursor2: cursorType === true,
                     right: v[2] === 1,
@@ -296,7 +296,6 @@ const defaultConf = { // 默认配置
     hasDecimal: false, // 启用小数
     vertical: false, // 开启竖式
     decimalLen: 2, // 最大小数位
-    vertical: false // 开启竖式
 }
 const getStorageData = () => { // 读取设置缓存
     return Object.assign({}, defaultConf, uni.getStorageSync('config'));
@@ -395,7 +394,6 @@ uni.showShareMenu({
  * @param {string} isInit 是否初始化-重新生成数据
  */
 function createList(isInit = true) {
-    console.log(setConfig);
     /**
      * 需要创建的数据量
      * @author ToviLau 46134256@qq.com
@@ -444,7 +442,6 @@ function createList(isInit = true) {
 
                         const BN = new Bignumber(_expression[0])
                         const _bn = BN.modulo(_expression[1]) // 取模
-                        BN.minus(_bn)
                         _expression[0] = BN.minus(_bn) // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         if (
                             _expression[1] === 0 // 被除数为0, 小学阶段无意义
@@ -472,8 +469,8 @@ function createList(isInit = true) {
             //     订正次数
             // ]
             const numArr = new Array(4).fill(undefined)
-            const mData = mergeData(createExpression(), createExpression())
-
+            const mData = mergeData(createExpression(), createExpression(2))
+            // console.log(JSON.stringify(mData));
 
             // 获取小数位信息: 长度与小数值
             const getDecimalArr = val => {
@@ -514,6 +511,18 @@ function createList(isInit = true) {
     startTime.value = Date.now()
     contTime()
     curidx.value = 0;
+    // TODO: 历史功能: 存储当前配置信息 与 列表信息,正确率 提交次数等 订正次数 等 
+    // const _history_is = Date.now()
+    // const _history_conf =  {
+    //     ...JSON.parse(JSON.stringify(storageConf)) 
+    // }
+    // 
+    // // hasDecimal: false
+    // // decimalLen: 1
+    // // difficulty: false
+    // // isMixed: []
+    // // opType: false
+    // // totalNum: 20
 }
 createList(true);
 const keyboardCode = reactive(createKeyboardCode())
