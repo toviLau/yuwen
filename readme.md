@@ -2,7 +2,7 @@
 > 本来这小玩意是写给我闺女玩的, 没打算开源，受交流群的筒子们邀请开源，  
 > 于北京时间 2023-9-23 17:15 在 [GITHUB<sup>&copy;</sup>](https://github.com/toviLau/yuwen) 与 [码云<sup>&copy;</sup>](https://gitee.com/tovilau/yuwen) 同步开源, 欢迎共同交流学习找BUG  
 > 
-> 如果您有好的 idea 请踊跃给出 isuse, 我将选择性采纳。  
+> 如果您有好的 idea 请踊跃给出 issues, 我将选择性采纳。  
 > 最后如您喜欢，点个小星星啦 Y\^_\^Y
 > 
 

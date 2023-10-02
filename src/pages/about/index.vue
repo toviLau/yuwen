@@ -2,13 +2,13 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-10-01 15:51:59
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-01 19:13:22
+ * @LastEditTime : 2023-10-02 19:18:27
 -->
 <template>
     <view class="page">
         <div class="doc">
             <div class="doc-item">此小程序诞生是疫情失业在家无意之作，本意是给自家闺女玩的，训练她的数学计算能力，为将来的学习打好坚实基础。</div>
-            <div class="doc-item">经各交流群里的热心群友测试与体验，觉得比较实用后邀请开源。现此小程序源码已在 码云 与 gitbub 上同步开源(MIT)。欢迎 isuse。</div>
+            <div class="doc-item">经各交流群里的热心群友测试与体验，觉得比较实用后邀请开源。现此小程序源码已在 码云 与 gitbub 上同步开源(MIT)。欢迎 issues。</div>
             <div class="doc-item"><span class="iconfont icon-github"></span>https://github.com/toviLau/yuwen</div>
             <div class="doc-item"><span class="iconfont icon-gitee"></span>https://gitee.com/tovilau/yuwen</div>
             <div class="divider-line">纯个人版小程序, 非商用无广告，不采集个人信息。</div>
