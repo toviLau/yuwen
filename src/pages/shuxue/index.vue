@@ -372,7 +372,7 @@ const renderExpression = (data) => {
     if (Array.isArray(_data[0])) _data[0] = renderExpression(_data[0])
     if (Array.isArray(_data[1])) {
         _data[1] = renderExpression(_data[1])
-        if (_data[2] === 1) {
+        if (_data[2] === 1 && !/[÷×]/.test(_data[1])) {
             _data[1] = ['(', _data[1], ')'].join('')
         }
     }
