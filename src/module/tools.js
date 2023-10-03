@@ -123,8 +123,8 @@ function mergeData(data1, data2) {
     const idx = Math.random() > 0.5 ? 1 : 0;
     data2[idx] = data1;
     if (data2[2] === 1) {
-        const _data1 = Array.isArray(data2[0]) ? expressionResult(data2[0]) :  data2[0] - 0;
-        const _data2 = Array.isArray(data2[1]) ? expressionResult(data2[1]) :  data2[1] - 0;
+        const _data1 = Array.isArray(data2[0]) ? expressionResult(data2[0]) : data2[0] - 0;
+        const _data2 = Array.isArray(data2[1]) ? expressionResult(data2[1]) : data2[1] - 0;
         const _tmp = data2.pop();
         if (_data1 < _data2) data2.reverse();
         data2.push(_tmp);
@@ -142,7 +142,7 @@ function expressionResult(data) {
         expressionResult(data[0]),
         expressionResult(data[1]),
     ];
-    
+
     const BN = new Bignumber(_tmp[0])
 
     switch (data[2]) {
@@ -167,19 +167,31 @@ function expressionResult(data) {
  * @return 当前媒体实例对象
  */
 function playSound({ src, loop = false, volume = 10, instanceName }) {
-    // const _instanceName = 'Tovi_' + (instanceName || random(6, 8))
-    // Object[_instanceName] = Object[_instanceName] || uni.createInnerAudioContext();
+    /** 
+     * @Description  :  
+     * @Author       : ToviLau 46134256@qq.com
+     * @Date         : 2023-10-03 16:31:11
+     * @LastEditors  : ToviLau 46134256@qq.com
+     * @LastEditTime : Do not edit
+     * @param         {object} player: audio对象
+     **/    
+    const audioPlay = player => {
+        Object.assign(player, {
+            src,
+            volume: volume / (20 - (volume / 15)),
+            autoplay: true,
+            loop,
+        });
+        player.onEnded(() => {
+            player.destroy()
+            // delete player
+        });
+    }
+
     const audio = uni.createInnerAudioContext();
-    Object.assign(audio, {
-        src,
-        volume: volume / (20-(volume/15)),
-        autoplay: true,
-        loop,
-    });
-    audio.onEnded(() => {
-        audio.destroy()
-        // delete audio
-    });
+    // const _instanceName = 'ToviPlayer_' + (instanceName || random(6, 32))
+    // Object[_instanceName] = Object[_instanceName] || uni.createInnerAudioContext();
+    audioPlay(audio)
     return audio
 }
 

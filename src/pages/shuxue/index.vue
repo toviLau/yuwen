@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-03 00:18:38
+ * @LastEditTime : 2023-10-03 18:42:37
 -->
 <template>
     <view class="content">
@@ -50,10 +50,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="vertical" :class="{
-                        plus: v[0][2]===0,
-                        minus: v[0][2]===1
-                    }"> 
+                    <div v-if="vertical" class="vertical" :class="{
+                        plus: v[0][2] === 0,
+                        minus: v[0][2] === 1
+                    }">
                         <div class="vertical-li">
                             <div class="vertical-li-nums" v-for="vItem in v[0][0].toString().split('')">{{ vItem }}</div>
                         </div>
@@ -62,7 +62,8 @@
                         </div>
 
                         <div class="vertical-li">
-                            <div class="vertical-li-nums" v-for="vItem in (v[1]||'  ').toString().split('')">{{ vItem }}</div>
+                            <div class="vertical-li-nums" v-for="vItem in (v[1] || '  ').toString().split('')">{{ vItem }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -134,7 +135,7 @@
                                 <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.opType }">加减运算
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.opType" inactiveColor="#fcfcfc"
+                                    <zeroSwitch :size="18" v-model="setConfig.opType" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3"
                                         @change="opTypeChange" />
                                 </div>
@@ -156,7 +157,7 @@
                                     {{ setConfig.opType ? '简单' : '20以内' }}
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
+                                    <zeroSwitch :size="18" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">
@@ -172,7 +173,7 @@
                                 <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">20以内
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
+                                    <zeroSwitch :size="18" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">100以内
@@ -180,24 +181,24 @@
                             </div>
                         </div>
                     </div> -->
-                    <div class="set-sys-db-list" vif="!setConfig.opType">
+                    <!-- <div class="set-sys-db-list" vif="!setConfig.opType">
                         <div class="set-sys-db-list-left">开启竖式：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.vertical" inactiveColor="#fcfcfc"
+                                    <zeroSwitch :size="18" v-model="setConfig.vertical" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#cfcfcf"
                                         @change="verticalChange" />
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">启用小数：</div>
                         <div class="set-sys-db-list-right">
                             <div class="lv2 has-next">
                                 <div class="set-sys-switch">
-                                    <zeroSwitch :size="20" v-model="setConfig.hasDecimal" inactiveColor="#fcfcfc"
+                                    <zeroSwitch :size="18" v-model="setConfig.hasDecimal" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#cfcfcf" />
                                 </div>
                                 <div class="lv2-next" v-if="setConfig.hasDecimal">
@@ -214,7 +215,7 @@
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.showIdx" inactiveColor="#fcfcfc"
+                                    <zeroSwitch :size="18" v-model="setConfig.showIdx" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#cfcfcf" />
                                 </div>
                             </div>
@@ -227,7 +228,7 @@
                                 <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">简约
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="20" v-model="setConfig.keyboard" inactiveColor="#fcfcfc"
+                                    <zeroSwitch :size="18" v-model="setConfig.keyboard" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">九宫格
@@ -244,7 +245,7 @@
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
 
-                                    <zeroSwitch :size="20" v-model="setConfig.cursorType" inactiveColor="#fcfcfc"
+                                    <zeroSwitch :size="18" v-model="setConfig.cursorType" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.cursorType }">
@@ -373,8 +374,10 @@ watch(setConfig, val => {
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2, instanceName: 'set-config' })
     cursorType.value = val.cursorType
     showIdx.value = val.showIdx
+    vertical.value = val.vertical
 })
 watch(bgmPause, val => {
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     val ? bgm.pause() : bgm.play()
 })
 
@@ -752,7 +755,13 @@ const saveConfig = () => {
     showIdx.value = setConfig.showIdx
     cursorType.value = setConfig.cursorType
     vertical.value = setConfig.vertical
-    bgm.volume = setConfig.bgmVolume / 20
+
+    if (!bgmPause.value) {
+        bgm.volume = setConfig.bgmVolume / 20
+        bgmPause.value = false
+    } else {
+        bgm.stop()
+    }
 
     // 运算规则 或 难度变动 列表都要重新生成
     if (opType.value !== setConfig.opType
@@ -785,7 +794,12 @@ const cleanConfig = () => {
         vertical
     } = getStorageData()
 
-    bgm.volume = volume / 20
+    if (!bgmPause.value) {
+        bgm.volume = volume / 20
+        bgmPause.value = false
+    } else {
+        bgm.stop()
+    }
     cursorType.value = cursor
     showIdx.value = _showIdx
     setConfig.showIdx = _showIdx
@@ -809,10 +823,11 @@ const setDecimalLenChange = val => {
 const bgmVolumeChange = val => {
     setConfig.bgmVolume = val
     bgm.volume = val / 20
+    // bgm.play()
 }
 
 onShow(() => {
-    bgm.play();
+    if (!bgmPause.value) bgm.play();
 })
 onHide(() => {
     bgm.pause()
@@ -927,6 +942,11 @@ onUnload(() => {
             flex: 1 0 auto;
             margin: 0 2%;
 
+            &.list-item-none {
+                border: none;
+                line-height: 0;
+            }
+
             .list-item-li {
                 display: flex;
                 align-items: center;
@@ -936,11 +956,6 @@ onUnload(() => {
                 box-sizing: border-box;
                 position: relative;
                 overflow: hidden;
-
-                &.list-item-none {
-                    border: none;
-                    line-height: 0;
-                }
 
                 .list-item-idx {
                     border: 1px solid var(--c-safegray-hlight);
@@ -1108,6 +1123,7 @@ onUnload(() => {
                 width: 7em;
                 // margin-left: 2em;
                 margin: .5em 0 .5em 2em;
+
                 .vertical-li {
                     display: flex;
                     justify-content: flex-end;
@@ -1121,9 +1137,11 @@ onUnload(() => {
                         height: 2em;
                         line-height: 2em;
                     }
+
                     &:nth-child(2) {
                         padding-bottom: .5em;
                         position: relative;
+
                         &:after {
                             position: absolute;
                             bottom: .25em;
@@ -1136,36 +1154,43 @@ onUnload(() => {
                             border-top: 1rpx solid var(--c-safegray-dark);
                         }
                     }
-                    &:nth-child(3){
-                        .vertical-li-nums{
+
+                    &:nth-child(3) {
+                        .vertical-li-nums {
                             border-color: var(--c-safegray-light);
                         }
                     }
                 }
-                &.plus,&.minus{
-                    .vertical-li:nth-child(2){
+
+                &.plus,
+                &.minus {
+                    .vertical-li:nth-child(2) {
                         position: relative;
-                        &:before{
+
+                        &:before {
                             position: absolute;
                             left: .5em;
                             font-size: 1.25em;
                         }
+
                         // &:before,&:after{
                         //     position: absolute;
                         //     left: 1em;
                         // }
                     }
                 }
-                &.plus{
-                    .vertical-li:nth-child(2){
-                        &::before{
+
+                &.plus {
+                    .vertical-li:nth-child(2) {
+                        &::before {
                             content: '+';
                         }
                     }
                 }
-                &.minus{
-                    .vertical-li:nth-child(2){
-                        &::before{
+
+                &.minus {
+                    .vertical-li:nth-child(2) {
+                        &::before {
                             content: '-';
                         }
                     }
@@ -1460,6 +1485,7 @@ onUnload(() => {
                 align-items: center;
                 // padding: 1em;
                 margin-bottom: -.5em;
+                margin-top: .5em;
             }
 
             .set-sys-db-list {
@@ -1468,7 +1494,7 @@ onUnload(() => {
                 width: 90%;
                 padding: .2em;
                 font-size: 26rpx;
-                line-height: 2.25em;
+                line-height: 1.9em;
 
                 .set-sys-db-list-left {
                     flex-shrink: 0;
