@@ -2,20 +2,22 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-03 18:42:37
+ * @LastEditTime : 2023-10-04 23:25:01
 -->
 <template>
     <view class="content">
         <div class="top">
-            <div class="top-left">日期: {{ date('Y-m-d') }}</div>
-            <div class="top-right">用时: {{ startTimed }}</div>
-            <span class="top-audio" @click="">
-                <div class="iconfont icon-audio" :class="{ pause: bgmPause }" @click="bgmPause = !bgmPause"></div>
-            </span>
+            <div class="top-item">
+                <div class="top-left">日期: {{ date('Y-m-d') }}</div>
+                <div class="top-right">用时: {{ startTimed }}</div>
+                <span class="top-audio">
+                    <div class="iconfont icon-audio" :class="{ pause: bgmPause }" @click="bgmPause = !bgmPause"></div>
+                </span>
+            </div>
         </div>
         <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
             <div class="list">
-                <div class="list-item" v-for="(v, i) in numlist" :key="i" @click="ckItem(i)">
+                <div class="list-item" v-for="(v, i) in numList" :key="i" @click="ckItem(i)">
                     <div class="list-item-li" :class="{
                         'cur-item': !setConfig.status && i === curidx && submited === 0,
                         cursor1: cursorType === false,
@@ -29,7 +31,7 @@
                         <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
                         {{
                             renderExpression(v[0]) +
-                            `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && v[1] !== undefined ?
+                            `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && ![undefined, null].includes(v[1]) ?
                                 v[1] : ""}`
                         }}
                         <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
@@ -72,10 +74,10 @@
         </scroll-view>
         <div class="footer" v-show="curidx !== undefined"
             v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
-                dsb: curidx && (numlist[curidx][1] === undefined ? '' : numlist[curidx][1] + '').length > 2,
+                dsb: curidx && (numList[curidx][1] === undefined ? '' : numList[curidx][1] + '').length > 2,
             }">
             <div class="pan" :class="{
-                dsb: numlist[curidx][2] === 1, easyKeyboard: !keyboard,
+                dsb: numList[curidx][2] === 1, easyKeyboard: !keyboard,
                 'has-decimal': hasDecimal
             }" v-if="submited === 0 && curidx !== '' && !setConfig.status">
                 <template v-for="item in keyboardCode" :key="item.idx">
@@ -121,6 +123,26 @@
                     </div>
                 </div>
                 <div class="set-sys-bd">
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-histroy">
+                            <div class="set-sys-btn" @click="historyList()">
+                                <span class="iconfont icon-history"></span>
+                                <span>历史记录</span>
+                            </div>
+                        </div>
+                        <div class="set-sys-record">
+                            <div class="set-sys-btn" @click="recordRead()">
+                                <span class="iconfont icon-read"></span>
+                                <span>读档</span>
+                            </div>
+                            <div class="set-sys-btn" @click="recordSave()">
+                                <span class="iconfont icon-save"></span>
+                                <span>存档</span>
+                            </div>
+                            <!-- <div class="set-sys-rceord-item">
+                            </div> -->
+                        </div>
+                    </div>
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">题目数量：</div>
                         <div class="set-sys-db-list-right">
@@ -275,6 +297,64 @@
             </div>
         </div>
     </view>
+    <cc-popup :isShow='popupConf.status' width="calc(100vw - 70px)" height="auto" radius="16rpx">
+        <div class="popup-dialog">
+            <div class="popup-dialog-content">
+                <div class="popup-dialog-msg">{{ popupConf[popupConf.curKey].msg }}</div>
+            </div>
+            <div class="popup-dialog-footer">
+                <div class="popup-dialog-footer-item clean" vif="popupConf[popupConf.curKey].curKey==="
+                    @click="popupConf[popupConf.curKey].fn.clean">取消</div>
+                <div class="popup-dialog-footer-item submit" vif="popupConf[popupConf.curKey].fn.submit" :class="{
+                    danger: popupConf[popupConf.curKey].isDanger
+                }" @click="popupConf[popupConf.curKey].fn.submit">确定</div>
+            </div>
+        </div>
+    </cc-popup>
+    <cc-popup :isShow='historyConf.status' width="100vw" height="auto" radius="16rpx" :opacity="0.65" bgcolor="transparent">
+        <div class="history-dialog">
+            <span class="iconfont icon-wrong history-dialog-close" @click="historyConf.status = false"></span>
+            <span class="iconfont icon-clean history-dialog-clean" @click="historyClean()">清除所有历史</span>
+            <div class="history-title">历史成绩</div>
+            <div class="history-tab">
+                <div class="history-th">
+                    <div class="history-td">开始时间</div>
+                    <div class="history-td">提交时间</div>
+                    <div class="history-td">用时</div>
+                    <div class="history-td">题目数量</div>
+                    <div class="history-td">得分</div>
+                    <div class="history-td">订正次数</div>
+                </div>
+                <div class="history-tr" v-for="item in historyConf.list" v-if="historyConf.list.length > 0">
+                    <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div>
+                    <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
+                    <div class="history-td">{{ date.duration('H:i:s', item.endTime - item.startTime) }}</div>
+                    <div class="history-td">{{ item.totalNum }}</div>
+                    <div class="history-td">{{ item.score }}</div>
+                    <div class="history-td">{{ item.revision }}</div>
+                    <div class="history-td">题目设置: {{ item.config }}</div>
+                    <div class="history-td">
+                        <span class="iconfont icon-delete" @click="deleteHistory(item.id)"></span>
+                    </div>
+                </div>
+                <div class="history-tr" v-else>
+                    <div class="history-td history-none">暂无历史</div>
+                </div>
+            </div>
+            <div class="history-tips">最多只保留最近10条历史记录</div>
+        </div>
+    </cc-popup>
+    <!-- <cc-popup :isShow='!true' width="calc(100vw - 70px)" height="auto" radius="16rpx">
+        <div class="popup-dialog">
+            <div class="popup-dialog-content">
+                <div class="popup-dialog-msg">检测到您当前有一份存档记录，“确定”后将覆盖当前记录。</div>
+            </div>
+            <div class="popup-dialog-footer">
+                <div class="popup-dialog-footer-item clean">取消</div>
+                <div class="popup-dialog-footer-item submit">确定</div>
+            </div>
+        </div>
+    </cc-popup> -->
 </template>
 
 <script setup>
@@ -291,7 +371,8 @@ import Bignumber from 'BigNumber.js'
 import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
 // import uniNavBar from "../../uni_modules/uni-nav-bar/uni-nav-bar.vue"
 import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
-import { onReady, onShow, onHide, onUnload } from '@dcloudio/uni-app'
+import ccPopup from "../../uni_modules/cc-popup"
+import { onReady, onShow, onHide, onUnload, onLoad } from '@dcloudio/uni-app'
 import uniDataCheckbox from '../../uni_modules/uni-data-checkbox/uni-data-checkbox.vue'
 const musics = import.meta.globEager('../../assets/music/*.mp3')
 const musicArr = reactive({})
@@ -300,7 +381,7 @@ Object.keys(musics).forEach(key => {
     musicArr[_key] = musics[key].default
 })
 
-const numlist = reactive([]); // 数据列表:[[[数字1 || [数字1,数字2, 运算符], 数字2 || [数字1,数字2, 运算符], 运算符], 用户运算结果, 结果对错判定, 订正次数], ...]
+const numList = reactive([]); // 数据列表:[[[数字1 || [数字1,数字2, 运算符], 数字2 || [数字1,数字2, 运算符], 运算符], 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
 const score = ref(0); // 得分
 const comment = ref(""); // 评语
@@ -323,6 +404,87 @@ const defaultConf = { // 默认配置
     vertical: false, // 开启竖式
     decimalLen: 2, // 最大小数位
 }
+// 在读档弹窗
+const popupConf = reactive({
+    status: false,
+    curKey: 'save',
+    save: {
+        msg: '检测到您当前有一份存档记录，“确定”后将覆盖当前记录。',
+        isDanger: true,
+        fn: {
+            clean() {
+                popupConf.status = false
+            },
+            submit() {
+                popupConf.status = false
+                uni.setStorageSync('record', numList)
+                // setConfig.status=false
+            },
+        }
+    },
+    read: {
+        msg: '您确定要读档么?此操作将会覆盖当前正在计算的结果。',
+        isDanger: true,
+        fn: {
+            clean() {
+                popupConf.status = false
+            },
+            submit() {
+                Object.assign(numList, nulToUndef(uni.getStorageSync('record')))
+                popupConf.status = false
+                setTimeout(() => {
+                    popupConf.status = true
+                    popupConf.curKey = 'del'
+                    setConfig.status = false
+                }, 500)
+            },
+        }
+    },
+    del: {
+        msg: '存档记录已读取，是否删除当前存档',
+        isDanger: true,
+        fn: {
+            clean() {
+                popupConf.status = false
+            },
+            submit() {
+                popupConf.status = false
+                uni.removeStorageSync('record')
+            },
+        }
+    },
+    recordUnll: {
+        msg: '您还没有存档哦',
+        isDanger: false,
+        fn: {
+            // clean() {
+            //     popupConf.status = false
+            // },
+            submit() {
+                popupConf.status = false
+            },
+        }
+    },
+    onLoad: {
+        msg: '检测到您有一份存档，请问是否读取？',
+        isDanger: false,
+        fn: {
+            clean() {
+                popupConf.status = false
+            },
+            submit() {
+                popupConf.status = false
+                Object.assign(numList, nulToUndef(uni.getStorageSync('record')))
+                // setConfig.status=false
+                setTimeout(() => {
+                    popupConf.status = true
+                    popupConf.curKey = 'del'
+                }, 300)
+            },
+        }
+    }
+})
+
 const getStorageData = () => { // 读取设置缓存
     return Object.assign({}, defaultConf, uni.getStorageSync('config'));
 }
@@ -333,6 +495,7 @@ const setConfig = reactive( // 配制项
     })
 )
 const totalNum = ref(storageConf.totalNum) // 题目数量
+const numListId = ref()
 const keyboard = ref(storageConf.keyboard) // 键盘类型 false: 简约, true: 九宫格
 const showIdx = ref(storageConf.showIdx) // 显示序号
 const opType = ref(storageConf.opType) // 运算类型
@@ -343,7 +506,10 @@ const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
 const decimalLen = ref(storageConf.decimalLen) // 小数位数
 const scrollTop = ref(0) // 滚动位置
 const vertical = ref(storageConf.vertical) // 开启竖式
-
+const historyConf = reactive({
+    status: false,
+    list: []
+})
 // 滚动条将当前光标自动滚动到可视区域内
 const autoCurItemPosition = async () => {
     function createSelectorQuery(selector) {
@@ -497,9 +663,9 @@ function createList(isInit = true) {
             })
             return _expression.concat(_getOperator)
         }
-        if (isInit) numlist.length = 0 // 初始化完全新建
+        if (isInit) numList.length = 0 // 初始化完全新建
 
-        const _numlist = new Array(num).fill(undefined).map(res => {
+        const _numList = new Array(num).fill(undefined).map(res => {
             // [
             //     [ 数字1 || [ 数字1, 数字2, 运算符 ], 数字2 || [ 数字1, 数字2, 运算符 ], 运算符 ],
             //     用户运算结果,
@@ -508,7 +674,6 @@ function createList(isInit = true) {
             // ]
             const numArr = new Array(4).fill(undefined)
             const mData = mergeData(createExpression(), createExpression(2))
-            // console.log(JSON.stringify(mData));
 
             // 获取小数位信息: 长度与小数值
             const getDecimalArr = val => {
@@ -534,13 +699,13 @@ function createList(isInit = true) {
             }
             return numArr
         })
-        numlist.push(..._numlist)
+        numList.push(..._numList)
     }
     isInit  // 计算要创建的数量
         ? createData(totalNum.value) // 与用户设定一制
-        : totalNum.value > numlist.length
-            ? createData(totalNum.value - numlist.length) // 增量创建
-            : numlist.length = totalNum.value // 直接删除多出的数据
+        : totalNum.value > numList.length
+            ? createData(totalNum.value - numList.length) // 增量创建
+            : numList.length = totalNum.value // 直接删除多出的数据
 
     score.value = 0
 
@@ -549,6 +714,7 @@ function createList(isInit = true) {
     startTime.value = Date.now()
     contTime()
     curidx.value = 0;
+    numListId.value = Date.now().toString(16)
     // TODO: 历史功能: 存储当前配置信息 与 列表信息,正确率 提交次数等 订正次数 等 
     // const _history_is = Date.now()
     // const _history_conf =  {
@@ -568,6 +734,16 @@ const keyboardCode = reactive(createKeyboardCode())
 // BGM
 const bgm = playSound({ src: musicArr['bgm-sxg_mp3'], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM' })
 
+function nulToUndef(data) {
+    return data.map(res => {
+        if (Array.isArray(res)) {
+            return nulToUndef(res)
+        } else {
+            return res === null ? undefined : res
+        }
+    })
+
+}
 /**
  * 计时操作
  * @author ToviLau 46134256@qq.com
@@ -600,7 +776,7 @@ function contTime(isStop = false) {
 function edit() {
     if (score.value === 100) return
     submited.value = 0;
-    curidx.value = numlist.findIndex(res => [undefined, 0, ''].includes(res[2]))
+    curidx.value = numList.findIndex(res => [undefined, 0, ''].includes(res[2]))
     startTime.value = startTime.value + ((Date.now() - subEnterTime.value).toString().replace(/\d{3}$/, '000') - 0 + 1000)
     contTime()
 }
@@ -613,7 +789,7 @@ function edit() {
 const ckItem = (idx) => {
     if (submited.value === 0) playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })
     curidx.value = idx;
-    if (numlist[idx][2] === 0 && submited.value !== 1) numlist[idx][2] = ''
+    if (numList[idx][2] === 0 && submited.value !== 1) numList[idx][2] = ''
 };
 
 /**
@@ -622,29 +798,35 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyClick = (key) => {
+    uni.saveFile({
+        tempFilePath: './1.json',
+        complete: function (res) {
+            var savedFilePath = res.savedFilePath;
+        }
+    });
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     if (
-        numlist[curidx.value][2] === 1  // 已判定当前题为正确
-        || key === 'del' && ['', undefined].includes(numlist[curidx.value][1]) // 册除事件 并 内容为空时
+        numList[curidx.value][2] === 1  // 已判定当前题为正确
+        || key === 'del' && ['', undefined].includes(numList[curidx.value][1]) // 册除事件 并 内容为空时
     ) return
-    const _val = (numlist[curidx.value][1] || "") + '';
-    if (numlist[curidx.value][2] === 1) return
+    const _val = (numList[curidx.value][1] || "") + '';
+    if (numList[curidx.value][2] === 1) return
 
     switch (key) {
         case 'del': // 删除事件
             // 如果提交后已判错, 删除是全部,其它情况单个从右到左删除
-            numlist[curidx.value][1] = numlist[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
+            numList[curidx.value][1] = numList[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
             break;
 
         case 'next': // 下一题
-            if (curidx.value >= numlist.length - 1) return
+            if (curidx.value >= numList.length - 1) return
             const _curidx = curidx.value + 1
             // 查找没有做的 与 结果非正确的题
-            const _nextIdx = numlist[_curidx][2] === 1
-                ? numlist.findIndex((res, idx) => res[2] !== 1 && idx > _curidx)
+            const _nextIdx = numList[_curidx][2] === 1
+                ? numList.findIndex((res, idx) => res[2] !== 1 && idx > _curidx)
                 : _curidx
-            // const _curidx = numlist.findIndex((res, idx) => res[2]===0)
-            curidx.value = _nextIdx > numlist.length - 1 ? curidx.value : _nextIdx
+            // const _curidx = numList.findIndex((res, idx) => res[2]===0)
+            curidx.value = _nextIdx > numList.length - 1 ? curidx.value : _nextIdx
 
             autoCurItemPosition()
             break;
@@ -653,11 +835,11 @@ const keyClick = (key) => {
         default: // 默认数字输入事件
             const _keyVal = _val.length < 9 ? _val + key : _val;
             // _keyVal.replace(/^0$ || [^0.]\d+/)
-            numlist[curidx.value][1] = _keyVal.match(/^(0\.?|[1-9]\d*(\.?\d*))/)[0]
+            numList[curidx.value][1] = _keyVal.match(/^(0\.?|[1-9]\d*(\.?\d*))/)[0]
             break;
     }
     // 恢复下标4(对错判断)标识为:空 (错:0, 对:1, 无:'')
-    numlist[curidx.value].splice(2, 1, '')
+    numList[curidx.value].splice(2, 1, '')
 };
 
 // 查看得分事件
@@ -669,7 +851,7 @@ const subEnter = () => {
     contTime(true)
 
     // 对错判定
-    numlist.map((res) => {
+    numList.map((res) => {
         // let _val = expressionResult(res[0])
         const _val = Array.isArray(res[0][3]) ? res[0][3][0] : res[0][3];
         if ([''].includes(res[2]) && !['', undefined].includes(res[1])) res[3] = !['', undefined].includes(res[3]) ? res[3] + 1 : 0 // 订正次数
@@ -677,8 +859,8 @@ const subEnter = () => {
         if (!['', undefined].includes(res[1])) res[2] = _val === res[1] - 0 ? 1 : 0; // 1对,0错
     });
 
-    const totleLen = numlist.length; // 总题数
-    const rightLen = numlist.filter((res) => res[2] === 1).length; // 正确题数量
+    const totleLen = numList.length; // 总题数
+    const rightLen = numList.filter((res) => res[2] === 1).length; // 正确题数量
     score.value = Math.floor((100 * rightLen) / totleLen); // 得分计算
 
     // 评语数组
@@ -717,8 +899,36 @@ const subEnter = () => {
     }
 
     // 没有做满50%题不给评语
-    const fillLen = numlist.filter((res) => res[1]).length;
+    const fillLen = numList.filter((res) => res[1]).length;
     if (totleLen * 0.5 > fillLen) comment.value = commentArr[5];
+    // historyConf.list=[]
+    let revision = 0
+    numList.forEach(item => {
+        revision += (item[3] || 0)
+    })
+
+    const _config = []
+    _config.push(['加减运算', '乘除运算'][opType.value - 0] + `(${opType.value ? ['简单', '复杂'][difficulty.value - 0] : ['20以内', '100以内'][difficulty.value - 0]})`)
+    _config.push(isMixed.value[0] === 1 ? '混合' : '非混合')
+    _config.push(`${['未开启小数', '开启小数'][hasDecimal.value - 0]}` + (hasDecimal.value - 0 ? `(有效数位:${decimalLen.value})` : ''))
+
+    const _historyConf = {
+        id: numListId.value,
+        startTime: startTime.value,
+        endTime: Date.now(),
+        startTimed: startTimed.value,
+        totalNum: totalNum.value,
+        score: score.value,
+        revision,
+        config: _config.join(' / ')
+    }
+    const historyConfList = historyConf.list
+    const hasHistoryIdx = historyConfList.findIndex(res => res.id === _historyConf.id)
+    hasHistoryIdx === -1
+        ? historyConfList.unshift(_historyConf)
+        : historyConfList.splice(hasHistoryIdx, 1, _historyConf)
+    if (historyConfList.length > 10) historyConfList.length = 10
+    uni.setStorageSync('historyConfList', historyConfList)
 };
 
 // 设置窗口显隐
@@ -826,11 +1036,99 @@ const bgmVolumeChange = val => {
     // bgm.play()
 }
 
+// 显示历史弹窗
+const historyList = () => {
+    historyConf.status = true
+}
+
+// 册除单条历史事件
+const deleteHistory = id => {
+
+    uni.showModal({
+        // title: 'title',
+        // editable: false,
+        content: '您确定要清除所有历史记录么?',
+        showCancel: true,
+        // cancelText: '取消'
+        cancelColor: '#999',
+        // confirmText: '确定',
+        confirmColor: '#ed5d46',
+        success: function ({confirm, cancel}) {
+            if(confirm){
+                const idx = historyConf.list.findIndex(res => res.id === id)
+                historyConf.list.splice(idx, 1)
+                uni.setStorageSync('historyConfList', historyConf.list)
+            }
+        },
+        fail: function (res) {}
+    })
+}
+
+// 清除历史事件
+const historyClean = () => {
+
+    uni.showModal({
+        // title: 'title',
+        // editable: false,
+        content: '您确定要清除所有历史记录么?',
+        showCancel: true,
+        // cancelText: '取消'
+        cancelColor: '#999',
+        // confirmText: '确定',
+        confirmColor: '#ed5d46',
+        success: function ({confirm, cancel}) {
+            if(confirm){
+                uni.setStorageSync('historyConfList', [])
+                historyConf.list = []
+            }
+        },
+        fail: function (res) {}
+    })
+}
+
+// 读档
+const recordRead = () => {
+    const record = uni.getStorageSync('record')
+    popupConf.status = true
+    if (record) {
+        popupConf.curKey = 'read'
+    } else {
+        popupConf.curKey = 'recordUnll'
+    }
+}
+// 存档
+const recordSave = () => {
+    const record = uni.getStorageSync('record')
+    if (record) {
+        popupConf.curKey = 'save'
+        popupConf.status = true
+    } else {
+        uni.setStorageSync('record', numList)
+        uni.showToast({
+            icon: 'none',
+            title: '存档成功'
+        })
+    }
+}
+
 onShow(() => {
-    if (!bgmPause.value) bgm.play();
+    if (!bgmPause.value) {
+        // bgm.volume = setConfig.bgmVolume / 20
+        bgm.play();
+    }
 })
 onHide(() => {
     bgm.pause()
+})
+onLoad(() => {
+    const reCord = uni.getStorageSync('record');
+    historyConf.list = uni.getStorageSync('historyConfList') || []
+
+    if (reCord) {
+        popupConf.curKey = 'onLoad'
+        popupConf.status = true
+        setConfig.status = false
+    }
 })
 
 onUnload(() => {
@@ -846,12 +1144,20 @@ onUnload(() => {
     flex-direction: column;
 
     .top {
-        font-size: 26rpx;
-        padding: 0 1em;
-        color: var(--c-safegray);
-        background-color: var(--c-safegray-hlight);
-        display: flex;
-        line-height: 1.5em;
+        .top-item {
+            font-size: 26rpx;
+            padding: .25em 1em;
+            color: var(--c-safegray);
+            background-color: var(--c-safegray-hlight);
+            display: flex;
+            line-height: 1.5em;
+
+        }
+
+        .top-right {
+            display: flex;
+            justify-content: flex-end;
+        }
 
         .top-left,
         .top-right {
@@ -1358,7 +1664,7 @@ onUnload(() => {
             // width: 1.5em;
             // height: 1.5em;
             font-size: 50rpx;
-            color: var(--c-safegray-dark)
+            color: var(--c-safegray-dark);
         }
 
         .fen {
@@ -1495,6 +1801,40 @@ onUnload(() => {
                 padding: .2em;
                 font-size: 26rpx;
                 line-height: 1.9em;
+
+                .set-sys-histroy,
+                .set-sys-record {
+                    margin-bottom: 1em;
+                }
+
+                .set-sys-histroy {
+                    flex: 1;
+                    display: flex;
+                    justify-content: flex-start;
+                }
+
+                .set-sys-record {
+                    display: flex;
+                }
+
+                .set-sys-btn {
+                    background-image: linear-gradient(0deg, var(--c-safegray-lighter), var(--c-safegray-hlight));
+                    border: 1px solid var(--c-safegray-light);
+                    padding: 0 .5em;
+                    font-size: 26rpx;
+                    line-height: 2em;
+                    border-radius: 5rpx;
+                    margin: 0 5rpx;
+                    color: var(--c-safegray-hdark);
+
+                    display: flex;
+                    align-items: baseline;
+                    justify-content: center;
+
+                    :deep(.iconfont) {
+                        font-size: inherit;
+                    }
+                }
 
                 .set-sys-db-list-left {
                     flex-shrink: 0;
@@ -1655,4 +1995,172 @@ onUnload(() => {
         }
     }
 }
-</style>
+
+.popup-dialog {
+    font-size: 26rpx;
+    color: var(--c-safegray-hdarker);
+
+    // border: 1rpx solid var(--c-safegray-light);
+    // border-radius: 20rpx;
+    // overflow: hidden;
+    .popup-dialog-content {
+        min-height: 18vh;
+        border-bottom: 1rpx solid var(--c-safegray-light);
+        display: flex;
+        align-items: center;
+        padding: 0 1.2em;
+    }
+
+    .popup-dialog-footer {
+        display: flex;
+
+        .popup-dialog-footer-item {
+            flex: 1;
+            line-height: 3em;
+            text-align: center;
+
+            &:not(:nth-child(1)) {
+                border-left: 1rpx solid var(--c-safegray-light);
+            }
+
+            &.clean {
+                color: var(--c-safegray);
+            }
+
+            &.submit {
+                color: var(--c-safegray-hdark);
+            }
+
+            &.danger {
+                color: var(--color-R);
+            }
+
+        }
+    }
+}
+
+.history-dialog {
+    font-size: 24rpx;
+    margin: 0 10rpx;
+    position: relative;
+
+    .history-dialog-close {
+        position: absolute;
+        bottom: 0;
+        right: .5em;
+        padding: .125em;
+        font-size: 30rpx;
+        border-radius: 4rpx;
+        font-weight: bolder;
+        background-color: var(--c-gray-hlighter);
+    }
+
+    .history-dialog-clean {
+        position: absolute;
+        bottom: 0;
+        right: 2.5em;
+        padding: .125em;
+        font-size: 26rpx;
+        border-radius: 4rpx;
+        font-weight: bolder;
+        background-color: var(--c-gray-hlighter);
+    }
+
+    .history-title {
+        text-align: center;
+        color: var(--c-gray-hlighter);
+        font-size: 26rpx;
+        line-height: 1.5em;
+    }
+
+    .history-tab {
+        padding: .5em .5em;
+        margin: 0 auto;
+        // background-color: var(--c-safegray-hdark);
+        color: var(--c-safegray-darker);
+
+        .history-th,
+        .history-tr {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1rpx solid var(--c-safegray-light);
+
+            // border: 1rpx solid var(--c-safegray-lighter);
+            &.history-th {
+                background-image: linear-gradient(0deg, var(--c-safegray-light), var(--c-safegray-hlighter));
+                padding: .125em 0;
+                font-weight: bolder;
+            }
+
+            &:nth-child(odd):not(.history-th) {
+                background-color: var(--c-gray-hlighter);
+            }
+
+            &:nth-child(even) {
+                background-color: var(--c-safegray-hlighter);
+            }
+
+            &:not(:nth-child(1)) .history-td:nth-last-child(2) {
+                background-color: #ccc3;
+                margin: 0 8rpx 6rpx;
+                padding: 6rpx 0;
+                box-shadow: 2rpx 2rpx 1rpx var(--c-safegray-darker) inset, 2rpx 2rpx 1rpx var(--c-safegray-hlighter);
+                color: var(--c-safegray-dark) // border: 1rpx solid var(--c-safegray);
+                    // border-bottom: none;
+            }
+
+            &:not(:nth-child(1)) .history-td:nth-last-child(1):not(:nth-child(1)) {
+                flex: 0 0 auto;
+            }
+
+            .history-td {
+                // border: 1rpx solid var(--c-safegray-lighter);
+                text-align: center;
+                padding: .1em .25em;
+                // margin: -1rpx;
+                display: flex;
+                flex: 1 0 auto;
+                box-sizing: border-box;
+                align-items: center;
+                justify-content: center;
+                line-height: 1.1em;
+
+                // &:not(:nth-child(1)){
+                //     border-left: none;
+                // }
+                &:nth-child(1),
+                &:nth-child(2) {
+                    width: 6em;
+                }
+
+                &:nth-child(3) {
+                    width: 4em;
+                }
+
+                &:nth-child(4) {
+                    width: 2em;
+                }
+
+                &:nth-child(5) {
+                    width: 2.5em;
+                }
+
+                &:nth-child(6) {
+                    width: 2em;
+                }
+
+            }
+
+            .history-none {
+                flex: 1;
+                line-height: 4em;
+                height: 4em;
+            }
+        }
+    }
+
+    .history-tips {
+        margin-left: 1em;
+        color: var(--c-gray-hlighter);
+    }
+}</style>
