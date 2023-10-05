@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-04 23:25:01
+ * @LastEditTime : 2023-10-05 14:58:05
 -->
 <template>
     <view class="content">
@@ -139,8 +139,10 @@
                                 <span class="iconfont icon-save"></span>
                                 <span>存档</span>
                             </div>
-                            <!-- <div class="set-sys-rceord-item">
-                            </div> -->
+                            <div class="set-sys-btn" @click="recordDel()">
+                                <span class="iconfont icon-delete-fill"></span>
+                                <span>删档</span>
+                            </div>
                         </div>
                     </div>
                     <div class="set-sys-db-list">
@@ -188,21 +190,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <div class="set-sys-db-list" v-if="!setConfig.opType">
-                        <div class="set-sys-db-list-left">难易度：</div>
-                        <div class="set-sys-db-list-right">
-                            <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">20以内
-                                </div>
-                                <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="18" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
-                                </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">100以内
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
                     <!-- <div class="set-sys-db-list" vif="!setConfig.opType">
                         <div class="set-sys-db-list-left">开启竖式：</div>
                         <div class="set-sys-db-list-right">
@@ -314,47 +301,52 @@
     <cc-popup :isShow='historyConf.status' width="100vw" height="auto" radius="16rpx" :opacity="0.65" bgcolor="transparent">
         <div class="history-dialog">
             <span class="iconfont icon-wrong history-dialog-close" @click="historyConf.status = false"></span>
-            <span class="iconfont icon-clean history-dialog-clean" @click="historyClean()">清除所有历史</span>
+            <span class="iconfont icon-clean history-dialog-clean" @click="historyClean()">清除全部</span>
             <div class="history-title">历史成绩</div>
             <div class="history-tab">
                 <div class="history-th">
-                    <div class="history-td">开始时间</div>
-                    <div class="history-td">提交时间</div>
-                    <div class="history-td">用时</div>
-                    <div class="history-td">题目数量</div>
-                    <div class="history-td">得分</div>
-                    <div class="history-td">订正次数</div>
+                    <div class="history-li">
+                        <!-- <div class="history-td">开始时间</div> -->
+                        <div class="history-td">提交时间</div>
+                        <div class="history-td">用时</div>
+                        <div class="history-td">题数/已答/正确</div>
+                        <div class="history-td">得分</div>
+                        <div class="history-td">订正次数</div>
+                        <div class="history-td">...</div>
+                    </div>
                 </div>
-                <div class="history-tr" v-for="item in historyConf.list" v-if="historyConf.list.length > 0">
-                    <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div>
-                    <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
-                    <div class="history-td">{{ date.duration('H:i:s', item.endTime - item.startTime) }}</div>
-                    <div class="history-td">{{ item.totalNum }}</div>
-                    <div class="history-td">{{ item.score }}</div>
-                    <div class="history-td">{{ item.revision }}</div>
-                    <div class="history-td">题目设置: {{ item.config }}</div>
-                    <div class="history-td">
-                        <span class="iconfont icon-delete" @click="deleteHistory(item.id)"></span>
+                <div class="history-tr" v-for="(item, idx) in historyConf.list" v-if="historyConf.list.length > 0">
+                    <div class="history-li">
+                        <!-- <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div> -->
+                        <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
+                        <div class="history-td">{{ date.duration('H:i:s', item.endTime - item.startTime) }}</div>
+                        <div class="history-td">{{ `${item.totalNum} / ${item.answered} / ${item.corrected}` }}</div>
+                        <div class="history-td">{{ item.score }}</div>
+                        <div class="history-td">{{ item.revision }}</div>
+                        <div class="history-td">
+                            <span class="iconfont icon-delete" @click="deleteHistory(item.id)"></span>
+                        </div>
+                    </div>
+                    <div class="history-li">
+                        <div class="history-td">{{ idx + 1 }}</div>
+                        <div class="history-td">题目设置:
+                            {{ `${['加减运算', '四则运算'][item.config.opType - 0]}(${item.config.opType ? ['简单',
+                                '困难'][item.config.difficulty - 0] : ['20以内', '100以内'][item.config.difficulty - 0]}) / ` }}
+                            {{ (item.config.isMixed === 1 ? '混合' : '非混合') + ' / ' }}
+                            {{ `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
+                                ? '(小数位:' + item.config.decimalLen + ') ' : ''}` }}
+                        </div>
                     </div>
                 </div>
                 <div class="history-tr" v-else>
-                    <div class="history-td history-none">暂无历史</div>
+                    <div class="history-li">
+                        <div class="history-td history-none">暂无历史</div>
+                    </div>
                 </div>
             </div>
             <div class="history-tips">最多只保留最近10条历史记录</div>
         </div>
     </cc-popup>
-    <!-- <cc-popup :isShow='!true' width="calc(100vw - 70px)" height="auto" radius="16rpx">
-        <div class="popup-dialog">
-            <div class="popup-dialog-content">
-                <div class="popup-dialog-msg">检测到您当前有一份存档记录，“确定”后将覆盖当前记录。</div>
-            </div>
-            <div class="popup-dialog-footer">
-                <div class="popup-dialog-footer-item clean">取消</div>
-                <div class="popup-dialog-footer-item submit">确定</div>
-            </div>
-        </div>
-    </cc-popup> -->
 </template>
 
 <script setup>
@@ -423,7 +415,7 @@ const popupConf = reactive({
         }
     },
     read: {
-        msg: '您确定要读档么?此操作将会覆盖当前正在计算的结果。',
+        msg: '您确定要读档么?此操作将会覆盖当前正在计算的所有算术题。',
         isDanger: true,
         fn: {
             clean() {
@@ -454,14 +446,31 @@ const popupConf = reactive({
         }
     },
     recordUnll: {
-        msg: '您还没有存档哦',
+        msg: '您还没有存档哦?',
         isDanger: false,
         fn: {
-            // clean() {
-            //     popupConf.status = false
-            // },
+            clean() {
+                popupConf.status = false
+            },
             submit() {
                 popupConf.status = false
+            },
+        }
+    },
+    recordDel: {
+        msg: '您确定要删除存档么？',
+        isDanger: true,
+        fn: {
+            clean() {
+                popupConf.status = false
+            },
+            submit() {
+                popupConf.status = false
+                uni.removeStorageSync('record')
+                uni.showToast({
+                    icon: 'none',
+                    title: '存档已删除'
+                })
             },
         }
     },
@@ -606,9 +615,9 @@ function createList(isInit = true) {
         // 随机生成运算符 0:'+' | 1:'-' | 2:'*' | 3:'/'
         const createOperator = (operator) => Math.floor(Math.random() * (operator || (opType.value ? 4 : 2)) + 0)
 
-        // 创建题
+        // 
         /**
-         * @Description  :  
+         * 创建题
          * @Date         : 2023-10-01 21:22:15
          * @Author       : ToviLau 46134256@qq.com
          * @LastEditors  : ToviLau 46134256@qq.com
@@ -666,12 +675,15 @@ function createList(isInit = true) {
         if (isInit) numList.length = 0 // 初始化完全新建
 
         const _numList = new Array(num).fill(undefined).map(res => {
-            // [
-            //     [ 数字1 || [ 数字1, 数字2, 运算符 ], 数字2 || [ 数字1, 数字2, 运算符 ], 运算符 ],
-            //     用户运算结果,
-            //     结果对错判定,
-            //     订正次数
-            // ]
+            /**
+             * // 每项数据结构
+             * [
+             *      [ 数字1 || [ 数字1, 数字2, 运算符 ], 数字2 || [ 数字1, 数字2, 运算符 ], 运算符 ],
+             *      用户运算结果,
+             *      结果对错判定,
+             *      订正次数
+             * ]
+             */
             const numArr = new Array(4).fill(undefined)
             const mData = mergeData(createExpression(), createExpression(2))
 
@@ -715,18 +727,6 @@ function createList(isInit = true) {
     contTime()
     curidx.value = 0;
     numListId.value = Date.now().toString(16)
-    // TODO: 历史功能: 存储当前配置信息 与 列表信息,正确率 提交次数等 订正次数 等 
-    // const _history_is = Date.now()
-    // const _history_conf =  {
-    //     ...JSON.parse(JSON.stringify(storageConf)) 
-    // }
-    // 
-    // // hasDecimal: false
-    // // decimalLen: 1
-    // // difficulty: false
-    // // isMixed: []
-    // // opType: false
-    // // totalNum: 20
 }
 createList(true);
 const keyboardCode = reactive(createKeyboardCode())
@@ -825,7 +825,6 @@ const keyClick = (key) => {
             const _nextIdx = numList[_curidx][2] === 1
                 ? numList.findIndex((res, idx) => res[2] !== 1 && idx > _curidx)
                 : _curidx
-            // const _curidx = numList.findIndex((res, idx) => res[2]===0)
             curidx.value = _nextIdx > numList.length - 1 ? curidx.value : _nextIdx
 
             autoCurItemPosition()
@@ -834,7 +833,6 @@ const keyClick = (key) => {
         case '.':
         default: // 默认数字输入事件
             const _keyVal = _val.length < 9 ? _val + key : _val;
-            // _keyVal.replace(/^0$ || [^0.]\d+/)
             numList[curidx.value][1] = _keyVal.match(/^(0\.?|[1-9]\d*(\.?\d*))/)[0]
             break;
     }
@@ -852,10 +850,8 @@ const subEnter = () => {
 
     // 对错判定
     numList.map((res) => {
-        // let _val = expressionResult(res[0])
         const _val = Array.isArray(res[0][3]) ? res[0][3][0] : res[0][3];
         if ([''].includes(res[2]) && !['', undefined].includes(res[1])) res[3] = !['', undefined].includes(res[3]) ? res[3] + 1 : 0 // 订正次数
-        // debugger
         if (!['', undefined].includes(res[1])) res[2] = _val === res[1] - 0 ? 1 : 0; // 1对,0错
     });
 
@@ -902,15 +898,16 @@ const subEnter = () => {
     const fillLen = numList.filter((res) => res[1]).length;
     if (totleLen * 0.5 > fillLen) comment.value = commentArr[5];
     // historyConf.list=[]
-    let revision = 0
+
+    let revision = 0,
+        answered = 0,
+        corrected = 0;
+
     numList.forEach(item => {
         revision += (item[3] || 0)
+        answered += item[1] !== undefined ? 1 : 0;
+        corrected += item[2] ? 1 : 0;
     })
-
-    const _config = []
-    _config.push(['加减运算', '乘除运算'][opType.value - 0] + `(${opType.value ? ['简单', '复杂'][difficulty.value - 0] : ['20以内', '100以内'][difficulty.value - 0]})`)
-    _config.push(isMixed.value[0] === 1 ? '混合' : '非混合')
-    _config.push(`${['未开启小数', '开启小数'][hasDecimal.value - 0]}` + (hasDecimal.value - 0 ? `(有效数位:${decimalLen.value})` : ''))
 
     const _historyConf = {
         id: numListId.value,
@@ -920,7 +917,16 @@ const subEnter = () => {
         totalNum: totalNum.value,
         score: score.value,
         revision,
-        config: _config.join(' / ')
+        answered,
+        corrected,
+
+        config: {
+            opType: opType.value,
+            difficulty: difficulty.value,
+            isMixed: isMixed.value[0],
+            hasDecimal: hasDecimal.value,
+            decimalLen: decimalLen.value
+        }
     }
     const historyConfList = historyConf.list
     const hasHistoryIdx = historyConfList.findIndex(res => res.id === _historyConf.id)
@@ -1043,24 +1049,24 @@ const historyList = () => {
 
 // 册除单条历史事件
 const deleteHistory = id => {
-
+    const curHistory = historyConf.list.find(res => res.id === id)
     uni.showModal({
         // title: 'title',
-        // editable: false,
-        content: '您确定要清除所有历史记录么?',
+        // editable: false, 
+        content: `您确定要删除 ${date('Y-m-d H:i:s', curHistory.startTime)} 这条历史记录么?`,
         showCancel: true,
         // cancelText: '取消'
         cancelColor: '#999',
         // confirmText: '确定',
         confirmColor: '#ed5d46',
-        success: function ({confirm, cancel}) {
-            if(confirm){
+        success: function ({ confirm, cancel }) {
+            if (confirm) {
                 const idx = historyConf.list.findIndex(res => res.id === id)
                 historyConf.list.splice(idx, 1)
                 uni.setStorageSync('historyConfList', historyConf.list)
             }
         },
-        fail: function (res) {}
+        fail: function (res) { }
     })
 }
 
@@ -1076,13 +1082,13 @@ const historyClean = () => {
         cancelColor: '#999',
         // confirmText: '确定',
         confirmColor: '#ed5d46',
-        success: function ({confirm, cancel}) {
-            if(confirm){
+        success: function ({ confirm, cancel }) {
+            if (confirm) {
                 uni.setStorageSync('historyConfList', [])
                 historyConf.list = []
             }
         },
-        fail: function (res) {}
+        fail: function (res) { }
     })
 }
 
@@ -1090,11 +1096,7 @@ const historyClean = () => {
 const recordRead = () => {
     const record = uni.getStorageSync('record')
     popupConf.status = true
-    if (record) {
-        popupConf.curKey = 'read'
-    } else {
-        popupConf.curKey = 'recordUnll'
-    }
+    popupConf.curKey = record ? 'read' : 'recordUnll'
 }
 // 存档
 const recordSave = () => {
@@ -1110,6 +1112,13 @@ const recordSave = () => {
         })
     }
 }
+// 删档
+const recordDel = () => {
+    const record = uni.getStorageSync('record')
+    popupConf.status = true
+    popupConf.curKey = record ? 'recordDel' : 'recordUnll'
+}
+
 
 onShow(() => {
     if (!bgmPause.value) {
@@ -2046,46 +2055,120 @@ onUnload(() => {
 
     .history-dialog-close {
         position: absolute;
-        bottom: 0;
-        right: .5em;
+        bottom: -1.5em;
+        left: 50%;
+
         padding: .125em;
-        font-size: 30rpx;
-        border-radius: 4rpx;
+        font-size: 26rpx;
+        border-radius: 50%;
+        margin-left: -0.75em;
         font-weight: bolder;
-        background-color: var(--c-gray-hlighter);
+        color: var(--color-W);
+        width: 1.5em;
+        height: 1.5em;
+        line-height: 1.5em;
+        text-align: center;
+        // background-color: var(--c-gray-hlighter);
+        background-color: #fff5;
+        border: 5emrpx solid #fff6;
     }
 
     .history-dialog-clean {
         position: absolute;
         bottom: 0;
-        right: 2.5em;
-        padding: .125em;
-        font-size: 26rpx;
-        border-radius: 4rpx;
+        right: 0.5em;
+        padding: .1em;
+        font-size: 24rpx;
+        border-radius: .125em;
         font-weight: bolder;
-        background-color: var(--c-gray-hlighter);
+        color: var(--color-W);
+
+        &:before {
+            padding: .25em;
+            background-color: var(--c-gray-hlighter);
+            color: var(--c-safegray-dark);
+            border-radius: .25em;
+            margin-right: .5em;
+        }
     }
 
     .history-title {
         text-align: center;
         color: var(--c-gray-hlighter);
-        font-size: 26rpx;
-        line-height: 1.5em;
+        font-size: 36rpx;
+        line-height: 1.25em;
     }
 
     .history-tab {
         padding: .5em .5em;
         margin: 0 auto;
-        // background-color: var(--c-safegray-hdark);
         color: var(--c-safegray-darker);
 
         .history-th,
         .history-tr {
-            display: flex;
-            flex-wrap: wrap;
             border-bottom: 1rpx solid var(--c-safegray-light);
 
-            // border: 1rpx solid var(--c-safegray-lighter);
+            .history-li {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+
+                &:nth-child(2) {
+                    margin: 0 .35em 10rpx;
+
+                    .history-td:nth-child(1) {
+                        width: 2em;
+                        flex: 0 0 auto;
+                        background-color: var(--c-safegray-light);
+                        border-radius: .45em 0 0 .45em;
+                        color: var(--color-W);
+                        margin-right: .5em;
+                        position: relative;
+
+                        &:after {
+                            content: '';
+                            position: absolute;
+                            border-width: 0.5em 0 0.5em 0.35em;
+                            border-style: solid;
+                            border-color: transparent;
+                            border-left-color: var(--c-safegray-light);
+                            right: -.35em
+                        }
+
+                    }
+
+                    :nth-child(2) {
+                        background-color: #ccc3;
+                        padding: 6rpx 0;
+                        box-shadow: 2rpx 2rpx 1rpx var(--c-safegray-darker) inset, 2rpx 2rpx 2rpx var(--c-safegray-hlighter);
+                        color: var(--c-safegray-dark) // border: 1rpx solid var(--c-safegray);
+                    }
+
+                }
+            }
+            &:nth-child(-n+4) {
+                .history-li:nth-child(2) {
+                    .history-td:nth-child(1) {
+                        background-color: var(--color-G);
+                        &:after {
+                            border-left-color: var(--color-G);
+                        }
+                    }
+                }
+
+                &:nth-child(2) {
+                    .history-li:nth-child(2) {
+                        .history-td:nth-child(1) {
+                            background-color: #24a924;
+                            &:after {
+                                border-left-color: #24a924;
+                            }
+                        }
+                    }
+                }
+            }
+
+
             &.history-th {
                 background-image: linear-gradient(0deg, var(--c-safegray-light), var(--c-safegray-hlighter));
                 padding: .125em 0;
@@ -2100,24 +2183,23 @@ onUnload(() => {
                 background-color: var(--c-safegray-hlighter);
             }
 
-            &:not(:nth-child(1)) .history-td:nth-last-child(2) {
-                background-color: #ccc3;
-                margin: 0 8rpx 6rpx;
-                padding: 6rpx 0;
-                box-shadow: 2rpx 2rpx 1rpx var(--c-safegray-darker) inset, 2rpx 2rpx 1rpx var(--c-safegray-hlighter);
-                color: var(--c-safegray-dark) // border: 1rpx solid var(--c-safegray);
-                    // border-bottom: none;
-            }
 
-            &:not(:nth-child(1)) .history-td:nth-last-child(1):not(:nth-child(1)) {
-                flex: 0 0 auto;
-            }
+            // &:not(:nth-child(1)) .history-td:nth-last-child(2) {
+            //     background-color: #ccc3;
+            //     margin: 0 8rpx 6rpx;
+            //     padding: 6rpx 0;
+            //     box-shadow: 2rpx 2rpx 1rpx var(--c-safegray-darker) inset, 2rpx 2rpx 1rpx var(--c-safegray-hlighter);
+            //     color: var(--c-safegray-dark) // border: 1rpx solid var(--c-safegray);
+            //         // border-bottom: none;
+            // }
+
+            // &:not(:nth-child(1)) .history-td:nth-last-child(1):not(:nth-child(1)) {
+            //     flex: 0 0 auto;
+            // }
 
             .history-td {
-                // border: 1rpx solid var(--c-safegray-lighter);
                 text-align: center;
-                padding: .1em .25em;
-                // margin: -1rpx;
+                // padding: .1em .25em;
                 display: flex;
                 flex: 1 0 auto;
                 box-sizing: border-box;
@@ -2128,27 +2210,31 @@ onUnload(() => {
                 // &:not(:nth-child(1)){
                 //     border-left: none;
                 // }
-                &:nth-child(1),
-                &:nth-child(2) {
+                &:nth-child(1) {
                     width: 6em;
                 }
 
-                &:nth-child(3) {
+                &:nth-child(2) {
                     width: 4em;
                 }
 
+                &:nth-child(3) {
+                    width: 7.5em;
+                }
+
                 &:nth-child(4) {
-                    width: 2em;
+                    width: 3em;
                 }
 
                 &:nth-child(5) {
-                    width: 2.5em;
+                    width: 2.8em;
+                    flex: 0 0 auto;
                 }
 
                 &:nth-child(6) {
                     width: 2em;
+                    flex-grow: 0;
                 }
-
             }
 
             .history-none {
@@ -2163,4 +2249,5 @@ onUnload(() => {
         margin-left: 1em;
         color: var(--c-gray-hlighter);
     }
-}</style>
+}
+</style>

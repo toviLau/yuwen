@@ -1,6 +1,6 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4271811 */
-  src: url('iconfont.ttf?t=1696428687513') format('truetype');
+  src: url('iconfont.ttf?t=1696487291649') format('truetype');
 }
 
 .iconfont {
@@ -9,6 +9,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-delete-fill:before {
+  content: "\e7ce";
 }
 
 .icon-delete:before {
