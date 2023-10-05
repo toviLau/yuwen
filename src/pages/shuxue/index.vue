@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-05 14:58:05
+ * @LastEditTime : 2023-10-05 17:40:24
 -->
 <template>
     <view class="content">
@@ -291,16 +291,16 @@
             </div>
             <div class="popup-dialog-footer">
                 <div class="popup-dialog-footer-item clean" vif="popupConf[popupConf.curKey].curKey==="
-                    @click="popupConf[popupConf.curKey].fn.clean">取消</div>
+                    @click="[popupConf[popupConf.curKey].fn.clean(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">取消</div>
                 <div class="popup-dialog-footer-item submit" vif="popupConf[popupConf.curKey].fn.submit" :class="{
                     danger: popupConf[popupConf.curKey].isDanger
-                }" @click="popupConf[popupConf.curKey].fn.submit">确定</div>
+                }" @click="[popupConf[popupConf.curKey].fn.submit(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">确定</div>
             </div>
         </div>
     </cc-popup>
     <cc-popup :isShow='historyConf.status' width="100vw" height="auto" radius="16rpx" :opacity="0.65" bgcolor="transparent">
         <div class="history-dialog">
-            <span class="iconfont icon-wrong history-dialog-close" @click="historyConf.status = false"></span>
+            <span class="iconfont icon-wrong history-dialog-close" @click="[historyConf.status = false, playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]"></span>
             <span class="iconfont icon-clean history-dialog-clean" @click="historyClean()">清除全部</span>
             <div class="history-title">历史成绩</div>
             <div class="history-tab">
@@ -315,7 +315,8 @@
                         <div class="history-td">...</div>
                     </div>
                 </div>
-                <div class="history-tr" v-for="(item, idx) in historyConf.list" v-if="historyConf.list.length > 0">
+                <div class="history-tr" v-for="(item, idx) in historyConf.list" v-if="historyConf.list.length > 0"
+                    @click="()=>playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })">
                     <div class="history-li">
                         <!-- <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div> -->
                         <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
@@ -324,7 +325,7 @@
                         <div class="history-td">{{ item.score }}</div>
                         <div class="history-td">{{ item.revision }}</div>
                         <div class="history-td">
-                            <span class="iconfont icon-delete" @click="deleteHistory(item.id)"></span>
+                            <span class="iconfont icon-delete" @click="deleteHistory($event, item.id)"></span>
                         </div>
                     </div>
                     <div class="history-li">
@@ -338,6 +339,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="history-tr" v-else>
                     <div class="history-li">
                         <div class="history-td history-none">暂无历史</div>
@@ -798,12 +800,12 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyClick = (key) => {
-    uni.saveFile({
-        tempFilePath: './1.json',
-        complete: function (res) {
-            var savedFilePath = res.savedFilePath;
-        }
-    });
+    // uni.saveFile({
+    //     tempFilePath: './1.json',
+    //     complete: function (res) {
+    //         var savedFilePath = res.savedFilePath;
+    //     }
+    // });
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     if (
         numList[curidx.value][2] === 1  // 已判定当前题为正确
@@ -1044,11 +1046,14 @@ const bgmVolumeChange = val => {
 
 // 显示历史弹窗
 const historyList = () => {
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     historyConf.status = true
 }
 
 // 册除单条历史事件
-const deleteHistory = id => {
+const deleteHistory = (ev ,id) => {
+    ev.stopPropagation()
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     const curHistory = historyConf.list.find(res => res.id === id)
     uni.showModal({
         // title: 'title',
@@ -1060,6 +1065,7 @@ const deleteHistory = id => {
         // confirmText: '确定',
         confirmColor: '#ed5d46',
         success: function ({ confirm, cancel }) {
+            playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
             if (confirm) {
                 const idx = historyConf.list.findIndex(res => res.id === id)
                 historyConf.list.splice(idx, 1)
@@ -1072,7 +1078,7 @@ const deleteHistory = id => {
 
 // 清除历史事件
 const historyClean = () => {
-
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     uni.showModal({
         // title: 'title',
         // editable: false,
@@ -1083,6 +1089,7 @@ const historyClean = () => {
         // confirmText: '确定',
         confirmColor: '#ed5d46',
         success: function ({ confirm, cancel }) {
+            playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
             if (confirm) {
                 uni.setStorageSync('historyConfList', [])
                 historyConf.list = []
@@ -1094,12 +1101,14 @@ const historyClean = () => {
 
 // 读档
 const recordRead = () => {
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     const record = uni.getStorageSync('record')
     popupConf.status = true
     popupConf.curKey = record ? 'read' : 'recordUnll'
 }
 // 存档
 const recordSave = () => {
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     const record = uni.getStorageSync('record')
     if (record) {
         popupConf.curKey = 'save'
@@ -1114,6 +1123,7 @@ const recordSave = () => {
 }
 // 删档
 const recordDel = () => {
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     const record = uni.getStorageSync('record')
     popupConf.status = true
     popupConf.curKey = record ? 'recordDel' : 'recordUnll'
@@ -2107,7 +2117,9 @@ onUnload(() => {
         .history-th,
         .history-tr {
             border-bottom: 1rpx solid var(--c-safegray-light);
-
+            &:hover{
+                background-color: #d2e7f5 !important;
+            }
             .history-li {
                 display: flex;
                 flex-wrap: wrap;
@@ -2146,10 +2158,12 @@ onUnload(() => {
 
                 }
             }
+
             &:nth-child(-n+4) {
                 .history-li:nth-child(2) {
                     .history-td:nth-child(1) {
                         background-color: var(--color-G);
+
                         &:after {
                             border-left-color: var(--color-G);
                         }
@@ -2160,6 +2174,7 @@ onUnload(() => {
                     .history-li:nth-child(2) {
                         .history-td:nth-child(1) {
                             background-color: #24a924;
+
                             &:after {
                                 border-left-color: #24a924;
                             }
