@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-05 17:40:24
+ * @LastEditTime : 2023-10-06 12:37:19
 -->
 <template>
     <view class="content">
@@ -291,16 +291,21 @@
             </div>
             <div class="popup-dialog-footer">
                 <div class="popup-dialog-footer-item clean" vif="popupConf[popupConf.curKey].curKey==="
-                    @click="[popupConf[popupConf.curKey].fn.clean(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">取消</div>
+                    @click="[popupConf[popupConf.curKey].fn.clean(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">
+                    取消</div>
                 <div class="popup-dialog-footer-item submit" vif="popupConf[popupConf.curKey].fn.submit" :class="{
                     danger: popupConf[popupConf.curKey].isDanger
-                }" @click="[popupConf[popupConf.curKey].fn.submit(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">确定</div>
+                }"
+                    @click="[popupConf[popupConf.curKey].fn.submit(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">
+                    确定</div>
             </div>
         </div>
     </cc-popup>
     <cc-popup :isShow='historyConf.status' width="100vw" height="auto" radius="16rpx" :opacity="0.65" bgcolor="transparent">
+
         <div class="history-dialog">
-            <span class="iconfont icon-wrong history-dialog-close" @click="[historyConf.status = false, playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]"></span>
+            <span class="iconfont icon-wrong history-dialog-close"
+                @click="[historyConf.status = false, playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]"></span>
             <span class="iconfont icon-clean history-dialog-clean" @click="historyClean()">清除全部</span>
             <div class="history-title">历史成绩</div>
             <div class="history-tab">
@@ -315,38 +320,41 @@
                         <div class="history-td">...</div>
                     </div>
                 </div>
-                <div class="history-tr" v-for="(item, idx) in historyConf.list" v-if="historyConf.list.length > 0"
-                    @click="()=>playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })">
-                    <div class="history-li">
-                        <!-- <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div> -->
-                        <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
-                        <div class="history-td">{{ date.duration('H:i:s', item.endTime - item.startTime) }}</div>
-                        <div class="history-td">{{ `${item.totalNum} / ${item.answered} / ${item.corrected}` }}</div>
-                        <div class="history-td">{{ item.score }}</div>
-                        <div class="history-td">{{ item.revision }}</div>
-                        <div class="history-td">
-                            <span class="iconfont icon-delete" @click="deleteHistory($event, item.id)"></span>
+                <scroll-view class="history-tb" scroll-y="true">
+                    <div class="history-tr" v-for="(item, idx) in historyConf.list" v-if="historyConf.list.length > 0"
+                        @click="() => playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })">
+                        <div class="history-li">
+                            <!-- <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div> -->
+                            <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
+                            <div class="history-td">{{ date.duration('H:i:s', item.endTime - item.startTime) }}</div>
+                            <div class="history-td">{{ `${item.totalNum} / ${item.answered} / ${item.corrected}` }}
+                            </div>
+                            <div class="history-td">{{ item.score }}</div>
+                            <div class="history-td">{{ item.revision }}</div>
+                            <div class="history-td">
+                                <span class="iconfont icon-delete" @click="deleteHistory($event, item.id)"></span>
+                            </div>
+                        </div>
+                        <div class="history-li">
+                            <div class="history-td">{{ idx + 1 }}</div>
+                            <div class="history-td">题目设置:
+                                {{ `${['加减运算', '四则运算'][item.config.opType - 0]}(${item.config.opType ? ['简单',
+                                    '困难'][item.config.difficulty - 0] : ['20以内', '100以内'][item.config.difficulty - 0]})/`
+                                    + (item.config.isMixed === 1 ? '混合' : '非混合') + '/'
+                                    + `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
+                                        ? '(小数位:' + item.config.decimalLen + ') ' : ''}` }}
+                            </div>
                         </div>
                     </div>
-                    <div class="history-li">
-                        <div class="history-td">{{ idx + 1 }}</div>
-                        <div class="history-td">题目设置:
-                            {{ `${['加减运算', '四则运算'][item.config.opType - 0]}(${item.config.opType ? ['简单',
-                                '困难'][item.config.difficulty - 0] : ['20以内', '100以内'][item.config.difficulty - 0]}) / ` }}
-                            {{ (item.config.isMixed === 1 ? '混合' : '非混合') + ' / ' }}
-                            {{ `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
-                                ? '(小数位:' + item.config.decimalLen + ') ' : ''}` }}
+                    <div class="history-tr" v-else>
+                        <div class="history-li">
+                            <div class="history-td history-none">暂无历史</div>
                         </div>
                     </div>
-                </div>
-
-                <div class="history-tr" v-else>
-                    <div class="history-li">
-                        <div class="history-td history-none">暂无历史</div>
-                    </div>
-                </div>
+                </scroll-view>
             </div>
-            <div class="history-tips">最多只保留最近10条历史记录</div>
+            <div class="history-tips">最多只保留最近20条历史记录</div>
+
         </div>
     </cc-popup>
 </template>
@@ -398,7 +406,62 @@ const defaultConf = { // 默认配置
     vertical: false, // 开启竖式
     decimalLen: 2, // 最大小数位
 }
-// 在读档弹窗
+
+const getStorageData = () => { // 读取设置缓存
+    return Object.assign({}, defaultConf, uni.getStorageSync('config'));
+}
+const storageConf = getStorageData() // 获取用户保存的设置
+const setConfig = reactive( // 配制项
+    Object.assign(storageConf, {
+        status: false, // 设置框显隐
+    })
+)
+const totalNum = ref(storageConf.totalNum) // 题目数量
+const numListId = ref()
+const keyboard = ref(storageConf.keyboard) // 键盘类型 false: 简约, true: 九宫格
+const showIdx = ref(storageConf.showIdx) // 显示序号
+const opType = ref(storageConf.opType) // 运算类型
+const difficulty = ref(storageConf.difficulty) // 困难度
+const isMixed = ref(storageConf.isMixed) // 是否混合运算
+const cursorType = ref(storageConf.cursorType) // 光标类型
+const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
+const decimalLen = ref(storageConf.decimalLen) // 小数位数
+const scrollTop = ref(0) // 滚动位置
+const vertical = ref(storageConf.vertical) // 开启竖式
+const historyConf = reactive({
+    status: false,
+    list: []
+})
+// 滚动条将当前光标自动滚动到可视区域内
+const autoCurItemPosition = async () => {
+    function createSelectorQuery(selector) {
+        return new Promise(resolve => {
+            uni.createSelectorQuery().select(selector).boundingClientRect(({ top, bottom, left, right, height }) => {
+                resolve({ top, bottom, left, right, height })
+            }).exec()
+        })
+    }
+    const { top: scrollT, height: scrollH } = await createSelectorQuery('.scroll-view')
+    const { top: listTop, height: listHeight } = await createSelectorQuery('.list')
+    const { top: curItemTop, height: curItemHeight } = await createSelectorQuery('.cur-item')
+    scrollTop.value = curItemTop < 0
+        ? Math.abs(listTop) + curItemTop - curItemHeight * 2
+        : curItemTop + curItemHeight > scrollH
+            ? Math.abs(listTop) + scrollH - curItemHeight * 2
+            : scrollTop.value || 0
+}
+
+const recordSaveStorage = () => uni.setStorageSync('record', {
+    numList,
+    config: uni.getStorageSync('config')
+})
+const recordReadStorage = () => {
+    const { numList: _numList, config } = uni.getStorageSync('record')
+    Object.assign(numList, nulToUndef(_numList))
+    Object.assign(storageConf, config)
+    saveConfig()
+}
+// 存读档弹窗
 const popupConf = reactive({
     status: false,
     curKey: 'save',
@@ -411,7 +474,7 @@ const popupConf = reactive({
             },
             submit() {
                 popupConf.status = false
-                uni.setStorageSync('record', numList)
+                recordSaveStorage()
                 // setConfig.status=false
             },
         }
@@ -424,7 +487,7 @@ const popupConf = reactive({
                 popupConf.status = false
             },
             submit() {
-                Object.assign(numList, nulToUndef(uni.getStorageSync('record')))
+                recordReadStorage()
                 popupConf.status = false
                 setTimeout(() => {
                     popupConf.status = true
@@ -485,7 +548,7 @@ const popupConf = reactive({
             },
             submit() {
                 popupConf.status = false
-                Object.assign(numList, nulToUndef(uni.getStorageSync('record')))
+                recordReadStorage()
                 // setConfig.status=false
                 setTimeout(() => {
                     popupConf.status = true
@@ -496,50 +559,7 @@ const popupConf = reactive({
     }
 })
 
-const getStorageData = () => { // 读取设置缓存
-    return Object.assign({}, defaultConf, uni.getStorageSync('config'));
-}
-const storageConf = getStorageData() // 获取用户保存的设置
-const setConfig = reactive( // 配制项
-    Object.assign(storageConf, {
-        status: false, // 设置框显隐
-    })
-)
-const totalNum = ref(storageConf.totalNum) // 题目数量
-const numListId = ref()
-const keyboard = ref(storageConf.keyboard) // 键盘类型 false: 简约, true: 九宫格
-const showIdx = ref(storageConf.showIdx) // 显示序号
-const opType = ref(storageConf.opType) // 运算类型
-const difficulty = ref(storageConf.difficulty) // 困难度
-const isMixed = ref(storageConf.isMixed) // 是否混合运算
-const cursorType = ref(storageConf.cursorType) // 光标类型
-const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
-const decimalLen = ref(storageConf.decimalLen) // 小数位数
-const scrollTop = ref(0) // 滚动位置
-const vertical = ref(storageConf.vertical) // 开启竖式
-const historyConf = reactive({
-    status: false,
-    list: []
-})
-// 滚动条将当前光标自动滚动到可视区域内
-const autoCurItemPosition = async () => {
-    function createSelectorQuery(selector) {
-        return new Promise(resolve => {
-            uni.createSelectorQuery().select(selector).boundingClientRect(({ top, bottom, left, right, height }) => {
-                resolve({ top, bottom, left, right, height })
-            }).exec()
-        })
-    }
-    const { top: scrollT, height: scrollH } = await createSelectorQuery('.scroll-view')
-    const { top: listTop, height: listHeight } = await createSelectorQuery('.list')
-    const { top: curItemTop, height: curItemHeight } = await createSelectorQuery('.cur-item')
-    scrollTop.value = curItemTop < 0
-        ? Math.abs(listTop) + curItemTop - curItemHeight * 2
-        : curItemTop + curItemHeight > scrollH
-            ? Math.abs(listTop) + scrollH - curItemHeight * 2
-            : scrollTop.value || 0
-}
-
+// 监听键盘输入, 滚动条自动滚动到光标, 让光标出现在可视区
 watch(keyboard, () => {
     autoCurItemPosition()
 })
@@ -547,12 +567,14 @@ watch(keyboard, () => {
 watch(cursorType, () => {
     setConfig.cursorType = cursorType.value
 })
+
 watch(setConfig, val => {
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2, instanceName: 'set-config' })
     cursorType.value = val.cursorType
     showIdx.value = val.showIdx
     vertical.value = val.vertical
 })
+
 watch(bgmPause, val => {
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     val ? bgm.pause() : bgm.play()
@@ -570,12 +592,12 @@ const opTypeChange = val => {
 }
 
 // TODO: 竖式
-const verticalChange = val => {
-    if (val) {
-        setConfig.opType = false
-        setConfig.isMixed[0] = undefined
-    }
-}
+// const verticalChange = val => {
+//     if (val) {
+//         setConfig.opType = false
+//         setConfig.isMixed[0] = undefined
+//     }
+// }
 
 // 获取运算符
 const getOperator = i => ["+", "-", '×', '÷'][i]
@@ -728,7 +750,7 @@ function createList(isInit = true) {
     startTime.value = Date.now()
     contTime()
     curidx.value = 0;
-    numListId.value = Date.now().toString(16)
+    numListId.value = Date.now().toString(16) // 当前题目列表ID, 用户不重新生成数据, 每次提交历史都会更新这个 ID 下的数据,不新增历史记录 
 }
 createList(true);
 const keyboardCode = reactive(createKeyboardCode())
@@ -737,6 +759,7 @@ const keyboardCode = reactive(createKeyboardCode())
 const bgm = playSound({ src: musicArr['bgm-sxg_mp3'], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM' })
 
 function nulToUndef(data) {
+    console.log(data);
     return data.map(res => {
         if (Array.isArray(res)) {
             return nulToUndef(res)
@@ -807,12 +830,13 @@ const keyClick = (key) => {
     //     }
     // });
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
+    debugger
     if (
-        numList[curidx.value][2] === 1  // 已判定当前题为正确
+        numList[curidx.value][2] === 1 && key !== 'next' // 已判定当前题为正确
         || key === 'del' && ['', undefined].includes(numList[curidx.value][1]) // 册除事件 并 内容为空时
     ) return
+
     const _val = (numList[curidx.value][1] || "") + '';
-    if (numList[curidx.value][2] === 1) return
 
     switch (key) {
         case 'del': // 删除事件
@@ -821,6 +845,7 @@ const keyClick = (key) => {
             break;
 
         case 'next': // 下一题
+            debugger
             if (curidx.value >= numList.length - 1) return
             const _curidx = curidx.value + 1
             // 查找没有做的 与 结果非正确的题
@@ -911,6 +936,7 @@ const subEnter = () => {
         corrected += item[2] ? 1 : 0;
     })
 
+    // 历史记录信息
     const _historyConf = {
         id: numListId.value,
         startTime: startTime.value,
@@ -935,7 +961,7 @@ const subEnter = () => {
     hasHistoryIdx === -1
         ? historyConfList.unshift(_historyConf)
         : historyConfList.splice(hasHistoryIdx, 1, _historyConf)
-    if (historyConfList.length > 10) historyConfList.length = 10
+    if (historyConfList.length > 20) historyConfList.length = 20
     uni.setStorageSync('historyConfList', historyConfList)
 };
 
@@ -1051,7 +1077,7 @@ const historyList = () => {
 }
 
 // 册除单条历史事件
-const deleteHistory = (ev ,id) => {
+const deleteHistory = (ev, id) => {
     ev.stopPropagation()
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     const curHistory = historyConf.list.find(res => res.id === id)
@@ -1114,7 +1140,8 @@ const recordSave = () => {
         popupConf.curKey = 'save'
         popupConf.status = true
     } else {
-        uni.setStorageSync('record', numList)
+        // uni.setStorageSync('record', numList)
+        recordSaveStorage()
         uni.showToast({
             icon: 'none',
             title: '存档成功'
@@ -1140,8 +1167,8 @@ onHide(() => {
     bgm.pause()
 })
 onLoad(() => {
-    const reCord = uni.getStorageSync('record');
-    historyConf.list = uni.getStorageSync('historyConfList') || []
+    const reCord = uni.getStorageSync('record'); // 存档信息
+    historyConf.list = uni.getStorageSync('historyConfList') || [] // 历史信息
 
     if (reCord) {
         popupConf.curKey = 'onLoad'
@@ -2023,11 +2050,12 @@ onUnload(() => {
     // border-radius: 20rpx;
     // overflow: hidden;
     .popup-dialog-content {
-        min-height: 18vh;
+        min-height: 4em;
         border-bottom: 1rpx solid var(--c-safegray-light);
         display: flex;
         align-items: center;
-        padding: 0 1.2em;
+        padding: .5em 1.2em;
+        justify-content: center;
     }
 
     .popup-dialog-footer {
@@ -2113,40 +2141,45 @@ onUnload(() => {
         padding: .5em .5em;
         margin: 0 auto;
         color: var(--c-safegray-darker);
+        display: flex;
+        flex-direction: column;
 
         .history-th,
         .history-tr {
             border-bottom: 1rpx solid var(--c-safegray-light);
-            &:hover{
+
+            &:hover {
                 background-color: #d2e7f5 !important;
             }
+
             .history-li {
                 display: flex;
                 flex-wrap: wrap;
                 align-items: center;
+                padding: .25em 0 0;
 
                 &:nth-child(2) {
                     margin: 0 .35em 10rpx;
 
                     .history-td:nth-child(1) {
-                        width: 2em;
+                        width: 1.8em;
+                        line-height: 1.2em;
                         flex: 0 0 auto;
                         background-color: var(--c-safegray-light);
                         border-radius: .45em 0 0 .45em;
                         color: var(--color-W);
-                        margin-right: .5em;
+                        margin-right: .25em;
                         position: relative;
 
-                        &:after {
-                            content: '';
-                            position: absolute;
-                            border-width: 0.5em 0 0.5em 0.35em;
-                            border-style: solid;
-                            border-color: transparent;
-                            border-left-color: var(--c-safegray-light);
-                            right: -.35em
-                        }
-
+                        // &:after {
+                        //     content: '';
+                        //     position: absolute;
+                        //     border-width: 0.5em 0 0.5em 0.35em;
+                        //     border-style: solid;
+                        //     border-color: transparent;
+                        //     border-left-color: var(--c-safegray-light);
+                        //     right: -.35em
+                        // }
                     }
 
                     :nth-child(2) {
@@ -2159,7 +2192,7 @@ onUnload(() => {
                 }
             }
 
-            &:nth-child(-n+4) {
+            &:nth-child(-n+3) {
                 .history-li:nth-child(2) {
                     .history-td:nth-child(1) {
                         background-color: var(--color-G);
@@ -2170,7 +2203,7 @@ onUnload(() => {
                     }
                 }
 
-                &:nth-child(2) {
+                &:nth-child(1) {
                     .history-li:nth-child(2) {
                         .history-td:nth-child(1) {
                             background-color: #24a924;
@@ -2220,7 +2253,7 @@ onUnload(() => {
                 box-sizing: border-box;
                 align-items: center;
                 justify-content: center;
-                line-height: 1.1em;
+                line-height: 1.2em;
 
                 // &:not(:nth-child(1)){
                 //     border-left: none;
@@ -2258,6 +2291,47 @@ onUnload(() => {
                 height: 4em;
             }
         }
+
+        .history-tb {
+            flex: 1;
+            overflow: auto;
+            max-height: 80vh;
+
+            .history-td {
+
+                &:nth-child(4) {
+                    width: 3em;
+                    position: relative;
+                    color: var(--color-R);
+                    font-size: 1.1em;
+
+                    &:after,
+                    &:before {
+                        content: "";
+                        position: absolute;
+                        left: 50%;
+                        top: 50%;
+                        height: .1em;
+                        background-color: var(--color-R);
+                    }
+
+                    &:after {
+                        margin-left: -0.816em;
+                        width: 1.8em;
+                        margin-top: .38em;
+                        transform: rotate(-7deg);
+                    }
+
+                    &:before {
+                        margin-left: -0.7em;
+                        width: 2em;
+                        margin-top: .5em;
+                        transform: rotate(-5deg);
+                    }
+                }
+            }
+        }
+
     }
 
     .history-tips {
