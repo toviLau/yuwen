@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-06 12:37:19
+ * @LastEditTime : 2023-10-06 13:01:20
 -->
 <template>
     <view class="content">
@@ -1084,7 +1084,7 @@ const deleteHistory = (ev, id) => {
     uni.showModal({
         // title: 'title',
         // editable: false, 
-        content: `您确定要删除 ${date('Y-m-d H:i:s', curHistory.startTime)} 这条历史记录么?`,
+        content: `您确定要删除 ${date('Y-m-d H:i:s', curHistory.endTime)} 这条历史记录么?`,
         showCancel: true,
         // cancelText: '取消'
         cancelColor: '#999',
@@ -1868,7 +1868,7 @@ onUnload(() => {
                     border: 1px solid var(--c-safegray-light);
                     padding: 0 .5em;
                     font-size: 26rpx;
-                    line-height: 2em;
+                    line-height: 1.6em;
                     border-radius: 5rpx;
                     margin: 0 5rpx;
                     color: var(--c-safegray-hdark);
@@ -2311,7 +2311,7 @@ onUnload(() => {
                         position: absolute;
                         left: 50%;
                         top: 50%;
-                        height: .1em;
+                        height: .08em;
                         background-color: var(--color-R);
                     }
 
