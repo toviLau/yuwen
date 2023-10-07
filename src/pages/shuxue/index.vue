@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-07 23:11:25
+ * @LastEditTime : 2023-10-08 01:26:21
 -->
 <template>
     <view class="content">
@@ -17,8 +17,7 @@
         </div>
         <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
             <div class="list">
-                <div class="list-item" v-for="(v, i) in numList" :key="i" @click="ckItem(i)"
-                :class="{
+                <div class="list-item" v-for="(v, i) in numList" :key="i" @click="ckItem(i)" :class="{
                     'min-font1': isMixed && hasDecimal && decimalLen === 1,
                     'min-font2': isMixed && hasDecimal && decimalLen === 2,
                     'min-font3': isMixed && hasDecimal && decimalLen === 3,
@@ -62,7 +61,7 @@
                         plus: v[0][2] === 0,
                         minus: v[0][2] === 1
                     }">
-                        <div class="vertical-li">
+                        <!-- <div class="vertical-li">
                             <div class="vertical-li-nums" v-for="vItem in v[0][0].toString().split('')">{{ vItem }}</div>
                         </div>
                         <div class="vertical-li">
@@ -72,7 +71,7 @@
                         <div class="vertical-li">
                             <div class="vertical-li-nums" v-for="vItem in (v[1] || '  ').toString().split('')">{{ vItem }}
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="list-item list-item-none" v-for="i in 10" :key="i" />
@@ -283,9 +282,9 @@
                         <div class="set-sys-db-list-left">背景音乐：</div>
                         <div class="set-sys-db-list-right">
                             <div class="check-box" @click="switchBgmClick">
-                                <div class="check-box-item" :class="{
+                                <div class="check-box-item" :data-text='item.title' :class="{
                                     cur: item.value === setConfig.bgmSelectValue
-                                }" v-for="item in bgmSelect">{{ item.title }}</div>
+                                }" v-for="item in bgmSelect" :key="item.value">{{ item.title }}</div>
                             </div>
                         </div>
                     </div>
@@ -341,7 +340,7 @@
                 </div>
                 <scroll-view class="history-tb" scroll-y="true">
                     <div class="history-tr" v-for="(item, idx) in historyConf.list" v-if="historyConf.list.length > 0"
-                        @click="() => playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })">
+                        @click="() => playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })" :key="item.endTime">
                         <div class="history-li">
                             <!-- <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div> -->
                             <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
@@ -830,10 +829,9 @@ function contTime(isStop = false) {
 }
 
 const switchBgmClick = (ev) => {
-    const res = bgmSelect.find(res => res.title === ev.target.innerText)
-
-    setConfig.bgmSelectValue = res.value
-    bgm.src = musicArr[res.value]
+    const succ = bgmSelect.find(res => res.title === (ev.target?.innerText || ev.target?.dataset?.text || ''))
+    setConfig.bgmSelectValue = succ.value
+    bgm.src = musicArr[succ.value]
 }
 
 // 订正事件
@@ -895,8 +893,12 @@ const keyClick = (key) => {
             break;
 
         case '.':
-        default: // 默认数字输入事件
-            const _keyVal = _val.length < 3 + (hasDecimal.value ? decimalLen.value + 1 : 0) ? _val + key : _val;
+        default: // 默认数字输入事件 
+            const _succ = Array.isArray(numList[curidx.value][0][3]) ? numList[curidx.value][0][3][0] : numList[curidx.value][0][3];
+            let _succLen = _succ.toString().length
+            _succLen = _succLen + (_succLen % 2 === 0 ? 1 : 0) 
+            console.log(_succ,_succLen);
+            const _keyVal = _val.length < _succLen ? _val + key : _val;
             numList[curidx.value][1] = _keyVal.match(/^(0\.?|[1-9]\d*(\.?\d*))/)[0]
             break;
     }
@@ -1042,7 +1044,7 @@ const saveConfig = () => {
         bgm.volume = setConfig.bgmVolume / 20
         bgmPause.value = false
     } else {
-        bgm.stop()
+        bgm.pause()
     }
 
     // 运算规则 或 难度变动 列表都要重新生成
@@ -1077,13 +1079,14 @@ const cleanConfig = () => {
         bgmSelectValue
     } = getStorageData()
 
+    bgm.src = musicArr[bgmSelectValue]
     if (!bgmPause.value) {
         bgm.volume = volume / 20
         bgmPause.value = false
     } else {
-        bgm.stop()
+        bgm.pause()
     }
-    bgm.src = musicArr[bgmSelectValue]
+
     cursorType.value = cursor
     showIdx.value = _showIdx
     setConfig.showIdx = _showIdx
@@ -1333,10 +1336,13 @@ onUnload(() => {
             min-width: 46%;
             flex: 1 0 auto;
             margin: 0 2%;
-            &.min-font1{
+
+            &.min-font1 {
                 font-size: 28rpx;
             }
-            &.min-font2, &.min-font3{
+
+            &.min-font2,
+            &.min-font3 {
                 min-width: 60%;
             }
 
@@ -1404,7 +1410,7 @@ onUnload(() => {
                     }
                 }
 
-                .wait-edited{
+                .wait-edited {
                     background-color: var(--color-R);
                     color: var(--c-safegray-hlight);
 
