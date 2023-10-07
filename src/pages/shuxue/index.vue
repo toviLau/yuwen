@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-07 15:34:01
+ * @LastEditTime : 2023-10-07 16:37:25
 -->
 <template>
     <view class="content">
@@ -582,9 +582,7 @@ const bgmSelect = [{
     value: 'bgm-ldzgr_mp3'
 }]
 
-// watch(bgmSelectValue, value => {
-    
-    
+// watch(bgmSelectValue, value => {  
 // })
 
 // 监听键盘输入, 滚动条自动滚动到光标, 让光标出现在可视区
@@ -878,7 +876,6 @@ const keyClick = (key) => {
             break;
 
         case 'next': // 下一题
-            debugger
             if (curidx.value >= numList.length - 1) return
             const _curidx = curidx.value + 1
             // 查找没有做的 与 结果非正确的题
@@ -1318,7 +1315,7 @@ onUnload(() => {
         .list-item {
             @item-primary-color: #b6aafa;
             border-bottom: 1px solid var(--c-safegray-hlight);
-            font-size: 28rpx;
+            font-size: 32rpx;
             // font-size: 70%;
             // width: 42%;
             display: flex;
