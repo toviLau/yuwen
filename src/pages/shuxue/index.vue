@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-07 16:37:25
+ * @LastEditTime : 2023-10-07 23:11:25
 -->
 <template>
     <view class="content">
@@ -17,7 +17,12 @@
         </div>
         <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
             <div class="list">
-                <div class="list-item" v-for="(v, i) in numList" :key="i" @click="ckItem(i)">
+                <div class="list-item" v-for="(v, i) in numList" :key="i" @click="ckItem(i)"
+                :class="{
+                    'min-font1': isMixed && hasDecimal && decimalLen === 1,
+                    'min-font2': isMixed && hasDecimal && decimalLen === 2,
+                    'min-font3': isMixed && hasDecimal && decimalLen === 3,
+                }">
                     <div class="list-item-li" :class="{
                         'cur-item': !setConfig.status && i === curidx && submited === 0,
                         cursor1: cursorType === false,
@@ -27,6 +32,7 @@
                     }">
 
                         <div class="edited" v-if="v[3] > 0">{{ v[3] }}</div>
+                        <div class="empty-edit" v-if="!v[1] && submited === 1"></div>
                         <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
                         <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
                         {{
@@ -446,7 +452,8 @@ const historyConf = reactive({
     status: false,
     list: []
 })
-const bgmSelectValue= ref(storageConf.bgmSelectValue)
+
+const bgmSelectValue = ref(storageConf.bgmSelectValue)
 // 滚动条将当前光标自动滚动到可视区域内
 const autoCurItemPosition = async () => {
     function createSelectorQuery(selector) {
@@ -889,7 +896,7 @@ const keyClick = (key) => {
 
         case '.':
         default: // 默认数字输入事件
-            const _keyVal = _val.length < 9 ? _val + key : _val;
+            const _keyVal = _val.length < 3 + (hasDecimal.value ? decimalLen.value + 1 : 0) ? _val + key : _val;
             numList[curidx.value][1] = _keyVal.match(/^(0\.?|[1-9]\d*(\.?\d*))/)[0]
             break;
     }
@@ -1315,7 +1322,7 @@ onUnload(() => {
         .list-item {
             @item-primary-color: #b6aafa;
             border-bottom: 1px solid var(--c-safegray-hlight);
-            font-size: 32rpx;
+            font-size: 34rpx;
             // font-size: 70%;
             // width: 42%;
             display: flex;
@@ -1326,6 +1333,12 @@ onUnload(() => {
             min-width: 46%;
             flex: 1 0 auto;
             margin: 0 2%;
+            &.min-font1{
+                font-size: 28rpx;
+            }
+            &.min-font2, &.min-font3{
+                min-width: 60%;
+            }
 
             &.list-item-none {
                 border: none;
@@ -1336,10 +1349,11 @@ onUnload(() => {
                 display: flex;
                 align-items: center;
                 text-align: center;
-                line-height: 3em;
+                line-height: 2.8em;
                 padding-left: .5em;
                 box-sizing: border-box;
                 position: relative;
+                // margin-top: 4rpx;
                 overflow: hidden;
 
                 .list-item-idx {
@@ -1356,16 +1370,25 @@ onUnload(() => {
                 }
 
                 .edited,
-                .wait-edited {
-                    font-size: 16rpx;
+                .wait-edited,
+                .empty-edit {
+                    // font-size: 16rpx;
+                    // line-height: 1em;
+                    // padding: 6rpx 1.25em 6rpx .75em;
+                    // // opacity: .8;
+                    // text-align: center;
+                    // position: absolute;
+                    // left: 0;
+                    // top: 0;
+                    // border-radius: 0 0 16rpx 0;
+                    font-size: 0.6em;
                     line-height: 1em;
-                    padding: 6rpx 1.25em 6rpx .75em;
-                    // opacity: .8;
+                    padding: .3em 1em .3em .5em;
                     text-align: center;
                     position: absolute;
                     left: 0;
                     top: 0;
-                    border-radius: 0 0 16rpx 0;
+                    border-radius: 0 0 .85em;
                 }
 
                 .edited {
@@ -1381,12 +1404,21 @@ onUnload(() => {
                     }
                 }
 
-                .wait-edited {
+                .wait-edited{
                     background-color: var(--color-R);
                     color: var(--c-safegray-hlight);
 
                     &::before {
                         content: '尚未订正'
+                    }
+                }
+
+                .empty-edit {
+                    background-color: var(--color-Y);
+                    color: var(--c-safegray-hlight);
+
+                    &::before {
+                        content: '尚未做完'
                     }
                 }
 
@@ -1502,6 +1534,13 @@ onUnload(() => {
                         margin-left: .125em;
                     }
                 }
+            }
+
+            .empty {
+                // border: 1rpx solid var(--color-R)
+                color: var(--color-R);
+                // background-color: #fcf9f9;
+                // box-shadow: 0 0 2rpx 0 var(--color-R);
             }
 
             .vertical {
