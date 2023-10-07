@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-06 13:01:20
+ * @LastEditTime : 2023-10-07 15:34:01
 -->
 <template>
     <view class="content">
@@ -76,6 +76,7 @@
             v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
                 dsb: curidx && (numList[curidx][1] === undefined ? '' : numList[curidx][1] + '').length > 2,
             }">
+            <!-- 键盘 -->
             <div class="pan" :class="{
                 dsb: numList[curidx][2] === 1, easyKeyboard: !keyboard,
                 'has-decimal': hasDecimal
@@ -95,6 +96,7 @@
                     <div class="pan-item pan-del" @click="keyClick('del')">⇐</div>
                 </div>
             </div>
+            <!-- 得分 -->
             <div class="fen" v-if="submited === 1 && !setConfig.status">
                 <div class="fen-title">
                     <div class="fen-title-left">宝贝你的得分</div>
@@ -115,6 +117,7 @@
                     </div>
                 </div>
             </div>
+            <!-- 系统设置 -->
             <div class="set-sys" v-if="setConfig.status">
                 <div class="set-sys-title">
                     <div class="set-sys-title-left">设置</div>
@@ -270,6 +273,16 @@
                                 :value="setConfig.bgmVolume" :max="20" @change="bgmVolumeChange" class="set-slider" />
                         </div>
                     </div>
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">背景音乐：</div>
+                        <div class="set-sys-db-list-right">
+                            <div class="check-box" @click="switchBgmClick">
+                                <div class="check-box-item" :class="{
+                                    cur: item.value === setConfig.bgmSelectValue
+                                }" v-for="item in bgmSelect">{{ item.title }}</div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="declare divider-line">
                         <div>
                             <div>个人版非商用，不采集个人信息。所有数据仅存储在本地</div>
@@ -405,6 +418,7 @@ const defaultConf = { // 默认配置
     hasDecimal: false, // 启用小数
     vertical: false, // 开启竖式
     decimalLen: 2, // 最大小数位
+    bgmSelectValue: 'bgm-sxg_mp3',
 }
 
 const getStorageData = () => { // 读取设置缓存
@@ -432,6 +446,7 @@ const historyConf = reactive({
     status: false,
     list: []
 })
+const bgmSelectValue= ref(storageConf.bgmSelectValue)
 // 滚动条将当前光标自动滚动到可视区域内
 const autoCurItemPosition = async () => {
     function createSelectorQuery(selector) {
@@ -558,6 +573,19 @@ const popupConf = reactive({
         }
     }
 })
+
+const bgmSelect = [{
+    title: '上学歌',
+    value: 'bgm-sxg_mp3'
+}, {
+    title: '劳动最光荣',
+    value: 'bgm-ldzgr_mp3'
+}]
+
+// watch(bgmSelectValue, value => {
+    
+    
+// })
 
 // 监听键盘输入, 滚动条自动滚动到光标, 让光标出现在可视区
 watch(keyboard, () => {
@@ -755,11 +783,10 @@ function createList(isInit = true) {
 createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
-// BGM
-const bgm = playSound({ src: musicArr['bgm-sxg_mp3'], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM' })
+// BGM - 'bgm-sxg_mp3'
+const bgm = playSound({ src: musicArr[bgmSelectValue.value], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM' })
 
 function nulToUndef(data) {
-    console.log(data);
     return data.map(res => {
         if (Array.isArray(res)) {
             return nulToUndef(res)
@@ -797,6 +824,13 @@ function contTime(isStop = false) {
     }
 }
 
+const switchBgmClick = (ev) => {
+    const res = bgmSelect.find(res => res.title === ev.target.innerText)
+
+    setConfig.bgmSelectValue = res.value
+    bgm.src = musicArr[res.value]
+}
+
 // 订正事件
 function edit() {
     if (score.value === 100) return
@@ -830,7 +864,6 @@ const keyClick = (key) => {
     //     }
     // });
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    debugger
     if (
         numList[curidx.value][2] === 1 && key !== 'next' // 已判定当前题为正确
         || key === 'del' && ['', undefined].includes(numList[curidx.value][1]) // 册除事件 并 内容为空时
@@ -983,6 +1016,7 @@ const setNumDefault = () => {
     Object.assign(setConfig, defaultConf)
     // cursorType.value = setConfig.cursorType
     bgm.volume = setConfig.bgmVolume / 20
+    bgm.src = musicArr[setConfig.bgmSelectValue]
 }
 
 // 保存设置事件
@@ -1035,7 +1069,8 @@ const cleanConfig = () => {
         bgmVolume: volume,
         cursorType: cursor,
         showIdx: _showIdx,
-        vertical
+        vertical,
+        bgmSelectValue
     } = getStorageData()
 
     if (!bgmPause.value) {
@@ -1044,6 +1079,7 @@ const cleanConfig = () => {
     } else {
         bgm.stop()
     }
+    bgm.src = musicArr[bgmSelectValue]
     cursorType.value = cursor
     showIdx.value = _showIdx
     setConfig.showIdx = _showIdx
@@ -2036,6 +2072,28 @@ onUnload(() => {
                 .set-btn-clean {
                     background-color: var(--c-safegray-hlight);
                     color: var(--c-safegray);
+                }
+            }
+
+            .check-box {
+                display: flex;
+
+                .check-box-item {
+                    padding: 0 .75em;
+                    border: 1rpx solid var(--c-safegray-lighter);
+                    background-color: var(--c-safegray-hlight);
+                    color: var(--c-safegray);
+                    border-radius: 5rpx;
+
+                    &:not(:nth-child(1)) {
+                        margin-left: .5em;
+                    }
+
+                    &.cur {
+                        background-color: var(--color-B);
+                        color: var(--color-W);
+                        border-color: var(--color-B);
+                    }
                 }
             }
         }
