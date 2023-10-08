@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-08 01:26:21
+ * @LastEditTime : 2023-10-08 23:53:24
 -->
 <template>
     <view class="content">
@@ -340,7 +340,8 @@
                 </div>
                 <scroll-view class="history-tb" scroll-y="true">
                     <div class="history-tr" v-for="(item, idx) in historyConf.list" v-if="historyConf.list.length > 0"
-                        @click="() => playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })" :key="item.endTime">
+                        @click="() => playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })"
+                        :key="item.endTime">
                         <div class="history-li">
                             <!-- <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div> -->
                             <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
@@ -394,13 +395,13 @@ import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
 import ccPopup from "../../uni_modules/cc-popup"
 import { onReady, onShow, onHide, onUnload, onLoad } from '@dcloudio/uni-app'
 import uniDataCheckbox from '../../uni_modules/uni-data-checkbox/uni-data-checkbox.vue'
+// 导入音频 - 准备弃用(已上传至 OSS)
 const musics = import.meta.globEager('../../assets/music/*.mp3')
 const musicArr = reactive({})
 Object.keys(musics).forEach(key => {
     const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, '$1_$2')
     musicArr[_key] = musics[key].default
 })
-
 const numList = reactive([]); // 数据列表:[[[数字1 || [数字1,数字2, 运算符], 数字2 || [数字1,数字2, 运算符], 运算符], 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
 const score = ref(0); // 得分
@@ -582,14 +583,18 @@ const popupConf = reactive({
 
 const bgmSelect = [{
     title: '上学歌',
-    value: 'bgm-sxg_mp3'
+    value: 'bgm-sxg_mp3',
+    src: 'http://file.7bzc.com/radio/bgm-sxg.mp3'
+}, {
+    title: '读书郞',
+    value: 'bgm-dsl_mp3',
+    src: 'http://file.7bzc.com/radio/bgm-dsl.mp3'
 }, {
     title: '劳动最光荣',
-    value: 'bgm-ldzgr_mp3'
+    value: 'bgm-ldzgr_mp3',
+    src: 'http://file.7bzc.com/radio/bgm-ldzgr.mp3'
 }]
-
-// watch(bgmSelectValue, value => {  
-// })
+const findBgm = key => bgmSelect.find(res => res.value === key) || bgmSelect.find(res => res.value === defaultConf.bgmSelectValue)
 
 // 监听键盘输入, 滚动条自动滚动到光标, 让光标出现在可视区
 watch(keyboard, () => {
@@ -788,7 +793,7 @@ createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
 // BGM - 'bgm-sxg_mp3'
-const bgm = playSound({ src: musicArr[bgmSelectValue.value], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM' })
+const bgm = playSound({ src: findBgm(bgmSelectValue.value).src, volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM', sessionCategory: 'soloAmbient' })
 
 function nulToUndef(data) {
     return data.map(res => {
@@ -830,8 +835,9 @@ function contTime(isStop = false) {
 
 const switchBgmClick = (ev) => {
     const succ = bgmSelect.find(res => res.title === (ev.target?.innerText || ev.target?.dataset?.text || ''))
+    if (!succ || setConfig.bgmSelectValue === succ?.value) return
     setConfig.bgmSelectValue = succ.value
-    bgm.src = musicArr[succ.value]
+    bgm.src = succ.src
 }
 
 // 订正事件
@@ -860,12 +866,6 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyClick = (key) => {
-    // uni.saveFile({
-    //     tempFilePath: './1.json',
-    //     complete: function (res) {
-    //         var savedFilePath = res.savedFilePath;
-    //     }
-    // });
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     if (
         numList[curidx.value][2] === 1 && key !== 'next' // 已判定当前题为正确
@@ -896,8 +896,7 @@ const keyClick = (key) => {
         default: // 默认数字输入事件 
             const _succ = Array.isArray(numList[curidx.value][0][3]) ? numList[curidx.value][0][3][0] : numList[curidx.value][0][3];
             let _succLen = _succ.toString().length
-            _succLen = _succLen + (_succLen % 2 === 0 ? 1 : 0) 
-            console.log(_succ,_succLen);
+            _succLen = _succLen + (_succLen % 2 === 0 ? 1 : 0)
             const _keyVal = _val.length < _succLen ? _val + key : _val;
             numList[curidx.value][1] = _keyVal.match(/^(0\.?|[1-9]\d*(\.?\d*))/)[0]
             break;

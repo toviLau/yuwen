@@ -166,7 +166,7 @@ function expressionResult(data) {
  * @param {string} instanceName 实例名称
  * @return 当前媒体实例对象
  */
-function playSound({ src, loop = false, volume = 10, instanceName }) {
+function playSound({ src, loop = false, volume = 10, instanceName, sessionCategory = 'ambient' }) {
     /** 
      * @Description  :  
      * @Author       : ToviLau 46134256@qq.com
@@ -178,13 +178,14 @@ function playSound({ src, loop = false, volume = 10, instanceName }) {
     const audioPlay = player => {
         Object.assign(player, {
             src,
-            volume: volume / (20 - (volume / 15)),
+            // volume: volume / (20 - (volume / 15)),
+            volume: volume / 20,                    
             autoplay: true,
             loop,
+            sessionCategory
         });
         player.onEnded(() => {
             player.destroy()
-            // delete player
         });
     }
 
