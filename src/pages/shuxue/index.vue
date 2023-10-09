@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-09 14:39:34
+ * @LastEditTime : 2023-10-09 23:35:00
 -->
 <template>
     <view class="content">
@@ -448,7 +448,7 @@ const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
 const decimalLen = ref(storageConf.decimalLen) // 小数位数
 const scrollTop = ref(0) // 滚动位置
 const vertical = ref(storageConf.vertical) // 开启竖式
-const historyConf = reactive({
+const historyConf = reactive({ // 历史记录
     status: false,
     list: []
 })
@@ -584,15 +584,15 @@ const popupConf = reactive({
 const bgmSelect = [{
     title: '上学歌',
     value: 'bgm-sxg_mp3',
-    src: 'http://file.7bzc.com/radio/bgm-sxg.mp3'
+    // src: 'http://file.7bzc.com/radio/bgm-sxg.mp3'
 }, {
-//     title: '读书郞',
-//     value: 'bgm-dsl_mp3',
-//     src: 'http://file.7bzc.com/radio/bgm-dsl.mp3'
-// }, {
+    //     title: '读书郞',
+    //     value: 'bgm-dsl_mp3',
+    //     src: 'http://file.7bzc.com/radio/bgm-dsl.mp3'
+    // }, {
     title: '劳动最光荣',
     value: 'bgm-ldzgr_mp3',
-    src: 'http://file.7bzc.com/radio/bgm-ldzgr.mp3'
+    // src: 'http://file.7bzc.com/radio/bgm-ldzgr.mp3'
 }]
 const findBgm = key => bgmSelect.find(res => res.value === key) || bgmSelect.find(res => res.value === defaultConf.bgmSelectValue)
 
@@ -606,7 +606,12 @@ watch(cursorType, () => {
 })
 
 watch(setConfig, val => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2, instanceName: 'set-config' })
+    if(setConfig.status) playSound({ 
+        src: musicArr['dian2_mp3'], 
+        volume: setConfig.bgmVolume / 2, 
+        instanceName: 'set-config',
+        sessionCategory: 'soloAmbient'
+    })
     cursorType.value = val.cursorType
     showIdx.value = val.showIdx
     vertical.value = val.vertical
@@ -793,7 +798,7 @@ createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
 // BGM - 'bgm-sxg_mp3'
-const bgm = playSound({ src: musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM' })
+const bgm = playSound({ src: musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM', sessionCategory: 'soloAmbient' })
 // OSS方式
 // const bgm = playSound({ src: findBgm(bgmSelectValue.value).src, volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM', sessionCategory: 'soloAmbient' })
 
@@ -870,6 +875,7 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyClick = (key) => {
+    autoCurItemPosition()
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     if (
         numList[curidx.value][2] === 1 && key !== 'next' // 已判定当前题为正确
@@ -892,8 +898,6 @@ const keyClick = (key) => {
                 ? numList.findIndex((res, idx) => res[2] !== 1 && idx > _curidx)
                 : _curidx
             curidx.value = _nextIdx > numList.length - 1 ? curidx.value : _nextIdx
-
-            autoCurItemPosition()
             break;
 
         case '.':
@@ -1082,7 +1086,7 @@ const cleanConfig = () => {
         bgmSelectValue
     } = getStorageData()
 
-    bgm.src = findBgm(bgmSelectValue).src
+    bgm.src = musicArr[bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
     if (!bgmPause.value) {
         bgm.volume = volume / 20
         bgmPause.value = false

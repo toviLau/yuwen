@@ -176,7 +176,6 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
      * @param         {object} player: audio对象
      **/    
     const audioPlayer = player => {
-        console.log(src);
         Object.assign(player, {
             src,
             // volume: volume / (20 - (volume / 15)),
