@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-09 01:53:04
+ * @LastEditTime : 2023-10-09 14:39:34
 -->
 <template>
     <view class="content">
@@ -586,10 +586,10 @@ const bgmSelect = [{
     value: 'bgm-sxg_mp3',
     src: 'http://file.7bzc.com/radio/bgm-sxg.mp3'
 }, {
-    title: '读书郞',
-    value: 'bgm-dsl_mp3',
-    src: 'http://file.7bzc.com/radio/bgm-dsl.mp3'
-}, {
+//     title: '读书郞',
+//     value: 'bgm-dsl_mp3',
+//     src: 'http://file.7bzc.com/radio/bgm-dsl.mp3'
+// }, {
     title: '劳动最光荣',
     value: 'bgm-ldzgr_mp3',
     src: 'http://file.7bzc.com/radio/bgm-ldzgr.mp3'
@@ -793,7 +793,9 @@ createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
 // BGM - 'bgm-sxg_mp3'
-const bgm = playSound({ src: findBgm(bgmSelectValue.value).src, volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM', sessionCategory: 'soloAmbient' })
+const bgm = playSound({ src: musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM' })
+// OSS方式
+// const bgm = playSound({ src: findBgm(bgmSelectValue.value).src, volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM', sessionCategory: 'soloAmbient' })
 
 function nulToUndef(data) {
     return data.map(res => {
@@ -837,7 +839,9 @@ const switchBgmClick = (ev) => {
     const succ = bgmSelect.find(res => res.title === (ev.target?.innerText || ev.target?.dataset?.text || ''))
     if (!succ || setConfig.bgmSelectValue === succ?.value) return
     setConfig.bgmSelectValue = succ.value
-    bgm.src = succ.src
+    bgm.src = musicArr[succ.value]
+    // oss 方式
+    // bgm.src = succ.src
 }
 
 // 订正事件

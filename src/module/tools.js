@@ -175,7 +175,8 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
      * @LastEditTime : Do not edit
      * @param         {object} player: audio对象
      **/    
-    const audioPlay = player => {
+    const audioPlayer = player => {
+        console.log(src);
         Object.assign(player, {
             src,
             // volume: volume / (20 - (volume / 15)),
@@ -190,7 +191,7 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
     }
 
     const audio = uni.createInnerAudioContext();
-    audioPlay(audio)
+    audioPlayer(audio)
     return audio
 }
 
