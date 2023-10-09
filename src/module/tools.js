@@ -167,43 +167,30 @@ function expressionResult(data) {
  * @return 当前媒体实例对象
  */
 function playSound({ src, loop = false, volume = 10, instanceName, sessionCategory = 'ambient' }) {
-    // /** 
-    //  * @Description  :  
-    //  * @Author       : ToviLau 46134256@qq.com
-    //  * @Date         : 2023-10-03 16:31:11
-    //  * @LastEditors  : ToviLau 46134256@qq.com
-    //  * @LastEditTime : Do not edit
-    //  * @param         {object} player: audio对象
-    //  **/    
-    // const audioPlay = player => {
-    //     Object.assign(player, {
-    //         src,
-    //         // volume: volume / (20 - (volume / 15)),
-    //         volume: volume / 20,
-                    
-    //         autoplay: true,
-    //         loop,
-    //         sessionCategory
-    //     });
-    //     player.onEnded(() => {
-    //         player.destroy()
-    //     });
-    // }
-
-    // const audio = uni.createInnerAudioContext();
-    // audioPlay(audio)
-    // return audio
-
+    /** 
+     * @Description  :  
+     * @Author       : ToviLau 46134256@qq.com
+     * @Date         : 2023-10-03 16:31:11
+     * @LastEditors  : ToviLau 46134256@qq.com
+     * @LastEditTime : Do not edit
+     * @param         {object} player: audio对象
+     **/    
+    const audioPlay = player => {
+        Object.assign(player, {
+            src,
+            // volume: volume / (20 - (volume / 15)),
+            volume: volume / 20,
+            autoplay: true,
+            loop,
+            sessionCategory
+        });
+        player.onEnded(() => {
+            player.destroy()
+        });
+    }
 
     const audio = uni.createInnerAudioContext();
-    audio.autoplay=true
-    audio.src=src
-    audio.volume= volume / 20
-    audio.loop=loop
-    audio.sessionCategory=sessionCategory
-    audio.onEnded(() => {
-        audio.destroy()
-    });
+    audioPlay(audio)
     return audio
 }
 

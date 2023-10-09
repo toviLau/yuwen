@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-08 23:53:24
+ * @LastEditTime : 2023-10-09 01:53:04
 -->
 <template>
     <view class="content">
@@ -1078,7 +1078,7 @@ const cleanConfig = () => {
         bgmSelectValue
     } = getStorageData()
 
-    bgm.src = musicArr[bgmSelectValue]
+    bgm.src = findBgm(bgmSelectValue).src
     if (!bgmPause.value) {
         bgm.volume = volume / 20
         bgmPause.value = false
