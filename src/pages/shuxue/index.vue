@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-09 23:35:00
+ * @LastEditTime : 2023-10-10 22:04:55
 -->
 <template>
     <view class="content">
@@ -385,7 +385,8 @@ import {
     mergeData,
     playSound,
     expressionResult,
-    createKeyboardCode
+    createKeyboardCode,
+    throttle
 } from "../../module/tools";
 import date from 'date-php'
 import Bignumber from 'BigNumber.js'
@@ -584,15 +585,15 @@ const popupConf = reactive({
 const bgmSelect = [{
     title: '上学歌',
     value: 'bgm-sxg_mp3',
-    // src: 'http://file.7bzc.com/radio/bgm-sxg.mp3'
+    src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-sxg.mp3'
 }, {
-    //     title: '读书郞',
-    //     value: 'bgm-dsl_mp3',
-    //     src: 'http://file.7bzc.com/radio/bgm-dsl.mp3'
-    // }, {
+    title: '读书郞',
+    value: 'bgm-dsl_mp3',
+    src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-dsl.mp3'
+}, {
     title: '劳动最光荣',
     value: 'bgm-ldzgr_mp3',
-    // src: 'http://file.7bzc.com/radio/bgm-ldzgr.mp3'
+    src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-ldzgr.mp3'
 }]
 const findBgm = key => bgmSelect.find(res => res.value === key) || bgmSelect.find(res => res.value === defaultConf.bgmSelectValue)
 
@@ -605,17 +606,23 @@ watch(cursorType, () => {
     setConfig.cursorType = cursorType.value
 })
 
-watch(setConfig, val => {
-    if(setConfig.status) playSound({ 
-        src: musicArr['dian2_mp3'], 
-        volume: setConfig.bgmVolume / 2, 
-        instanceName: 'set-config',
-        sessionCategory: 'soloAmbient'
-    })
-    cursorType.value = val.cursorType
-    showIdx.value = val.showIdx
-    vertical.value = val.vertical
-})
+watch(setConfig,
+    val => {
+        (throttle(() => {
+            playSound({
+                src: musicArr['dian2_mp3'],
+                volume: setConfig.bgmVolume / 2,
+                instanceName: 'set-config',
+                sessionCategory: 'soloAmbient'
+            })
+        }, 100))()
+
+        cursorType.value = val.cursorType
+        showIdx.value = val.showIdx
+        vertical.value = val.vertical
+    },
+    // { immediate: true }
+)
 
 watch(bgmPause, val => {
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
@@ -798,7 +805,13 @@ createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
 // BGM - 'bgm-sxg_mp3'
-const bgm = playSound({ src: musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue], volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM', sessionCategory: 'soloAmbient' })
+const bgm = playSound({
+    src: findBgm(bgmSelectValue.value).src || musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue],
+    volume: setConfig.bgmVolume,
+    loop: true,
+    instanceName: 'BGM',
+    sessionCategory: 'soloAmbient'
+})
 // OSS方式
 // const bgm = playSound({ src: findBgm(bgmSelectValue.value).src, volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM', sessionCategory: 'soloAmbient' })
 
@@ -844,7 +857,7 @@ const switchBgmClick = (ev) => {
     const succ = bgmSelect.find(res => res.title === (ev.target?.innerText || ev.target?.dataset?.text || ''))
     if (!succ || setConfig.bgmSelectValue === succ?.value) return
     setConfig.bgmSelectValue = succ.value
-    bgm.src = musicArr[succ.value]
+    bgm.src = succ.src || musicArr[succ.value]
     // oss 方式
     // bgm.src = succ.src
 }
@@ -1013,7 +1026,7 @@ const subEnter = () => {
 
 // 设置窗口显隐
 const showConfig = (val = false) => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
+    // playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     if (val) Object.assign(setConfig, getStorageData())
     setConfig.status = val
 }
@@ -1025,7 +1038,7 @@ function setNumFn(num) {
 
 // 恢复默认
 const setNumDefault = () => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
+    // playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     Object.assign(setConfig, defaultConf)
     // cursorType.value = setConfig.cursorType
     bgm.volume = setConfig.bgmVolume / 20
@@ -1078,27 +1091,25 @@ const saveConfig = () => {
 
 // 取消设置事件
 const cleanConfig = () => {
+    showConfig(false)
     const {
         bgmVolume: volume,
-        cursorType: cursor,
+        cursorType: _cursorType,
         showIdx: _showIdx,
         vertical,
         bgmSelectValue
     } = getStorageData()
 
-    bgm.src = musicArr[bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
-    if (!bgmPause.value) {
-        bgm.volume = volume / 20
-        bgmPause.value = false
-    } else {
-        bgm.pause()
-    }
+    const bgmSrc = musicArr[bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
+    if (bgmSrc !== bgm.src) bgm.src = bgmSrc
+    !bgmPause.value ? bgmPause.value = false : bgm.pause()
 
-    cursorType.value = cursor
+    cursorType.value = _cursorType
     showIdx.value = _showIdx
-    setConfig.showIdx = _showIdx
-    setConfig.vertical = vertical
-    showConfig(false)
+    Object.assign(setConfig, {
+        showIdx: _showIdx,
+        vertical
+    })
 
 }
 
@@ -1117,7 +1128,6 @@ const setDecimalLenChange = val => {
 const bgmVolumeChange = val => {
     setConfig.bgmVolume = val
     bgm.volume = val / 20
-    // bgm.play()
 }
 
 // 显示历史弹窗
@@ -1208,10 +1218,7 @@ const recordDel = () => {
 
 
 onShow(() => {
-    if (!bgmPause.value) {
-        // bgm.volume = setConfig.bgmVolume / 20
-        bgm.play();
-    }
+    if (!bgmPause.value) bgm.play();
 })
 onHide(() => {
     bgm.pause()

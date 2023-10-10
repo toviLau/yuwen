@@ -174,7 +174,7 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
      * @LastEditors  : ToviLau 46134256@qq.com
      * @LastEditTime : Do not edit
      * @param         {object} player: audio对象
-     **/    
+     **/
     const audioPlayer = player => {
         Object.assign(player, {
             src,
@@ -248,10 +248,35 @@ function createKeyboardCode() {
     return keyboardCodeArr
 }
 
+// 防抖
+function debounce(fn, delay = 300) {
+    let timer = null;
+    return function () {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(fn, delay);
+    }
+}
+
+// 截流
+function throttle(fn, delay = 300) {
+    let eving = false
+    return function () {
+        // 正在执行
+        if (eving) return false
+        eving = true;
+        setTimeout(() => {
+            eving = false;
+            fn()
+        }, delay)
+    }
+}
+
 export {
     random,
     mergeData,
     playSound,
     expressionResult,
-    createKeyboardCode
+    createKeyboardCode,
+    debounce,
+    throttle
 };
