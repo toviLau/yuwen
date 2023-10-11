@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-10 22:04:55
+ * @LastEditTime : 2023-10-11 23:02:45
 -->
 <template>
     <view class="content">
@@ -804,16 +804,13 @@ function createList(isInit = true) {
 createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
-// BGM - 'bgm-sxg_mp3'
+// BGM
 const bgm = playSound({
     src: findBgm(bgmSelectValue.value).src || musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue],
     volume: setConfig.bgmVolume,
     loop: true,
-    instanceName: 'BGM',
-    sessionCategory: 'soloAmbient'
+    instanceName: 'BGM'
 })
-// OSS方式
-// const bgm = playSound({ src: findBgm(bgmSelectValue.value).src, volume: setConfig.bgmVolume, loop: true, instanceName: 'BGM', sessionCategory: 'soloAmbient' })
 
 function nulToUndef(data) {
     return data.map(res => {

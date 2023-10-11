@@ -179,7 +179,7 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
         Object.assign(player, {
             src,
             // volume: volume / (20 - (volume / 15)),
-            volume: volume / 20,
+            volume: (volume && volume > 20 ? 20 : volume)/ 20,
             autoplay: true,
             loop,
             sessionCategory
