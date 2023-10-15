@@ -2,135 +2,422 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2022-09-23 22:46:19
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-02 19:54:53
+ * @LastEditTime : 2023-10-16 05:18:47
 -->
 <template>
-    <page-meta
-        page-orientation="landscape"
-        root-font-size="16px"
-        >
-    <view class="content">
-        <div class="btns">
-            <div class="btn"
-                 @click="randomList()">打乱
-            </div>
-            <div class="btn"
-                 @click="show = showPopup()">筛选
-            </div>
-        </div>
-        <div class="list">
-            <div class="list-content">
-                <div class="list-item"
-                     v-for="i in selectArr.length < 3 && selectArr.every(item=>pyList.sm.list.includes(item)) ? selectArr : selectArr"
-                     :key="i">{{ i }}
+    <page-meta page-orientation="landscape" root-font-size="16px">
+        <view class="content">
+            <div class="btns">
+                <div class="btn" @click="randomList()">打乱
                 </div>
-                <div class="list-item"
-                     v-for="i in selectArr.length%6 > 0 ? Math.abs(6 - selectArr.length%6) : 0"
-                     :key="i"/>
-            </div>
-        </div>
-        <div class="select"
-             :style="{display: show ? 'block' : 'none'}">
-            <div class="form">
-               <!-- <div class="switch">合并模式:
-                   <switch :checked="isMerge"
-                           color="#FFCC33"
-                           @change="s=>isMerge = s.detail.value"
-                           style="transform:scale(0.7)"/>
-                   <span class="tip"
-                         v-show="isMerge">声母可选: {{ selectLenSm }}个 - 韵母可选: {{ selectLenYm }}个</span>
-               </div> -->
-                <div class="btns">
-                    <button class="btn"
-                            size="mini"
-                            @click="reload()">恢复默认
-                    </button>
-                    <button class="btn"
-                            size="mini"
-                            @click="reload(true)">全不选
-                    </button>
+                <div class="btn" @click="show = showPopup()">筛选
                 </div>
-                <icon type="cancel"
-                      size="26"
-                      color="#f0f0f0"
-                      @click="show = showPopup()"/>
             </div>
-            <template v-for="list in Object.keys(pyList)">
-                <div class="select-li"
-                     v-if="!(isMerge && ['ym1','ztrd'].includes(list))"
-                     :key="list">
-                    <div class="select-label">{{ pyList[list].title }}</div>
-                    <div class="select-items">
-                        <div class="select-item"
-                             :class="{
-                            active: hasInclude(item)
-                         }"
-                             v-for="item in pyList[list].list"
-                             :key="item"
-                             @click="()=>opSelectArr(item)">{{ item }}
+            <div class="list">
+                <div class="list-content">
+                    <div class="list-item" :class="{
+                        'list-item-hover': focus && item.value === focus.value,
+                        // sm: item.audio.type === 'sm',
+                        // dym: item.audio.type === 'dym',
+                        // fym: item.audio.type === 'fym',
+                    }" v-for="item in selectArr" :key="item.value" @click="itemCk(item)">
+                        <div class="type-tips">
+                            {{ {
+                                sm: '声母',
+                                dym: '单韵母',
+                                fym: '复韵母',
+                                qbym: '前鼻韵母',
+                                hbym: '后鼻韵母',
+                                whole: '整体认读'
+                            }[item.type] }}
+                        </div>
+                        <span class="iconfont icon-volume" :class="{
+                            playing: readPlaying === item.value
+                        }" @click="playAudio({ ...item })" :key="item.value"
+                            v-if="item?.audio?.src && item?.audio?.areaTime"></span>
+                        {{ item.value }}
+                    </div>
+                    <div class="list-item" v-for="i in selectArr.length % 6 > 0 ? Math.abs(6 - selectArr.length % 6) : 0"
+                        :key="i" />
+                </div>
+            </div>
+            <div class="select" :style="{ display: show ? 'flex' : 'none' }">
+                <div class="form">
+                    <!-- <div class="switch">合并模式:
+                        <switch :checked="isMerge"
+                                color="#FFCC33"
+                                @change="s=>isMerge = s.detail.value"
+                                style="transform:scale(0.7)"/>
+                        <span class="tip"
+                                v-show="isMerge">声母可选: {{ selectLenSm }}个 - 韵母可选: {{ selectLenYm }}个</span>
+                    </div> -->
+                    <div class="btns">
+                        <button class="btn" size="mini" @click="reload()">恢复默认
+                        </button>
+                        <button class="btn" size="mini" @click="reload(true)">全不选
+                        </button>
+                    </div>
+                    <icon type="cancel" size="26" color="#f0f0f0" @click="show = showPopup()" />
+                </div>
+                <div style="overflow: auto; flex:1;">
+                    <div class="select-li" vif="'合并模式' && !(isMerge && ['ym1', 'ztrd'].includes(list))"
+                        v-for="(list, index) in Object.keys(pyList)" :key="list">
+                        <div class="select-label">{{ pyList[list].title }}</div>
+                        <div class="select-items">
+                            <div class="select-item" :class="{
+                                active: hasInclude(item),
+                                // 'ym-ghbs': list !== 'sm'
+                            }" v-for="item in pyList[list].list" :key="'select' + item.value"
+                                @click="() => opSelectArr(item)">
+                                {{ item.value }}
+                            </div>
+                            <!-- <div class="select-group" v-if="index%4===0">
+                            </div> -->
                         </div>
                     </div>
                 </div>
-            </template>
-        </div>
-    </view>
+            </div>
+        </view>
     </page-meta>
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, reactive, watch } from 'vue';
+import {
+    playSound
+} from "../../module/tools";
+const musics = import.meta.globEager('../../assets/pinyin/*.mp3')
+const audioList = reactive({})
+
+Object.keys(musics).forEach(key => {
+    const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, '$1_$2')
+    audioList[_key] = musics[key].default
+})
+const readPlaying = ref('') // 是否播阅读放中
+const focus = reactive({}) // tfq
 
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
-    title:'四小二(8)班',
-    content:'语文拼音练习',
+    title: '四小二(8)班',
+    content: '语文拼音练习',
     imageUrl: '/assets/icon.jpeg',
     path: '/pages/yuwen/index'
 });
 // #endif
 
-// 有声调韵母字典表
-const dictionary = {
-    'ā': '`', 'á': 1, 'ǎ': 2, 'à': 3, 'ō': 4, 'ó': 5, 'ǒ': 6, 'ò': 7,
-    'ē': 8, 'é': 9, 'ě': 0, 'è': '-', 'ī': '~', 'í': '!', 'ǐ': '@', 'ì': '#',
-    'ū': '$', 'ú': '%', 'ǔ': '^', 'ù': '&', 'ǖ': '*', 'ǘ': '(', 'ǚ': ')', 'ǜ': '_',
-};
+const audioPathHost = "http://www.baidu.com/pinyin"
 // 拼音表
 const pyList = {
-    sm  : {
+    sm: {
         title: '声母',
-        list : [
-            'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h',
-            'j', 'q', 'x', 'zh', 'ch', 'sh', 'r', 'z', 'c', 's', 'y', 'w',
-        ],
-    },
-    ym1 : {
-        title: '韵母有声调',
-        list : (() => Object.keys(dictionary).map(item => dictionary[item]))(),
-    },
-    ym2 : {
-        title: '韵母无声调',
-        list : [
-            'a', 'o', 'e', 'i', 'u', 'v',
-            'ai', 'ei', 'ui', 'ao', 'ou', 'iu', 'ie', 've', 'er', 'an', 'en', 'in', 'un', 'vn',
-            'ang', 'eng', 'ing', 'ong',
-        ],
-    },
-    ztrd: {
-        title: '整体认读',
-        list : [
-            'zhi', 'chi', 'shi', 'ri', 'zi', 'ci', 'si', 'yi',
-            'wu', 'yu', 'ye', 'yue', 'yuan', 'yin', 'yun', 'ying'],
-    },
+        list: [
+            { value: 'b', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [0, 1500] } },
+            { value: 'p', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [2, 1500] } },
+            { value: 'm', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [4, 1500] } },
+            { value: 'f', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [6, 1500] } },
+            { value: 'd', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [8, 1500] } },
+            { value: 't', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [10, 1500] } },
+            { value: 'n', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [12, 1500] } },
+            { value: 'l', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [14, 1500] } },
+            { value: 'g', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [16, 1500] } },
+            { value: 'k', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [18, 1500] } },
+            { value: 'h', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [20, 1500] } },
+            { value: 'j', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [22, 1500] } },
+            { value: 'q', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [24, 1500] } },
+            { value: 'x', audio: { src: audioPathHost + '/sm1.mp3', areaTime: [26, 1500] } },
 
+            { value: 'z', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [0, 1500] } },
+            { value: 'c', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [2, 1500] } },
+            { value: 's', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [4, 1500] } },
+            { value: 'zh', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [6, 1500] } },
+            { value: 'ch', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [8, 1500] } },
+            { value: 'sh', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [10, 1500] } },
+            { value: 'r', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [12, 1500] } },
+            { value: 'y', audio: { src: audioPathHost + '/dym.mp3', areaTime: [60, 1500] } },
+            { value: 'w', audio: { src: audioPathHost + '/dym.mp3', areaTime: [70, 1500] } }
+        ],
+    },
+    dym: {
+        title: '单韵母',
+        // list: (() => Object.keys(dictionary).map(item => dictionary[item]))(),
+        list: [
+            { key: 'ā', value: '`', audio: { src: audioPathHost + '/dym.mp3', areaTime: [0, 1500] } },
+            { key: 'á', value: '1', audio: { src: audioPathHost + '/dym.mp3', areaTime: [2, 1500] } },
+            { key: 'ǎ', value: '2', audio: { src: audioPathHost + '/dym.mp3', areaTime: [4, 1500] } },
+            { key: 'à', value: '3', audio: { src: audioPathHost + '/dym.mp3', areaTime: [6, 1500] } },
+
+            { key: 'ō', value: '4', audio: { src: audioPathHost + '/dym.mp3', areaTime: [10, 1500] } },
+            { key: 'ó', value: '5', audio: { src: audioPathHost + '/dym.mp3', areaTime: [12, 1500] } },
+            { key: 'ǒ', value: '6', audio: { src: audioPathHost + '/dym.mp3', areaTime: [14, 1500] } },
+            { key: 'ò', value: '7', audio: { src: audioPathHost + '/dym.mp3', areaTime: [16, 1500] } },
+
+            { key: 'ē', value: '8', audio: { src: audioPathHost + '/dym.mp3', areaTime: [20, 1500] } },
+            { key: 'é', value: '9', audio: { src: audioPathHost + '/dym.mp3', areaTime: [22, 1500] } },
+            { key: 'ě', value: '0', audio: { src: audioPathHost + '/dym.mp3', areaTime: [24, 1500] } },
+            { key: 'è', value: '-', audio: { src: audioPathHost + '/dym.mp3', areaTime: [26, 1500] } },
+
+            { key: 'ī', value: '~', audio: { src: audioPathHost + '/dym.mp3', areaTime: [30, 1500] } },
+            { key: 'í', value: '!', audio: { src: audioPathHost + '/dym.mp3', areaTime: [32, 1500] } },
+            { key: 'ǐ', value: '@', audio: { src: audioPathHost + '/dym.mp3', areaTime: [34, 1500] } },
+            { key: 'ì', value: '#', audio: { src: audioPathHost + '/dym.mp3', areaTime: [36, 1500] } },
+
+            { key: 'ū', value: '$', audio: { src: audioPathHost + '/dym.mp3', areaTime: [40, 1500] } },
+            { key: 'ú', value: '%', audio: { src: audioPathHost + '/dym.mp3', areaTime: [42, 1500] } },
+            { key: 'ǔ', value: '^', audio: { src: audioPathHost + '/dym.mp3', areaTime: [44, 1500] } },
+            { key: 'ù', value: '&', audio: { src: audioPathHost + '/dym.mp3', areaTime: [46, 1500] } },
+
+            { key: 'ǖ', value: '*', audio: { src: audioPathHost + '/dym.mp3', areaTime: [50, 1500] } },
+            { key: 'ǘ', value: '(', audio: { src: audioPathHost + '/dym.mp3', areaTime: [52, 1500] } },
+            { key: 'ǚ', value: ')', audio: { src: audioPathHost + '/dym.mp3', areaTime: [54, 1500] } },
+            { key: 'ǜ', value: '_', audio: { src: audioPathHost + '/dym.mp3', areaTime: [56, 1500] } }
+        ]
+    },
+    fym: {
+        title: '复韵母',
+        list: [
+            { key: 'āi', value: '`i', audio: { src: audioPathHost + '/fym.mp3', areaTime: [0, 1500] } },
+            { key: 'ái', value: '1i', audio: { src: audioPathHost + '/fym.mp3', areaTime: [2, 1500] } },
+            { key: 'ǎi', value: '2i', audio: { src: audioPathHost + '/fym.mp3', areaTime: [4, 1500] } },
+            { key: 'ài', value: '3i', audio: { src: audioPathHost + '/fym.mp3', areaTime: [6, 1500] } },
+            { key: 'ēi', value: '8i', audio: { src: audioPathHost + '/fym.mp3', areaTime: [10, 1500] } },
+            { key: 'éi', value: '9i', audio: { src: audioPathHost + '/fym.mp3', areaTime: [12, 1500] } },
+            { key: 'ěi', value: '0i', audio: { src: audioPathHost + '/fym.mp3', areaTime: [14, 1500] } },
+            { key: 'èi', value: '-i', audio: { src: audioPathHost + '/fym.mp3', areaTime: [16, 1500] } },
+            { key: 'uī', value: 'u~', audio: { src: audioPathHost + '/fym.mp3', areaTime: [20, 1500] } },
+            { key: 'uí', value: 'u!', audio: { src: audioPathHost + '/fym.mp3', areaTime: [22, 1500] } },
+            { key: 'uǐ', value: 'u@', audio: { src: audioPathHost + '/fym.mp3', areaTime: [24, 1500] } },
+            { key: 'uì', value: 'u#', audio: { src: audioPathHost + '/fym.mp3', areaTime: [26, 1500] } },
+            { key: 'āo', value: '`o', audio: { src: audioPathHost + '/fym.mp3', areaTime: [30, 1500] } },
+            { key: 'áo', value: '1o', audio: { src: audioPathHost + '/fym.mp3', areaTime: [32, 1500] } },
+            { key: 'ǎo', value: '2o', audio: { src: audioPathHost + '/fym.mp3', areaTime: [34, 1500] } },
+            { key: 'ào', value: '3o', audio: { src: audioPathHost + '/fym.mp3', areaTime: [36, 1500] } },
+            { key: 'ōu', value: '4u', audio: { src: audioPathHost + '/fym.mp3', areaTime: [40, 1500] } },
+            { key: 'óu', value: '5u', audio: { src: audioPathHost + '/fym.mp3', areaTime: [42, 1500] } },
+            { key: 'ǒu', value: '6u', audio: { src: audioPathHost + '/fym.mp3', areaTime: [44, 1500] } },
+            { key: 'òu', value: '7u', audio: { src: audioPathHost + '/fym.mp3', areaTime: [46, 1500] } },
+            { key: 'iǖ', value: 'i*', audio: { src: audioPathHost + '/fym.mp3', areaTime: [50, 1500] } },
+            { key: 'iǘ', value: 'i(', audio: { src: audioPathHost + '/fym.mp3', areaTime: [52, 1500] } },
+            { key: 'iǚ', value: 'i)', audio: { src: audioPathHost + '/fym.mp3', areaTime: [54, 1500] } },
+            { key: 'iǜ', value: 'i_', audio: { src: audioPathHost + '/fym.mp3', areaTime: [56, 1500] } },
+
+            { key: 'ie', value: 'ie', audio: { src: audioPathHost + '/fym.mp3', areaTime: [60, 1500] } },
+            { key: 've', value: 've', audio: { src: audioPathHost + '/fym.mp3', areaTime: [62, 1500] } },
+            { key: 'er', value: 'er', audio: { src: audioPathHost + '/fym.mp3', areaTime: [64, 1500] } },
+            // { key: 'iē', value: 'i8', audio: { src: audioPathHost + '/fym.mp3', areaTime: [16, 1500] } },
+            // { key: 'ié', value: 'i9', audio: { src: audioPathHost + '/fym.mp3', areaTime: [18, 1500] } },
+            // { key: 'iě', value: 'i0', audio: { src: audioPathHost + '/fym.mp3', areaTime: [20, 1500] } },
+            // { key: 'iè', value: 'i-', audio: { src: audioPathHost + '/fym.mp3', areaTime: [22, 1500] } },
+            // { key: 'vē', value: 'v8', audio: { src: audioPathHost + '/fym.mp3', areaTime: [16, 1500] } },
+            // { key: 'vé', value: 'v9', audio: { src: audioPathHost + '/fym.mp3', areaTime: [18, 1500] } },
+            // { key: 'vě', value: 'v0', audio: { src: audioPathHost + '/fym.mp3', areaTime: [20, 1500] } },
+            // { key: 'vè', value: 'v-', audio: { src: audioPathHost + '/fym.mp3', areaTime: [22, 1500] } },
+            // { key: 'ēr', value: '8r', audio: { src: audioPathHost + '/fym.mp3', areaTime: [16, 1500] } },
+            // { key: 'ér', value: '9r', audio: { src: audioPathHost + '/fym.mp3', areaTime: [18, 1500] } },
+            // { key: 'ěr', value: '0r', audio: { src: audioPathHost + '/fym.mp3', areaTime: [20, 1500] } },
+            // { key: 'èr', value: '-r', audio: { src: audioPathHost + '/fym.mp3', areaTime: [22, 1500] } },
+        ]
+    },
+    qbym: {
+        title: '前鼻韵母',
+        list: [
+            { key: 'an', value: 'an', audio: { src: audioPathHost + '/bym.mp3', areaTime: [0, 1500] } },
+            { key: 'en', value: 'en', audio: { src: audioPathHost + '/bym.mp3', areaTime: [2, 1500] } },
+            { key: 'in', value: 'in', audio: { src: audioPathHost + '/bym.mp3', areaTime: [4, 1500] } },
+            { key: 'un', value: 'un', audio: { src: audioPathHost + '/bym.mp3', areaTime: [6, 1500] } },
+            { key: 'vn', value: 'vn', audio: { src: audioPathHost + '/bym.mp3', areaTime: [8, 1500] } },
+            // { key: 'ān', value: '`n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [0, 1500] }},
+            // { key: 'án', value: '1n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [2, 1500] } },
+            // { key: 'ǎn', value: '2n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [4, 1500] } },
+            // { key: 'àn', value: '3n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [6, 1500] } },
+            // { key: 'ēn', value: '8n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [16, 1500] } },
+            // { key: 'én', value: '9n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [18, 1500] } },
+            // { key: 'ěn', value: '0n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [20, 1500] } },
+            // { key: 'èn', value: '-n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [22, 1500] } },
+            // { key: 'īn', value: '~n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [24, 1500] } },
+            // { key: 'ín', value: '!n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [26, 1500] } },
+            // { key: 'ǐn', value: '@n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [28, 1500] } },
+            // { key: 'ìn', value: '#n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [30, 1500] } },
+            // { key: 'ūn', value: '$n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [32, 1500] } },
+            // { key: 'ún', value: '%n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [34, 1500] } },
+            // { key: 'ǔn', value: '^n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [36, 1500] } },
+            // { key: 'ùn', value: '&n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [38, 1500] } },
+            // { key: 'ǖn', value: '*n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [40, 1500] } },
+            // { key: 'ǘn', value: '(n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [42, 1500] } },
+            // { key: 'ǚn', value: ')n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [44, 1500] } },
+            // { key: 'ǜn', value: '_n', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [46, 1500] } }
+        ]
+    },
+    hbym: {
+        title: '后鼻韵母',
+        list: [
+            { key: 'ang', value: 'ang', audio: { src: audioPathHost + '/bym.mp3', areaTime: [10, 1500] } },
+            { key: 'eng', value: 'eng', audio: { src: audioPathHost + '/bym.mp3', areaTime: [12, 1500] } },
+            { key: 'ing', value: 'ing', audio: { src: audioPathHost + '/bym.mp3', areaTime: [14, 1500] } },
+            { key: 'ong', value: 'ong', audio: { src: audioPathHost + '/bym.mp3', areaTime: [16, 1500] } },
+            // { key: 'āng', value: '`ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [0, 1500] } },
+            // { key: 'áng', value: '1ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [2, 1500] } },
+            // { key: 'ǎng', value: '2ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [4, 1500] } },
+            // { key: 'àng', value: '3ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [6, 1500] } },
+            // { key: 'ēng', value: '8ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [16, 1500] } },
+            // { key: 'éng', value: '9ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [18, 1500] } },
+            // { key: 'ěng', value: '0ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [20, 1500] } },
+            // { key: 'èng', value: '-ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [22, 1500] } },
+            // { key: 'īng', value: '~ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [24, 1500] } },
+            // { key: 'íng', value: '!ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [26, 1500] } },
+            // { key: 'ǐng', value: '@ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [28, 1500] } },
+            // { key: 'ìng', value: '#ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [30, 1500] } },
+            // { key: 'ōng', value: '4ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [8, 1500] } },
+            // { key: 'óng', value: '5ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [10, 1500] } },
+            // { key: 'ǒng', value: '6ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [12, 1500] } },
+            // { key: 'òng', value: '7ng', audio: { src: audioPathHost + '/1111111.mp3', areaTime: [14, 1500] } },
+        ]
+    },
+    whole: {
+        title: '整体认读',
+        list: [
+            { value: 'zi', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [14, 1500] } },
+            { value: 'ci', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [16, 1500] } },
+            { value: 'si', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [18, 1500] } },
+            { value: 'zhi', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [20, 1500] } },
+            { value: 'chi', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [22, 1500] } },
+            { value: 'shi', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [24, 1500] } },
+            { value: 'ri', audio: { src: audioPathHost + '/sm2.mp3', areaTime: [26, 1500] } },
+
+            { value: 'y~', audio: { src: audioPathHost + '/dym.mp3', areaTime: [60, 1500] } },
+            { value: 'y!', audio: { src: audioPathHost + '/dym.mp3', areaTime: [62, 1500] } },
+            { value: 'y@', audio: { src: audioPathHost + '/dym.mp3', areaTime: [64, 1500] } },
+            { value: 'y#', audio: { src: audioPathHost + '/dym.mp3', areaTime: [66, 1500] } },
+
+            { value: 'w$', audio: { src: audioPathHost + '/dym.mp3', areaTime: [70, 1500] } },
+            { value: 'w%', audio: { src: audioPathHost + '/dym.mp3', areaTime: [72, 1500] } },
+            { value: 'w^', audio: { src: audioPathHost + '/dym.mp3', areaTime: [74, 1500] } },
+            { value: 'w&', audio: { src: audioPathHost + '/dym.mp3', areaTime: [76, 1500] } },
+
+            { value: 'y*', audio: { src: audioPathHost + '/dym.mp3', areaTime: [80, 1500] } },
+            { value: 'y(', audio: { src: audioPathHost + '/dym.mp3', areaTime: [82, 1500] } },
+            { value: 'y)', audio: { src: audioPathHost + '/dym.mp3', areaTime: [84, 1500] } },
+            { value: 'y_', audio: { src: audioPathHost + '/dym.mp3', areaTime: [86, 1500] } },
+            { value: 'ye', audio: { src: audioPathHost + '/fym.mp3', areaTime: [70, 1500] } },
+            // { value: 'ye', audio: '' },
+            // { value: 'ye', audio: '' },
+            // { value: 'ye', audio: '' },
+            { value: 'yue', audio: { src: audioPathHost + '/fym.mp3', areaTime: [72, 1500] } },
+            // { value: 'yue', audio: '' },
+            // { value: 'yue', audio: '' },
+            // { value: 'yue', audio: '' },
+            { value: 'yuan',audio: { src: audioPathHost + '/bym.mp3', areaTime: [18, 1500] }  },
+            { value: 'yin',audio: { src: audioPathHost + '/bym.mp3', areaTime: [20, 1500] }  },
+            { value: 'yvn',audio: { src: audioPathHost + '/bym.mp3', areaTime: [22, 1500] }  },
+            { value: 'ying',audio: { src: audioPathHost + '/bym.mp3', areaTime: [24, 1500] }  },
+            // { value: 'yuan', audio: '' },
+            // { value: 'yuan', audio: '' },
+            // { value: 'yuan', audio: '' },
+            // { value: 'y~n', audio: '' },
+            // { value: 'y!n', audio: '' },
+            // { value: 'y@n', audio: '' },
+            // { value: 'y#n', audio: '' },
+            // { value: 'yun', audio: '' },
+            // { value: 'yun', audio: '' },
+            // { value: 'yun', audio: '' },
+            // { value: 'yun', audio: '' },
+            // { value: 'y~ng', audio: '' },
+            // { value: 'y!ng', audio: '' },
+            // { value: 'y@ng', audio: '' },
+            // { value: 'y#ng', audio: '' },
+        ],
+    },
 };
+Object.keys(pyList).forEach(key => {
+    pyList[key].list.map(res => {
+        res.type = key
+        return res
+    })
+
+})
 const show = ref(false); // 筛选列表是否显示
-const defList = [...pyList.ym1.list]; // 默认筛选列表
+const defList = [...pyList.dym.list]; // 默认筛选列表
 const selectArr = ref([...defList]); // 已筛选列表
 const isMerge = ref(false);
 const selectLenSm = ref(0);
 const selectLenYm = ref(0);
 
+/**
+ * value
+ * audio:
+ *   src: 资源路径
+ *   areaTime: 播放时间[开始时间, 播放时长[ms]]
+ *   whole: 是否整体认读
+ * @param {*} item 
+ */
+const playAudio = (item) => {
+    if (readPlaying.value) return // 防抖
+    const { value, type, audio: { src, areaTime } } = item
+    readPlaying.value = value
+
+    const audioFn = () => {
+        const audio = playSound({
+            src,
+            volume: 10,
+            areaTime,
+            loop: false
+        })
+
+        audio.onStop(() => {
+            readPlaying.value = ''
+        })
+        audio.onError(error => {
+            const errCode = {
+                '10001': '系统错误',
+                '10002': '网络错误',
+                '10003': '文件错误',
+                '10004': '格式错误',
+                '-1': '未知错误',
+            }
+            setTimeout(() => {
+                readPlaying.value = ''
+            }, 1000)
+
+            uni.showToast({
+                icon: 'none',
+                title: (errCode[error] || '网络错误') + '，请稍后再试'
+            })
+        })
+    }
+    if (type) {
+        let areaTime = [0, 0]
+        switch (type) {
+            case 'dym':
+                areaTime = [0, 1500]
+                break;
+            case 'fym':
+                areaTime = [2, 1500]
+                break;
+            case 'sm':
+                areaTime = [4, 1500]
+                break;
+            case 'qbym':
+                areaTime = [6, 1600]
+                break;
+            case 'hbym':
+                areaTime = [8, 1600]
+                break;
+            case 'whole':
+                areaTime = [10, 2000]
+        }
+        playSound({
+            src: audioPathHost + '/type.mp3',
+            volume: 10,
+            areaTime,
+            loop: false
+        }).onStop(function () {
+            audioFn()
+        })
+    } else audioFn()
+}
+
+const itemCk = item => {
+    Object.assign(focus, item)
+}
 
 watch(isMerge, async (_isMerge) => {
     reload(_isMerge);
@@ -138,11 +425,11 @@ watch(isMerge, async (_isMerge) => {
 watch(selectArr, async (_selectArr) => {
     const _tmpList = Object.values(_selectArr);
     let count = 0
-    _tmpList.forEach(res=>{
-         count += pyList.sm.list.includes(res) ? 1 : 0
+    _tmpList.forEach(res => {
+        count += pyList.sm.list.includes(res) ? 1 : 0
     })
     selectLenSm.value = 6 - count
-    selectLenYm.value = ~~(30 / (6-selectLenSm.value)) - _tmpList.length + count;
+    selectLenYm.value = ~~(30 / (6 - selectLenSm.value)) - _tmpList.length + count;
 }, { deep: true });
 
 /**
@@ -184,13 +471,13 @@ const hasInclude = s => selectArr.value.includes(s);
  * @param {string} i 被[添加/删除]的字符
  * @param {number} maxStrlen 最多选择
  */
-const opSelectArr = (i, maxStrlen = 30) => {
+const opSelectArr = (i, maxStrlen = 36) => {
     hasInclude(i)
         ? selectArr.value.splice(selectArr.value.findIndex(j => j === i), 1)
         : selectArr.value.length < maxStrlen ? selectArr.value.push(i) : uni.showToast({
-            title   : `最多选 ${ maxStrlen } 个`,
+            title: `最多选 ${maxStrlen} 个`,
             duration: 2000,
-            icon    : 'none',
+            icon: 'none',
         });
 };
 
@@ -203,6 +490,7 @@ onMounted(() => randomList());
     display: flex;
     align-items: flex-start;
     height: 100vh;
+    width: 100vw;
 }
 
 @font-face {
@@ -214,7 +502,8 @@ onMounted(() => randomList());
 .line {
     position: relative;
 
-    &:before, &:after {
+    &:before,
+    &:after {
         font-size: inherit;
         content: '';
         position: absolute;
@@ -277,16 +566,116 @@ onMounted(() => randomList());
         padding: .01em 0;
         color: #fff;
         text-align: center;
-        font-size: 8vw;
+        font-size: 50rpx;
+        max-height: 3.6em;
         //line-height: 1em;
         line-height: 0;
         border: 1px solid #c9ec87;
+        position: relative;
         .line;
 
-        &:hover {
+        &.list-item-hover {
             background-color: #4c8a01;
+
+            .iconfont {
+                display: block;
+
+                &:after {}
+
+                &.playing {
+                    font-size: 20rpx;
+
+                    &:before {
+                        animation: playing 1s infinite linear;
+                        animation-timing-function: steps(1, end);
+                        display: block;
+                        overflow: hidden;
+
+                        width: 1em;
+                        margin-left: 0.3em;
+
+                        @keyframes playing {
+                            0% {
+                                width: 1em;
+                            }
+
+                            32% {
+                                width: 0.58em;
+                                // margin-left: 0.4em;
+
+                            }
+
+                            64% {
+
+                                width: 0.78em;
+                                // margin-left: 0.2em;
+                            }
+
+                            96% {
+
+                                width: 1;
+                                // margin-left: 0em;
+                            }
+                        }
+                    }
+                }
+            }
         }
+
+        .type-tips {
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 12rpx;
+            line-height: 1em;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: .25em .75em .25em .5em;
+            border-bottom-right-radius: .85em;
+            color: var(--c-safegray-hlight);
+            font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+
+        }
+
+        // &:dym, &:fym, &:sm{
+        // }
+        // &:dym{
+        //     &:before{
+        //         content: '单韵母'
+        //     }
+        // }
+        // &:fym{
+        //     &:before{
+        //         content: '复韵母'
+        //     }
+        // }
+        // &:sm{
+        //     &:before{
+        //         content: '声母'
+        //     }
+        // }
+
+        .iconfont {
+            position: absolute;
+            right: 0;
+            top: 0;
+            font-size: 14rpx;
+            width: 1.6em;
+            height: 1.1em;
+            line-height: 1.1em;
+            background-color: rgba(255, 255, 255, 0.35);
+            border-width: 0 0 1rpx 1rpx;
+            border-style: solid;
+            border-color: rgba(255, 255, 255, 0.35);
+            border-bottom-left-radius: .5em;
+            display: none;
+        }
+
+        &:hover {}
     }
+}
+
+uni-view {
+    display: flex !important;
 }
 
 .btns {
@@ -305,12 +694,13 @@ onMounted(() => randomList());
 
 .select {
     display: none;
+    flex-direction: column;
     position: fixed;
     top: 50%;
     transform: translateY(-50%);
-    max-height: 90%;
-    width: 95%;
-    left: 2.5%;
+    max-height: 80%;
+    width: 90%;
+    left: 6.5%;
     margin-left: -3px;
     border: 6px solid #d3763a;
     border-radius: 5px;
@@ -329,7 +719,7 @@ onMounted(() => randomList());
         text-align: center;
         padding: .15em;
         background-color: #5ca502;
-        margin-bottom: .5em;
+        margin-bottom: .25em;
 
         .switch {
             margin: 0 1em;
@@ -360,12 +750,14 @@ onMounted(() => randomList());
     }
 
     .select-li {
-        padding: .25em;
+        padding: .15em .2em;
         display: flex;
         margin: 0 .5em;
+        font-size: 2vw;
 
         .select-label {
-            width: 6em;
+            min-width: 4.5em;
+            flex-shrink: 0;
         }
 
         .select-items {
@@ -375,24 +767,51 @@ onMounted(() => randomList());
         }
     }
 
+    .ym-ghbs {
+
+        &:nth-child(8n+1),
+        &:nth-child(8n+2),
+        &:nth-child(8n+3),
+        &:nth-child(8n+4) {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    .select-group {
+
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
     .select-item {
         border: 1px solid #c9ec87;
-        order: 1px solid #c9ec87;
-        padding: 0.1em 0.2em;
+        padding: 0.1em 0.25em;
         box-sizing: content-box;
-        flex: 1 0 auto;
-        max-width: 2em;
+        flex: none;
+        // max-width: 2em;
         min-width: 1.2em;
         text-align: center;
         margin: -1px -1px 0 0;
         font-family: 'pinyin', serif !important;
-        font-size: 2.8vw;
+        font-size: 22rpx;
+        color: #87df29;
+
+        // min-width: 1.2em;
+        // text-align: center;
+
+        position: relative;
+
         .line;
 
         &.active {
-            background-color: #4c8a01;
+            // background-color: #325a01;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: #fff;
 
         }
+
+
     }
 }
 </style>

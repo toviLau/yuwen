@@ -164,9 +164,11 @@ function expressionResult(data) {
  * @param {boolean} loop 是否循环播放
  * @param {number} volume 音量大小(1-20)
  * @param {string} instanceName 实例名称
+ * @param {array} areaTime [开始位置s, 播放多久 ms]
  * @return 当前媒体实例对象
  */
-function playSound({ src, loop = false, volume = 10, instanceName, sessionCategory = 'ambient' }) {
+function playSound({ src, loop = false, volume = 10, instanceName, sessionCategory = 'ambient', areaTime }) {
+    if(areaTime && JSON.stringify(areaTime)==='[]') return
     /** 
      * @Description  :  
      * @Author       : ToviLau 46134256@qq.com
@@ -180,6 +182,7 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
             src,
             // volume: volume / (20 - (volume / 15)),
             volume: (volume && volume > 20 ? 20 : volume)/ 20,
+            startTime: areaTime ? areaTime[0]: undefined,
             autoplay: true,
             loop,
             sessionCategory
@@ -187,6 +190,13 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
         player.onEnded(() => {
             player.destroy()
         });
+        if(areaTime?.[1]){
+            player.onPlay(()=>{
+                setTimeout(()=>{
+                    player.stop()
+                }, areaTime[1])
+            })
+        }
     }
 
     const audio = uni.createInnerAudioContext();
