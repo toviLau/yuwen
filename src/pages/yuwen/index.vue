@@ -2,13 +2,13 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2022-09-23 22:46:19
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-16 05:18:47
+ * @LastEditTime : 2023-10-16 23:08:28
 -->
 <template>
-    <page-meta page-orientation="landscape" root-font-size="16px">
+    <page-meta class="page" page-orientation="landscape" root-font-size="16px">
         <view class="content">
             <div class="btns">
-                <div class="btn" @click="randomList()">打乱
+                <div class="btn" @click="randomList(selectArr)">打乱
                 </div>
                 <div class="btn" @click="show = showPopup()">筛选
                 </div>
@@ -52,10 +52,9 @@
                                 v-show="isMerge">声母可选: {{ selectLenSm }}个 - 韵母可选: {{ selectLenYm }}个</span>
                     </div> -->
                     <div class="btns">
-                        <button class="btn" size="mini" @click="reload()">恢复默认
-                        </button>
-                        <button class="btn" size="mini" @click="reload(true)">全不选
-                        </button>
+                        <div class="btn" size="mini" @click="reload('selDef')">恢复默认</div>
+                        <div class="btn" size="mini" @click="reload('none')">全不选</div>
+                        <div class="btn" size="mini" @click="randomSelectFn">随机抽选</div>
                     </div>
                     <icon type="cancel" size="26" color="#f0f0f0" @click="show = showPopup()" />
                 </div>
@@ -79,6 +78,20 @@
             </div>
         </view>
     </page-meta>
+
+    <cc-popup :isShow='randomSelect' width="65%" height="auto" radius="6rpx">
+        <div class="popup-dialog">
+            <span class="iconfont icon-wrong" @click="randomSelectColse"></span>
+            <div class="popup-dialog-title">请选择要抽选的数量{{ randomSelect }}</div>
+            <div class="popup-dialog-content">
+                <div class="popup-dialog-content-item" @click="() => reload(i * 6 + 6)" v-for="i in 5" :key="i"> {{ i * 6 +
+                    6 }} </div>
+            </div>
+            <!-- <div class="popup-dialog-footer">
+                <div class="popup-dialog-footer-item clean">取消</div>
+            </div> -->
+        </div>
+    </cc-popup>
 </template>
 
 <script setup>
@@ -86,16 +99,23 @@ import { onMounted, ref, reactive, watch } from 'vue';
 import {
     playSound
 } from "../../module/tools";
-const musics = import.meta.globEager('../../assets/pinyin/*.mp3')
-const audioList = reactive({})
+import ccPopup from "../../uni_modules/cc-popup"
 
+const musics = import.meta.globEager('../../assets/pinyin/*.mp3')
 Object.keys(musics).forEach(key => {
     const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, '$1_$2')
     audioList[_key] = musics[key].default
 })
+
+const audioList = reactive({})
+
 const readPlaying = ref('') // 是否播阅读放中
 const focus = reactive({}) // tfq
 
+const randomSelect = ref(false)
+const randomSelectFn = () => {
+    randomSelect.value = !randomSelect.value
+}
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
     title: '四小二(8)班',
@@ -106,6 +126,7 @@ uni.showShareMenu({
 // #endif
 
 const audioPathHost = "http://www.baidu.com/pinyin"
+const randomSelectColse = () => randomSelect.value = !randomSelect.value
 // 拼音表
 const pyList = {
     sm: {
@@ -305,10 +326,10 @@ const pyList = {
             // { value: 'yue', audio: '' },
             // { value: 'yue', audio: '' },
             // { value: 'yue', audio: '' },
-            { value: 'yuan',audio: { src: audioPathHost + '/bym.mp3', areaTime: [18, 1500] }  },
-            { value: 'yin',audio: { src: audioPathHost + '/bym.mp3', areaTime: [20, 1500] }  },
-            { value: 'yvn',audio: { src: audioPathHost + '/bym.mp3', areaTime: [22, 1500] }  },
-            { value: 'ying',audio: { src: audioPathHost + '/bym.mp3', areaTime: [24, 1500] }  },
+            { value: 'yuan', audio: { src: audioPathHost + '/bym.mp3', areaTime: [18, 1500] } },
+            { value: 'yin', audio: { src: audioPathHost + '/bym.mp3', areaTime: [20, 1500] } },
+            { value: 'yvn', audio: { src: audioPathHost + '/bym.mp3', areaTime: [22, 1500] } },
+            { value: 'ying', audio: { src: audioPathHost + '/bym.mp3', areaTime: [24, 1500] } },
             // { value: 'yuan', audio: '' },
             // { value: 'yuan', audio: '' },
             // { value: 'yuan', audio: '' },
@@ -419,9 +440,9 @@ const itemCk = item => {
     Object.assign(focus, item)
 }
 
-watch(isMerge, async (_isMerge) => {
-    reload(_isMerge);
-});
+// watch(isMerge, async (_isMerge) => {
+//     reload(_isMerge);
+// });
 watch(selectArr, async (_selectArr) => {
     const _tmpList = Object.values(_selectArr);
     let count = 0
@@ -439,25 +460,58 @@ watch(selectArr, async (_selectArr) => {
 const showPopup = status => status || !show.value;
 
 // 打乱
-const randomList = () => {
+const randomList = (arr, count = 2) => {
     const random = () => Math.random().toFixed(1) - 0;
-    selectArr.value
-        .sort(() => random() < 0.5 ? 1 : random() > 0.5 ? -1 : 0)
-        .sort(() => random() < 0.5 ? 1 : random() > 0.5 ? -1 : 0);
+    while (count > 0) {
+        arr.sort(() => random() < 0.5 ? 1 : random() > 0.5 ? -1 : 0);
+        console.log(count);
+        count --;
+    }
 };
 
 /**
  * 重载选择
- * @param {boolean} isClear 是否清空
+ * @param {string} type 是否清空
  * @return {any[]}
  */
-const reload = (isClear = false) => {
-    if (isMerge.value) isMerge.value = isClear;
-    !isClear
-        ? selectArr.value.splice(0, selectArr.value.length, ...defList)
-        : selectArr.value.splice(0, selectArr.value.length);
-    randomList();
+const reload = (type) => {
+    // if (isMerge.value) isMerge.value = isClear;
+    switch (type) {
+        case 'selDef':
+            selectArr.value.splice(0, selectArr.value.length, ...defList)
+            break;
+        case 'none':
+            selectArr.value.splice(0, selectArr.value.length);
+            break;
+        default:
+            const _allStr = []
+            Object.keys(pyList).forEach(key => {
+                _allStr.push(...pyList[key].list)
+            })
+            randomList(_allStr, 10)
+            _allStr.length = type
+            selectArr.value = _allStr
+            randomSelectColse()
+            
+    }
+    randomList(selectArr.value);
 };
+// // uni.showModal({
+// //     title: '请选择生成数量',
+// //     content: '',
+// //     showCancel: false,
+// //     // confirmText: '确定',
+// //     confirmColor: '#ed5d46',
+// // })
+// uni.showActionSheet({
+// 	itemList: ['A', 'B', 'C'],
+// 	success: function (res) {
+// 		console.log('选中了第' + (res.tapIndex + 1) + '个按钮');
+// 	},
+// 	fail: function (res) {
+// 		console.log(res.errMsg);
+// 	}
+// });
 
 
 /**
@@ -471,17 +525,17 @@ const hasInclude = s => selectArr.value.includes(s);
  * @param {string} i 被[添加/删除]的字符
  * @param {number} maxStrlen 最多选择
  */
-const opSelectArr = (i, maxStrlen = 36) => {
-    hasInclude(i)
-        ? selectArr.value.splice(selectArr.value.findIndex(j => j === i), 1)
-        : selectArr.value.length < maxStrlen ? selectArr.value.push(i) : uni.showToast({
+const opSelectArr = (item, maxStrlen = 30) => {
+    hasInclude(item)
+        ? selectArr.value.splice(selectArr.value.findIndex(j => j.value === item.value), 1)
+        : selectArr.value.length < maxStrlen ? selectArr.value.push(item) : uni.showToast({
             title: `最多选 ${maxStrlen} 个`,
             duration: 2000,
             icon: 'none',
         });
 };
 
-onMounted(() => randomList());
+onMounted(() => randomList(selectArr.value));
 
 </script>
 
@@ -491,6 +545,21 @@ onMounted(() => randomList());
     align-items: flex-start;
     height: 100vh;
     width: 100vw;
+
+    .btns {
+        display: flex;
+        flex-direction: column;
+
+        .btn {
+            background-image: linear-gradient(0deg, var(--c-safegray-light), var(--c-safegray-hlight));
+            color: var(--c-safegray-darker);
+            padding: .35em 1em;
+            border-radius: .35em;
+            display: inline-block;
+            border: 1px solid var(--c-safegray-hlight);
+            margin: .5em;
+        }
+    }
 }
 
 @font-face {
@@ -600,14 +669,14 @@ onMounted(() => randomList());
                             }
 
                             32% {
-                                width: 0.58em;
+                                width: 0.57em;
                                 // margin-left: 0.4em;
 
                             }
 
                             64% {
 
-                                width: 0.78em;
+                                width: 0.76em;
                                 // margin-left: 0.2em;
                             }
 
@@ -620,20 +689,25 @@ onMounted(() => randomList());
                     }
                 }
             }
+
+            .type-tips {
+                opacity: 1;
+                background-color: rgba(0, 0, 0, 0.35);
+            }
         }
 
         .type-tips {
             position: absolute;
             left: 0;
             top: 0;
-            font-size: 12rpx;
+            font-size: 10rpx;
             line-height: 1em;
-            background-color: rgba(0, 0, 0, 0.1);
+            background-color: rgba(0, 0, 0, 0.15);
             padding: .25em .75em .25em .5em;
             border-bottom-right-radius: .85em;
             color: var(--c-safegray-hlight);
+            opacity: 0.35;
             font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-
         }
 
         // &:dym, &:fym, &:sm{
@@ -675,22 +749,13 @@ onMounted(() => randomList());
 }
 
 uni-view {
-    display: flex !important;
-}
+    &.page {
 
-.btns {
-    display: flex;
-    flex-direction: column;
-
-    .btn {
-        background-color: #e8e5e5;
-        padding: .5em 1em;
-        border-radius: .5em;
-        display: inline-block;
-        border: 1px solid #f0f0f0;
-        margin: .5em;
+        display: flex !important;
     }
 }
+
+
 
 .select {
     display: none;
@@ -728,7 +793,7 @@ uni-view {
         }
 
         .btns {
-            flex: 1; // -----
+            flex: 1;
             width: 12em;
             display: flex;
             flex-direction: row;
@@ -736,15 +801,17 @@ uni-view {
             justify-content: flex-start;
             //justify-content: center;
             align-items: center;
+            font-size: 10rpx;
 
             .btn {
-                padding: 0.25em 1em;
-                border-radius: 0.5em;
+                background-image: linear-gradient(0deg, var(--c-safegray-light), var(--c-safegray-hlight));
+                color: var(--c-safegray-darker);
+                // padding: .5em 1em;
+                border-radius: .5em;
+                line-height: 1.5em;
+                padding: .25em 1em;
                 display: inline-block;
-                border: 1px solid #f0f0f0;
-                margin: 0 0.5em;
-                line-height: 1em;
-                height: 2em;
+                box-shadow: 0 0 3rpx var(--c-safegray-darker);
             }
         }
     }
@@ -767,15 +834,15 @@ uni-view {
         }
     }
 
-    .ym-ghbs {
+    // .ym-ghbs {
 
-        &:nth-child(8n+1),
-        &:nth-child(8n+2),
-        &:nth-child(8n+3),
-        &:nth-child(8n+4) {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-    }
+    //     &:nth-child(8n+1),
+    //     &:nth-child(8n+2),
+    //     &:nth-child(8n+3),
+    //     &:nth-child(8n+4) {
+    //         background-color: rgba(0, 0, 0, 0.1);
+    //     }
+    // }
 
     .select-group {
 
@@ -813,6 +880,67 @@ uni-view {
 
 
     }
+}
+
+.popup-dialog {
+    padding: 1em;
+    position: relative;
+
+    .icon-wrong {
+        position: absolute;
+        right: .75em;
+        top: .75em;
+        font-size: 20rpx;
+    }
+
+    .popup-dialog-title {
+        font-size: 20rpx;
+        color: var(--c-safegray-hdark);
+        line-height: 2em;
+        // padding: 
+    }
+
+    .popup-dialog-content {
+        font-size: 20rpx;
+        color: var(--c-safegray-hdark);
+        line-height: 1.5em;
+        display: flex;
+        justify-content: center;
+        margin: 1em 0;
+
+        .popup-dialog-content-item {
+            border: 1rpx solid var(--c-safegray-lighter);
+            // color: var(--c-safegray-lighter);
+            font-size: 16rpx;
+            color: var(--c-safegray-dark);
+            background-image: linear-gradient(0deg, var(--c-safegray-hlight), var(--c-safegray-hlighter));
+            line-height: 2em;
+            padding: 0 1em;
+            margin: 0 .5em;
+            border-radius: .25em;
+            // &.cur{
+            //     color: var(--c-safegray-dark);
+            //     border-color:  var(--c-safegray-dark);
+            // }
+        }
+    }
+
+    // .popup-dialog-footer{
+    //     text-align: center;
+    //     .popup-dialog-footer-item{
+    //         background-image: linear-gradient(0deg, var(--c-safegray-light), var(--c-safegray-hlight));
+    //             color: var(--c-safegray-darker);
+    //             // padding: .5em 1em;
+    //             border-radius: .25em;
+    //             line-height: 1.5em;
+    //             padding: .25em 1em;
+    //             display: inline-block;
+    //             box-shadow: 0 0 3rpx var(--c-safegray-darker);
+    //             // border: 1px solid var(--c-safegray-hlight);
+    //             // margin: .5em;
+    //     }
+
+    // }
 }
 </style>
 <!--
