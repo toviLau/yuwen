@@ -82,7 +82,7 @@
     <cc-popup :isShow='randomSelect' width="65%" height="auto" radius="6rpx">
         <div class="popup-dialog">
             <span class="iconfont icon-wrong" @click="randomSelectColse"></span>
-            <div class="popup-dialog-title">请选择要抽选的数量{{ randomSelect }}</div>
+            <div class="popup-dialog-title">请选择要抽选的数量</div>
             <div class="popup-dialog-content">
                 <div class="popup-dialog-content-item" @click="() => reload(i * 6 + 6)" v-for="i in 5" :key="i"> {{ i * 6 +
                     6 }} </div>
