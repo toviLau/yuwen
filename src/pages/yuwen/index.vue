@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2022-09-23 22:46:19
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-16 23:08:28
+ * @LastEditTime : 2023-10-19 00:06:34
 -->
 <template>
     <page-meta class="page" page-orientation="landscape" root-font-size="16px">
@@ -51,10 +51,16 @@
                         <span class="tip"
                                 v-show="isMerge">声母可选: {{ selectLenSm }}个 - 韵母可选: {{ selectLenYm }}个</span>
                     </div> -->
+
+                    <div class="label">快捷选择</div>
                     <div class="btns">
-                        <div class="btn" size="mini" @click="reload('selDef')">恢复默认</div>
-                        <div class="btn" size="mini" @click="reload('none')">全不选</div>
-                        <div class="btn" size="mini" @click="randomSelectFn">随机抽选</div>
+                        <div class="btn" @click="reload('sm')">声母</div>
+                        <div class="btn" @click="reload('selDef')">单韵母(默认)</div>
+                        <div class="btn" @click="reload('fym')">复韵母</div>
+                        <div class="btn" @click="reload('bym')">鼻韵母</div>
+                        <div class="btn" @click="reload('ztrd')">整体认读</div>
+                        <div class="btn" @click="randomSelectFn">随机抽选</div>
+                        <div class="btn" @click="reload('none')" style="margin-left: 2em;">清除所选</div>
                     </div>
                     <icon type="cancel" size="26" color="#f0f0f0" @click="show = showPopup()" />
                 </div>
@@ -84,7 +90,7 @@
             <span class="iconfont icon-wrong" @click="randomSelectColse"></span>
             <div class="popup-dialog-title">请选择要抽选的数量</div>
             <div class="popup-dialog-content">
-                <div class="popup-dialog-content-item" @click="() => reload(i * 6 + 6)" v-for="i in 5" :key="i"> {{ i * 6 +
+                <div class="popup-dialog-content-item" @click="() => reload(i * 6 + 6)" v-for="i in 4" :key="i"> {{ i * 6 +
                     6 }} </div>
             </div>
             <!-- <div class="popup-dialog-footer">
@@ -378,7 +384,7 @@ const playAudio = (item) => {
     const audioFn = () => {
         const audio = playSound({
             src,
-            volume: 10,
+            volume: 18,
             areaTime,
             loop: false
         })
@@ -464,8 +470,7 @@ const randomList = (arr, count = 2) => {
     const random = () => Math.random().toFixed(1) - 0;
     while (count > 0) {
         arr.sort(() => random() < 0.5 ? 1 : random() > 0.5 ? -1 : 0);
-        console.log(count);
-        count --;
+        count--;
     }
 };
 
@@ -477,11 +482,23 @@ const randomList = (arr, count = 2) => {
 const reload = (type) => {
     // if (isMerge.value) isMerge.value = isClear;
     switch (type) {
+        case 'sm':
+            selectArr.value.splice(0, selectArr.value.length, ...pyList.sm.list)
+            break;
         case 'selDef':
             selectArr.value.splice(0, selectArr.value.length, ...defList)
             break;
         case 'none':
             selectArr.value.splice(0, selectArr.value.length);
+            break;
+        case 'fym':
+            selectArr.value.splice(0, selectArr.value.length, ...pyList.fym.list)
+            break;
+        case 'bym':
+            selectArr.value.splice(0, selectArr.value.length, ...[...pyList.qbym.list, ...pyList.hbym.list])
+            break;
+        case 'ztrd':
+            selectArr.value.splice(0, selectArr.value.length, ...pyList.whole.list)
             break;
         default:
             const _allStr = []
@@ -492,27 +509,10 @@ const reload = (type) => {
             _allStr.length = type
             selectArr.value = _allStr
             randomSelectColse()
-            
+
     }
     randomList(selectArr.value);
 };
-// // uni.showModal({
-// //     title: '请选择生成数量',
-// //     content: '',
-// //     showCancel: false,
-// //     // confirmText: '确定',
-// //     confirmColor: '#ed5d46',
-// // })
-// uni.showActionSheet({
-// 	itemList: ['A', 'B', 'C'],
-// 	success: function (res) {
-// 		console.log('选中了第' + (res.tapIndex + 1) + '个按钮');
-// 	},
-// 	fail: function (res) {
-// 		console.log(res.errMsg);
-// 	}
-// });
-
 
 /**
  * 筛选列表是否已包涵 s 字符
@@ -543,7 +543,7 @@ onMounted(() => randomList(selectArr.value));
 .content {
     display: flex;
     align-items: flex-start;
-    height: 100vh;
+    // height: 100vh;
     width: 100vw;
 
     .btns {
@@ -556,7 +556,7 @@ onMounted(() => randomList(selectArr.value));
             padding: .35em 1em;
             border-radius: .35em;
             display: inline-block;
-            border: 1px solid var(--c-safegray-hlight);
+            // border: 1px solid var(--c-safegray-hlight);
             margin: .5em;
         }
     }
@@ -636,7 +636,8 @@ onMounted(() => randomList(selectArr.value));
         color: #fff;
         text-align: center;
         font-size: 50rpx;
-        max-height: 3.6em;
+        // max-height: 3em;
+        max-height: 33%;
         //line-height: 1em;
         line-height: 0;
         border: 1px solid #c9ec87;
@@ -706,7 +707,7 @@ onMounted(() => randomList(selectArr.value));
             padding: .25em .75em .25em .5em;
             border-bottom-right-radius: .85em;
             color: var(--c-safegray-hlight);
-            opacity: 0.35;
+            opacity: 0.25;
             font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
         }
 
@@ -748,19 +749,17 @@ onMounted(() => randomList(selectArr.value));
     }
 }
 
-uni-view {
-    &.page {
-
-        display: flex !important;
-    }
+.page {
+    display: flex !important;
 }
 
-
+// uni-view {
+// }
 
 .select {
     display: none;
     flex-direction: column;
-    position: fixed;
+    position: absolute;
     top: 50%;
     transform: translateY(-50%);
     max-height: 80%;
@@ -778,6 +777,7 @@ uni-view {
     .form {
         //position: absolute;
         display: flex;
+        align-items: center;
         right: -4px;
         top: -1.8em;
         line-height: 1.2em;
@@ -785,6 +785,7 @@ uni-view {
         padding: .15em;
         background-color: #5ca502;
         margin-bottom: .25em;
+        padding: 0 0.5em;
 
         .switch {
             margin: 0 1em;
@@ -797,7 +798,6 @@ uni-view {
             width: 12em;
             display: flex;
             flex-direction: row;
-            margin: 0 1em;
             justify-content: flex-start;
             //justify-content: center;
             align-items: center;
@@ -807,11 +807,16 @@ uni-view {
                 background-image: linear-gradient(0deg, var(--c-safegray-light), var(--c-safegray-hlight));
                 color: var(--c-safegray-darker);
                 // padding: .5em 1em;
-                border-radius: .5em;
-                line-height: 1.5em;
-                padding: .25em 1em;
+                border-radius: .25em;
+                line-height: 2em;
+                padding: 0 1em;
+                // margin: 0 0.25em;
                 display: inline-block;
                 box-shadow: 0 0 3rpx var(--c-safegray-darker);
+
+                &:last-child {
+                    color: var(--c-safegray);
+                }
             }
         }
     }

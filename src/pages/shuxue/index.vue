@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-11 23:02:45
+ * @LastEditTime : 2023-10-19 01:44:09
 -->
 <template>
     <view class="content">
@@ -585,15 +585,15 @@ const popupConf = reactive({
 const bgmSelect = [{
     title: '上学歌',
     value: 'bgm-sxg_mp3',
-    src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-sxg.mp3'
+    // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-sxg.mp3'
 }, {
     title: '读书郞',
     value: 'bgm-dsl_mp3',
-    src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-dsl.mp3'
+    // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-dsl.mp3'
 }, {
     title: '劳动最光荣',
     value: 'bgm-ldzgr_mp3',
-    src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-ldzgr.mp3'
+    // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-ldzgr.mp3'
 }]
 const findBgm = key => bgmSelect.find(res => res.value === key) || bgmSelect.find(res => res.value === defaultConf.bgmSelectValue)
 
@@ -1039,7 +1039,7 @@ const setNumDefault = () => {
     Object.assign(setConfig, defaultConf)
     // cursorType.value = setConfig.cursorType
     bgm.volume = setConfig.bgmVolume / 20
-    bgm.src = musicArr[setConfig.bgmSelectValue]
+    bgm.src = findBgm(setConfig.bgmSelectValue).src || musicArr[setConfig.bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
 }
 
 // 保存设置事件
@@ -1096,13 +1096,14 @@ const cleanConfig = () => {
         vertical,
         bgmSelectValue
     } = getStorageData()
-
-    const bgmSrc = musicArr[bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
+                   
+    const bgmSrc = findBgm(bgmSelectValue).src || musicArr[bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
     if (bgmSrc !== bgm.src) bgm.src = bgmSrc
     !bgmPause.value ? bgmPause.value = false : bgm.pause()
 
     cursorType.value = _cursorType
     showIdx.value = _showIdx
+    bgm.volume = volume / 20
     Object.assign(setConfig, {
         showIdx: _showIdx,
         vertical
