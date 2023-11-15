@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-11-15 20:29:37
+ * @LastEditTime : 2023-11-15 22:28:19
 -->
 <template>
     <view class="content">
@@ -439,16 +439,22 @@ const { envVersion } = Object.assign(miniProgram, {
 const getStorageData = () => { // 读取设置缓存
     const storageConf = uni.getStorageSync('config')?.[envVersion] || {}
 
+    const _storageConf = storageConf.lastAccess && storageConf.lastAccess > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 7)
+        ? storageConf
+        : {}
     return Object.assign(
         {},
         defaultConf,
-        storageConf.lastAccess && storageConf.lastAccess > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000)
+        storageConf.lastAccess && storageConf.lastAccess > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 7)
             ? storageConf
             : {}
     );
 }
 
 const storageConf = getStorageData() // 获取用户保存的设置
+
+console.log(storageConf.lastAccess);
+uni.setStorageSync('config', { [envVersion]: storageConf.lastAccess < 1 ? storageConf : { ...storageConf, lastAccess: Date.now() } }) // 重新更新用户配置时间
 
 const setConfig = reactive( // 配制项
     Object.assign(storageConf, {
