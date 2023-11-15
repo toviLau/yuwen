@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-11-15 22:28:19
+ * @LastEditTime : 2023-11-15 22:33:50
 -->
 <template>
     <view class="content">
@@ -445,7 +445,7 @@ const getStorageData = () => { // 读取设置缓存
     return Object.assign(
         {},
         defaultConf,
-        storageConf.lastAccess && storageConf.lastAccess > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 7)
+        storageConf.lastAccess && storageConf.lastAccess > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 15)
             ? storageConf
             : {}
     );
