@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-11-15 22:33:50
+ * @LastEditTime : 2023-11-15 23:57:48
 -->
 <template>
     <view class="content">
@@ -403,6 +403,7 @@ Object.keys(musics).forEach(key => {
     const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, '$1_$2')
     musicArr[_key] = musics[key].default
 })
+let bgm = {}
 
 const numList = reactive([]); // 数据列表:[[[数字1 || [数字1,数字2, 运算符], 数字2 || [数字1,数字2, 运算符], 运算符], 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
@@ -828,14 +829,6 @@ function createList(isInit = true) {
 createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
-// BGM
-const bgm = playSound({
-    src: findBgm(bgmSelectValue.value).src || musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue],
-    volume: setConfig.bgmVolume,
-    loop: true,
-    instanceName: 'BGM'
-})
-
 function nulToUndef(data) {
     return data.map(res => {
         if (Array.isArray(res)) {
@@ -1250,6 +1243,13 @@ onHide(() => {
     bgm.pause()
 })
 onLoad(() => {
+    // BGM
+    bgm = playSound({
+        src: findBgm(bgmSelectValue.value).src || musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue],
+        volume: setConfig.bgmVolume,
+        loop: true,
+        instanceName: 'BGM'
+    })
     const reCord = uni.getStorageSync('record'); // 存档信息
     historyConf.list = uni.getStorageSync('historyConfList') || [] // 历史信息
 
