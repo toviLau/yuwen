@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-19 01:44:09
+ * @LastEditTime : 2023-11-15 20:29:37
 -->
 <template>
     <view class="content">
@@ -403,6 +403,7 @@ Object.keys(musics).forEach(key => {
     const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, '$1_$2')
     musicArr[_key] = musics[key].default
 })
+
 const numList = reactive([]); // 数据列表:[[[数字1 || [数字1,数字2, 运算符], 数字2 || [数字1,数字2, 运算符], 运算符], 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
 const score = ref(0); // 得分
@@ -426,12 +427,29 @@ const defaultConf = { // 默认配置
     vertical: false, // 开启竖式
     decimalLen: 2, // 最大小数位
     bgmSelectValue: 'bgm-sxg_mp3',
+    lastAccess: 0
 }
+const { miniProgram = {} } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {}
+const { envVersion } = Object.assign(miniProgram, {
+    // #ifdef WEB
+    envVersion: 'web'
+    // #endif
+})
 
 const getStorageData = () => { // 读取设置缓存
-    return Object.assign({}, defaultConf, uni.getStorageSync('config'));
+    const storageConf = uni.getStorageSync('config')?.[envVersion] || {}
+
+    return Object.assign(
+        {},
+        defaultConf,
+        storageConf.lastAccess && storageConf.lastAccess > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000)
+            ? storageConf
+            : {}
+    );
 }
+
 const storageConf = getStorageData() // 获取用户保存的设置
+
 const setConfig = reactive( // 配制项
     Object.assign(storageConf, {
         status: false, // 设置框显隐
@@ -1046,8 +1064,12 @@ const setNumDefault = () => {
 const saveConfig = () => {
     showConfig(false)
 
+
     // 配置存 stroage
-    const _setConfig = { ...setConfig }
+    const _setConfig = {
+        [envVersion]: { ...setConfig, lastAccess: Date.now() }
+    }
+
     delete _setConfig.status
     uni.setStorageSync('config', _setConfig)
 
@@ -1096,7 +1118,7 @@ const cleanConfig = () => {
         vertical,
         bgmSelectValue
     } = getStorageData()
-                   
+
     const bgmSrc = findBgm(bgmSelectValue).src || musicArr[bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
     if (bgmSrc !== bgm.src) bgm.src = bgmSrc
     !bgmPause.value ? bgmPause.value = false : bgm.pause()
