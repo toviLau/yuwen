@@ -20,3 +20,23 @@
     --c-safegray-hdark: #3f3f3f;
     --c-safegray-hdarker: #303030;
 }
+
+.divider-line {
+    width: 100%;
+    align-items: center;
+    display: flex;
+    
+    font-size: 24rpx;
+    color: #e9e9e9;
+    margin: .75em 0;
+    text-shadow: 3rpx 3rpx 0 var(--c-safegray-hlighter);
+}
+.divider-line:before,
+.divider-line:after {
+    content: '';
+    height: 1rpx;
+    flex: 1;
+    background-color: #e9e9e9;
+    margin: 0 .5em;
+    box-shadow: 3rpx 2rpx 0 var(--c-safegray-hlighter);
+}

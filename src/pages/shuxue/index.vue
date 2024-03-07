@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-11-15 23:57:48
+ * @LastEditTime : 2024-02-12 15:00:13
 -->
 <template>
     <view class="content">
@@ -117,7 +117,7 @@
                         <span class="iconfont icon-set pan-set-btn" @click="showConfig(true)"></span>
                     </div>
                     <div class="fen-item fen-new"
-                        @click="[createList(true), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">
+                        @click="[createList(true), uni.removeStorageSync('autoRecord'), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">
                         做新题
                     </div>
                 </div>
@@ -164,19 +164,36 @@
                         <div class="set-sys-db-list-left">运算规则：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.opType }">加减运算
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.opType }">加减
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
                                     <zeroSwitch :size="18" v-model="setConfig.opType" inactiveColor="#fcfcfc"
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3"
                                         @change="opTypeChange" />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.opType }">四则运算
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.opType }">四则
                                 </div>
+                            </div>
+                            <div class="label" v-if="setConfig.opType">
+                                <uni-data-checkbox multiple v-model="setConfig.notDivision" selectedColor="#55a4f3"
+                                    class="label-ckd" :localdata="[{ 'value': 1, 'text': '屏蔽除法' }]"
+                                    @change="mixedChange"></uni-data-checkbox>
                             </div>
                             <div class="label">
                                 <uni-data-checkbox multiple v-model="setConfig.isMixed" selectedColor="#55a4f3"
                                     class="label-ckd" :localdata="[{ 'value': 1, 'text': '混合' }]"
+                                    @change="mixedChange"></uni-data-checkbox>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="set-sys-db-list">
+                        <div class="set-sys-db-list-left">运算符：</div>
+                        <div class="set-sys-db-list-right">
+                            <!-- {{ getOperator() }} -->
+                            <div class="label" v-for="i in 4">
+                                <uni-data-checkbox multiple v-model="setConfig.opTypes" selectedColor="#55a4f3"
+                                    class="label-ckd2" :localdata="[{ 'value': i, 'text': getOperator(i - 1) }]"
                                     @change="mixedChange"></uni-data-checkbox>
                             </div>
                         </div>
@@ -266,7 +283,7 @@
                                         activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.cursorType }">
-                                    {{ `竖线 |` }}
+                                    {{ `竖线 | ` }}
                                 </div>
                             </div>
                         </div>
@@ -284,7 +301,7 @@
                             <div class="check-box" @click="switchBgmClick">
                                 <div class="check-box-item" :data-text='item.title' :class="{
                                     cur: item.value === setConfig.bgmSelectValue
-                                }" v-for="item in bgmSelect" :key="item.value">{{ item.title }}</div>
+                                }" v-for=" item  in  bgmSelect " :key="item.value">{{ item.title }}</div>
                             </div>
                         </div>
                     </div>
@@ -339,7 +356,7 @@
                     </div>
                 </div>
                 <scroll-view class="history-tb" scroll-y="true">
-                    <div class="history-tr" v-for="(item, idx) in historyConf.list" v-if="historyConf.list.length > 0"
+                    <div class="history-tr" v-for="( item, idx ) in  historyConf.list " v-if="historyConf.list.length > 0"
                         @click="() => playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })"
                         :key="item.endTime">
                         <div class="history-li">
@@ -358,10 +375,12 @@
                             <div class="history-td">{{ idx + 1 }}</div>
                             <div class="history-td">题目设置:
                                 {{ `${['加减运算', '四则运算'][item.config.opType - 0]}(${item.config.opType ? ['简单',
-                                    '困难'][item.config.difficulty - 0] : ['20以内', '100以内'][item.config.difficulty - 0]})/`
+                                    '困难'][item.config.difficulty - 0] : ['20以内', '100以内'][item.config.difficulty - 0]
+                                    }) / `
                                     + (item.config.isMixed === 1 ? '混合' : '非混合') + '/'
                                     + `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
-                                        ? '(小数位:' + item.config.decimalLen + ') ' : ''}` }}
+                                        ? '(小数位:' + item.config.decimalLen + ') ' : ''
+                                    }` }}
                             </div>
                         </div>
                     </div>
@@ -372,7 +391,7 @@
                     </div>
                 </scroll-view>
             </div>
-            <div class="history-tips">最多只保留最近20条历史记录</div>
+            <div class="history-tips">最多只保留最近50条历史记录</div>
 
         </div>
     </cc-popup>
@@ -386,7 +405,8 @@ import {
     playSound,
     expressionResult,
     createKeyboardCode,
-    throttle
+    throttle,
+    getGradeName
 } from "../../module/tools";
 import date from 'date-php'
 import Bignumber from 'BigNumber.js'
@@ -423,7 +443,9 @@ const defaultConf = { // 默认配置
     difficulty: true, // 困难度
     totalNum: 50, // 题目数量
     opType: false, // 运算规则 0:+-,1:+-*/
+    opTypes: [0, 1, 2, 3], // 自选运算符
     isMixed: false, // 是否混合运算
+    notDivision: [1], // 是否禁止除法
     hasDecimal: false, // 启用小数
     vertical: false, // 开启竖式
     decimalLen: 2, // 最大小数位
@@ -454,7 +476,6 @@ const getStorageData = () => { // 读取设置缓存
 
 const storageConf = getStorageData() // 获取用户保存的设置
 
-console.log(storageConf.lastAccess);
 uni.setStorageSync('config', { [envVersion]: storageConf.lastAccess < 1 ? storageConf : { ...storageConf, lastAccess: Date.now() } }) // 重新更新用户配置时间
 
 const setConfig = reactive( // 配制项
@@ -469,6 +490,7 @@ const showIdx = ref(storageConf.showIdx) // 显示序号
 const opType = ref(storageConf.opType) // 运算类型
 const difficulty = ref(storageConf.difficulty) // 困难度
 const isMixed = ref(storageConf.isMixed) // 是否混合运算
+const notDivision = ref(storageConf.notDivision) // 屏蔽除法
 const cursorType = ref(storageConf.cursorType) // 光标类型
 const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
 const decimalLen = ref(storageConf.decimalLen) // 小数位数
@@ -499,12 +521,20 @@ const autoCurItemPosition = async () => {
             : scrollTop.value || 0
 }
 
-const recordSaveStorage = () => uni.setStorageSync('record', {
-    numList,
-    config: uni.getStorageSync('config')
-})
-const recordReadStorage = () => {
-    const { numList: _numList, config } = uni.getStorageSync('record')
+const recordSaveStorage = (key = 'record') => {
+    const isEmpty = numList.every(res => [undefined, ''].includes(res[1]))
+    if (key === 'autoRecord' && isEmpty) {
+        uni.removeStorageSync('autoRecord')
+        return
+    }
+    uni.setStorageSync(key, {
+        numList,
+        config: uni.getStorageSync('config')
+    })
+}
+
+const recordReadStorage = (key = 'record') => {
+    const { numList: _numList, config } = uni.getStorageSync(key)
     Object.assign(numList, nulToUndef(_numList))
     Object.assign(storageConf, config)
     saveConfig()
@@ -542,6 +572,19 @@ const popupConf = reactive({
                     popupConf.curKey = 'del'
                     setConfig.status = false
                 }, 500)
+            },
+        }
+    },
+    readAutoSave: {
+        msg: '检测到您有一份未完成的算术题, 是否恢复?',
+        isDanger: true,
+        fn: {
+            clean() {
+                popupConf.status = false
+            },
+            submit() {
+                recordReadStorage('autoRecord')
+                popupConf.status = false
             },
         }
     },
@@ -688,10 +731,11 @@ const renderExpression = (data) => {
     }
     return `${_data[0]}${getOperator(_data[2])}${_data[1]}`
 }
+
 // #ifdef MP-WEIXIN
 // 条件编译--仅微信
 uni.showShareMenu({
-    title: '四小二(8)班',
+    title: `四小${['一', '二', '三', '四', '五', '六'][getGradeName().y]}(8)班`,
     content: '四则运算练习',
     imageUrl: '/assets/icon.jpeg',
     path: '/pages/shuxue/index'
@@ -711,7 +755,7 @@ function createList(isInit = true) {
      */
     function createData(num) {
         // 随机生成运算符 0:'+' | 1:'-' | 2:'*' | 3:'/'
-        const createOperator = (operator) => Math.floor(Math.random() * (operator || (opType.value ? 4 : 2)) + 0)
+        const createOperator = (operator) => Math.floor(Math.random() * (operator || (opType.value ? (notDivision.value.includes(1) ? 3 : 4) : 2)) + 0)
 
         // 
         /**
@@ -732,12 +776,12 @@ function createList(isInit = true) {
             switch (_getOperator) {
                 case 0: // '+'
                     _expression[0] = random(8, _expressionMax1)
-                    _expression[1] = random(8, `10-${_expressionMax2 - _expression[0]}`)
+                    _expression[1] = random(8, `10 - ${_expressionMax2 - _expression[0]}`)
                     break;
 
                 case 1: // '-'
                     _expression[1] = random(8, _expressionMax1)
-                    _expression[0] = random(8, `${_expression[1]}-${_expressionMax2}`)
+                    _expression[0] = random(8, `${_expression[1]} - ${_expressionMax2}`)
                     break;
 
                 case 2: // '*'
@@ -748,7 +792,7 @@ function createList(isInit = true) {
                 case 3: // '/'
                     const divisionFn = () => {
                         _expression[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
-                        _expression[0] = random(8, `${_expression[1]}-${difficulty.value ? '999' : '99'}`)
+                        _expression[0] = random(8, `${_expression[1]} - ${difficulty.value ? '999' : '99'}`)
 
                         const BN = new Bignumber(_expression[0])
                         const _bn = BN.modulo(_expression[1]) // 取模
@@ -938,6 +982,8 @@ const keyClick = (key) => {
     }
     // 恢复下标4(对错判断)标识为:空 (错:0, 对:1, 无:'')
     numList[curidx.value].splice(2, 1, '')
+
+    recordSaveStorage('autoRecord') // 自动保存
 };
 
 // 查看得分事件
@@ -1034,7 +1080,7 @@ const subEnter = () => {
     hasHistoryIdx === -1
         ? historyConfList.unshift(_historyConf)
         : historyConfList.splice(hasHistoryIdx, 1, _historyConf)
-    if (historyConfList.length > 20) historyConfList.length = 20
+    if (historyConfList.length > 50) historyConfList.length = 50
     uni.setStorageSync('historyConfList', historyConfList)
 };
 
@@ -1089,12 +1135,14 @@ const saveConfig = () => {
     if (opType.value !== setConfig.opType
         || difficulty.value !== setConfig.difficulty
         || isMixed.value[0] !== setConfig.isMixed[0]
+        || notDivision.value[0] !== setConfig.notDivision[0]
         || hasDecimal.value !== setConfig.hasDecimal
         || decimalLen.value !== setConfig.decimalLen
     ) {
         opType.value = setConfig.opType // 运算规则变动
         difficulty.value = setConfig.difficulty // 难度变动
         isMixed.value = setConfig.isMixed
+        notDivision.value = setConfig.notDivision
         hasDecimal.value = setConfig.hasDecimal
         decimalLen.value = setConfig.decimalLen
         createList(true) // 运算规则类型变动重新生成列表
@@ -1163,7 +1211,7 @@ const deleteHistory = (ev, id) => {
     uni.showModal({
         // title: 'title',
         // editable: false, 
-        content: `您确定要删除 ${date('Y-m-d H:i:s', curHistory.endTime)} 这条历史记录么?`,
+        content: `您确定要删除 ${date('Y-m-d H:i:s', curHistory.endTime)} 这条历史记录么 ? `,
         showCancel: true,
         // cancelText: '取消'
         cancelColor: '#999',
@@ -1251,9 +1299,14 @@ onLoad(() => {
         instanceName: 'BGM'
     })
     const reCord = uni.getStorageSync('record'); // 存档信息
+    const autoRecord = uni.getStorageSync('autoRecord'); // 自动存档信息
     historyConf.list = uni.getStorageSync('historyConfList') || [] // 历史信息
 
-    if (reCord) {
+    if (autoRecord) {
+        popupConf.curKey = 'readAutoSave'
+        popupConf.status = true
+        setConfig.status = false
+    } else if (reCord) {
         popupConf.curKey = 'onLoad'
         popupConf.status = true
         setConfig.status = false
@@ -2021,7 +2074,7 @@ onUnload(() => {
                     }
 
                     .label-ckd {
-                        margin-left: 1em;
+                        margin-left: 0em;
 
                         :deep(.checklist-box) {
                             .checklist-text {
@@ -2031,6 +2084,37 @@ onUnload(() => {
                             &.is-checked {
                                 .checklist-text {
                                     color: var(--color-B) !important;
+                                }
+                            }
+                        }
+
+                        .checklist-box {
+                            margin-right: 10px;
+                        }
+                    }
+
+                    .label-ckd2 {
+                        margin-left: 0em;
+
+
+                        :deep(.checklist-box) {
+                            .checklist-text {
+                                color: var(--c-safegray-lighter) !important;
+                            }
+
+                            .checkbox__inner {
+                                display: none;
+                            }
+
+                            .checklist-text {
+                                display: block;
+                                padding: 5rpx 15rpx;
+                                background-color: var(--c-safegray) !important;
+                            }
+
+                            &.is-checked {
+                                .checklist-text {
+                                    background-color: var(--color-B) !important;
                                 }
                             }
                         }

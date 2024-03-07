@@ -1,3 +1,4 @@
+import date from 'date-php'
 /**
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-26 07:04:50
@@ -168,7 +169,7 @@ function expressionResult(data) {
  * @return 当前媒体实例对象
  */
 function playSound({ src, loop = false, volume = 10, instanceName, sessionCategory = 'ambient', areaTime }) {
-    if(areaTime && JSON.stringify(areaTime)==='[]') return
+    if (areaTime && JSON.stringify(areaTime) === '[]') return
     /** 
      * @Description  :  
      * @Author       : ToviLau 46134256@qq.com
@@ -181,8 +182,8 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
         Object.assign(player, {
             src,
             // volume: volume / (20 - (volume / 15)),
-            volume: (volume && volume > 20 ? 20 : volume)/ 20,
-            startTime: areaTime ? areaTime[0]: undefined,
+            volume: (volume && volume > 20 ? 20 : volume) / 20,
+            startTime: areaTime ? areaTime[0] : undefined,
             autoplay: true,
             loop,
             sessionCategory
@@ -190,9 +191,9 @@ function playSound({ src, loop = false, volume = 10, instanceName, sessionCatego
         player.onEnded(() => {
             player.destroy()
         });
-        if(areaTime?.[1]){
-            player.onPlay(()=>{
-                setTimeout(()=>{
+        if (areaTime?.[1]) {
+            player.onPlay(() => {
+                setTimeout(() => {
                     player.stop()
                 }, areaTime[1])
             })
@@ -281,6 +282,14 @@ function throttle(fn, delay = 300) {
     }
 }
 
+// 取年级名
+const getGradeName = () => {
+    const d = new Date()
+    const Y = d.getFullYear()
+    const m = d.getMonth() + 1
+    const nowDate = new Date(Y, m) - new Date(2021, 9)
+    return date.duration('all', nowDate)
+}
 export {
     random,
     mergeData,
@@ -288,5 +297,6 @@ export {
     expressionResult,
     createKeyboardCode,
     debounce,
-    throttle
+    throttle,
+    getGradeName
 };

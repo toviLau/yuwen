@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-10-01 15:51:59
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-02 19:40:15
+ * @LastEditTime : 2024-03-07 21:35:10
 -->
 <template>
     <view class="page">
@@ -20,9 +20,10 @@
 </template>
 <script setup>
 import { onMounted, ref, watch, reactive } from 'vue';
+import { getGradeName } from '@/module/tools';
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
-    title: '四小二(8)班',
+    title: `四小${['一', '二', '三', '四', '五', '六'][getGradeName().y]}(8)班`,
     content: '课外练习',
     imageUrl: '/assets/icon.jpeg',
     path: '/pages/about/index'
@@ -38,37 +39,42 @@ uni.showShareMenu({
     display: flex;
     flex-direction: column;
 }
-.doc{
+
+.doc {
     font-size: 30rpx;
     font-weight: normal;
     margin: 0 1em;
     color: var(--c-safegray-hdark);
-    .doc-item{
+
+    .doc-item {
         text-indent: 2em;
     }
-    .doc-item-h{
+
+    .doc-item-h {
         font-size: 1.1em;
         font-weight: bolder;
         margin-top: 1em;
         color: var(--c-safegray-hdark);
     }
-    .iconfont{
+
+    .iconfont {
         font-size: 35rpx;
         line-height: 1em;
-        &.icon-github{
+
+        &.icon-github {
             color: #333;
         }
-        &.icon-gitee{
-            color:#c71d23;
+
+        &.icon-gitee {
+            color: #c71d23;
         }
     }
-    .me-wechat{
+
+    .me-wechat {
         width: 60vw;
         height: 60vw;
         margin: 0 auto;
         display: block;
     }
 }
-
 </style>
-

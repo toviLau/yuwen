@@ -21,12 +21,16 @@
 </template>
 <script setup>
 import { onMounted, ref, watch, reactive } from 'vue';
+import {
+    getGradeName
+} from "../../module/tools";
 const { miniProgram } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {}
 const version = (miniProgram?.version || '0.0.2').match(/^\d+(\.\d+){2}/)[0]
 
 // #ifdef MP-WEIXIN
+
 uni.showShareMenu({
-    title: '四小二(8)班',
+    title: `四小${['一', '二', '三', '四', '五', '六'][getGradeName().y]}(8)班`,
     content: '课外练习',
     imageUrl: '/assets/icon.jpeg',
     path: '/pages/index/index'

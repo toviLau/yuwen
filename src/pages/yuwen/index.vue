@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2022-09-23 22:46:19
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2023-10-19 14:04:37
+ * @LastEditTime : 2024-02-12 13:00:49
 -->
 <template>
     <page-meta class="page" page-orientation="landscape" root-font-size="16px">
@@ -123,7 +123,7 @@ const randomSelectFn = () => {
 }
 // #ifdef MP-WEIXIN
 uni.showShareMenu({
-    title: '四小二(8)班',
+    title: `四小${['一', '二', '三', '四', '五', '六'][getGradeName().y]}(8)班`,
     content: '语文拼音练习',
     imageUrl: '/assets/icon.jpeg',
     path: '/pages/yuwen/index'
