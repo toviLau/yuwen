@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2024-02-12 15:00:13
+ * @LastEditTime : 2024-03-07 23:28:41
 -->
 <template>
     <view class="content">
@@ -23,44 +23,46 @@
                     'min-font3': isMixed && hasDecimal && decimalLen === 3,
                 }">
                     <div class="list-item-li" :class="{
-                        'cur-item': !setConfig.status && i === curidx && submited === 0,
-                        cursor1: cursorType === false,
-                        cursor2: cursorType === true,
-                        right: v[2] === 1,
-                        wrong: v[2] === 0 && !['', undefined].includes(v[1]),
-                    }">
+                    'cur-item': !setConfig.status && i === curidx && submited === 0,
+                    cursor1: cursorType === false,
+                    cursor2: cursorType === true,
+                    right: v[2] === 1,
+                    wrong: v[2] === 0 && !['', undefined].includes(v[1]),
+                }">
 
                         <div class="edited" v-if="v[3] > 0">{{ v[3] }}</div>
                         <div class="empty-edit" v-if="!v[1] && submited === 1"></div>
                         <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
                         <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
                         {{
-                            renderExpression(v[0]) +
-                            `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && ![undefined, null].includes(v[1]) ?
-                                v[1] : ""}`
-                        }}
-                        <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数</div>
+                    renderExpression(v[0]) +
+                    `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && ![undefined,
+                        null].includes(v[1]) ?
+                        v[1] : ""}`
+                }}
+                        <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数
+                        </div>
 
                         <div v-show="v[2] === 0">
                             <div class="tip-wrong">
                                 {{
-                                    v[1] - 0 === v[0][0] + v[0][1]
-                                    ? '粗心了吧，是不是当成加(+)法算啦。'
-                                    : v[1] - 0 === v[0][0] - v[0][1] + 10
-                                        ? '忘记借位了吧？'
-                                        : v[1] - 0 === v[0][0] - v[0][1]
-                                            ? '这是加法哦，粗心当减(-)法算了么？'
-                                            : v[1] - 0 === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9
-                                                ? '忘记进位了吧?'
-                                                : ''
-                                }}
+                    v[1] - 0 === v[0][0] + v[0][1]
+                        ? '粗心了吧，是不是当成加(+)法算啦。'
+                        : v[1] - 0 === v[0][0] - v[0][1] + 10
+                            ? '忘记借位了吧？'
+                            : v[1] - 0 === v[0][0] - v[0][1]
+                                ? '这是加法哦，粗心当减(-)法算了么？'
+                                : v[1] - 0 === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9
+                                    ? '忘记进位了吧?'
+                                    : ''
+                }}
                             </div>
                         </div>
                     </div>
                     <div v-if="vertical" class="vertical" :class="{
-                        plus: v[0][2] === 0,
-                        minus: v[0][2] === 1
-                    }">
+                    plus: v[0][2] === 0,
+                    minus: v[0][2] === 1
+                }">
                         <!-- <div class="vertical-li">
                             <div class="vertical-li-nums" v-for="vItem in v[0][0].toString().split('')">{{ vItem }}</div>
                         </div>
@@ -79,13 +81,13 @@
         </scroll-view>
         <div class="footer" v-show="curidx !== undefined"
             v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
-                dsb: curidx && (numList[curidx][1] === undefined ? '' : numList[curidx][1] + '').length > 2,
-            }">
+                    dsb: curidx && (numList[curidx][1] === undefined ? '' : numList[curidx][1] + '').length > 2,
+                }">
             <!-- 键盘 -->
             <div class="pan" :class="{
-                dsb: numList[curidx][2] === 1, easyKeyboard: !keyboard,
-                'has-decimal': hasDecimal
-            }" v-if="submited === 0 && curidx !== '' && !setConfig.status">
+                    dsb: numList[curidx][2] === 1, easyKeyboard: !keyboard,
+                    'has-decimal': hasDecimal
+                }" v-if="submited === 0 && curidx !== '' && !setConfig.status">
                 <template v-for="item in keyboardCode" :key="item.idx">
                     <div class="pan-item" @click="keyClick(item.value)"
                         v-if="keyboard && item.fullKey || !keyboard && item.easyKey">
@@ -116,8 +118,7 @@
                     <div class="pan-item pan-set">
                         <span class="iconfont icon-set pan-set-btn" @click="showConfig(true)"></span>
                     </div>
-                    <div class="fen-item fen-new"
-                        @click="[createList(true), uni.removeStorageSync('autoRecord'), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">
+                    <div class="fen-item fen-new" @click="reCreate()">
                         做新题
                     </div>
                 </div>
@@ -187,29 +188,31 @@
                         </div>
                     </div>
 
-                    <div class="set-sys-db-list">
+                    <!-- <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">运算符：</div>
                         <div class="set-sys-db-list-right">
-                            <!-- {{ getOperator() }} -->
                             <div class="label" v-for="i in 4">
                                 <uni-data-checkbox multiple v-model="setConfig.opTypes" selectedColor="#55a4f3"
                                     class="label-ckd2" :localdata="[{ 'value': i, 'text': getOperator(i - 1) }]"
                                     @change="mixedChange"></uni-data-checkbox>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <div class="set-sys-db-list" vif="setConfig.opType">
                         <div class="set-sys-db-list-left">难易度：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.difficulty }">
+                                <div class="set-sys-switch-item set-sys-switch-l"
+                                    :class="{ cur: !setConfig.difficulty }">
                                     {{ setConfig.opType ? '简单' : '20以内' }}
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
                                     <zeroSwitch :size="18" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#55a4f3" />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.difficulty }">
+                                <div class="set-sys-switch-item set-sys-switch-r"
+                                    :class="{ cur: setConfig.difficulty }">
                                     {{ setConfig.opType ? '困难' : '100以内' }}
                                 </div>
                             </div>
@@ -233,12 +236,14 @@
                             <div class="lv2 has-next">
                                 <div class="set-sys-switch">
                                     <zeroSwitch :size="18" v-model="setConfig.hasDecimal" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#cfcfcf" />
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#cfcfcf" />
                                 </div>
                                 <div class="lv2-next" v-if="setConfig.hasDecimal">
                                     <div class="lv2-label">最多有效位数:</div>
                                     <hao-slider :step="1" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="1" :max="3"
-                                        :value="setConfig.decimalLen" @change="setDecimalLenChange" class="set-slider" />
+                                        :value="setConfig.decimalLen" @change="setDecimalLenChange"
+                                        class="set-slider" />
                                 </div>
                             </div>
                         </div>
@@ -250,7 +255,8 @@
                             <div class="set-sys-switch">
                                 <div class="set-sys-switch-item set-sys-switch-c">
                                     <zeroSwitch :size="18" v-model="setConfig.showIdx" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#cfcfcf" />
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#cfcfcf" />
                                 </div>
                             </div>
                         </div>
@@ -259,13 +265,16 @@
                         <div class="set-sys-db-list-left">键盘布局：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">简约
+                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">
+                                    简约
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
                                     <zeroSwitch :size="18" v-model="setConfig.keyboard" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#55a4f3" />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">九宫格
+                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">
+                                    九宫格
                                 </div>
                             </div>
                         </div>
@@ -274,15 +283,18 @@
                         <div class="set-sys-db-list-left">光标提示符：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.cursorType }">
+                                <div class="set-sys-switch-item set-sys-switch-l"
+                                    :class="{ cur: !setConfig.cursorType }">
                                     {{ `下划线 _` }}
                                 </div>
                                 <div class="set-sys-switch-item set-sys-switch-c">
 
                                     <zeroSwitch :size="18" v-model="setConfig.cursorType" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3" />
+                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#55a4f3" />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.cursorType }">
+                                <div class="set-sys-switch-item set-sys-switch-r"
+                                    :class="{ cur: setConfig.cursorType }">
                                     {{ `竖线 | ` }}
                                 </div>
                             </div>
@@ -300,8 +312,8 @@
                         <div class="set-sys-db-list-right">
                             <div class="check-box" @click="switchBgmClick">
                                 <div class="check-box-item" :data-text='item.title' :class="{
-                                    cur: item.value === setConfig.bgmSelectValue
-                                }" v-for=" item  in  bgmSelect " :key="item.value">{{ item.title }}</div>
+                    cur: item.value === setConfig.bgmSelectValue
+                }" v-for=" item  in  bgmSelect " :key="item.value">{{ item.title }}</div>
                             </div>
                         </div>
                     </div>
@@ -336,7 +348,8 @@
             </div>
         </div>
     </cc-popup>
-    <cc-popup :isShow='historyConf.status' width="100vw" height="auto" radius="16rpx" :opacity="0.65" bgcolor="transparent">
+    <cc-popup :isShow='historyConf.status' width="100vw" height="auto" radius="16rpx" :opacity="0.65"
+        bgcolor="transparent">
 
         <div class="history-dialog">
             <span class="iconfont icon-wrong history-dialog-close"
@@ -356,7 +369,8 @@
                     </div>
                 </div>
                 <scroll-view class="history-tb" scroll-y="true">
-                    <div class="history-tr" v-for="( item, idx ) in  historyConf.list " v-if="historyConf.list.length > 0"
+                    <div class="history-tr" v-for="( item, idx ) in  historyConf.list "
+                        v-if="historyConf.list.length > 0"
                         @click="() => playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })"
                         :key="item.endTime">
                         <div class="history-li">
@@ -375,12 +389,12 @@
                             <div class="history-td">{{ idx + 1 }}</div>
                             <div class="history-td">题目设置:
                                 {{ `${['加减运算', '四则运算'][item.config.opType - 0]}(${item.config.opType ? ['简单',
-                                    '困难'][item.config.difficulty - 0] : ['20以内', '100以内'][item.config.difficulty - 0]
-                                    }) / `
-                                    + (item.config.isMixed === 1 ? '混合' : '非混合') + '/'
-                                    + `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
-                                        ? '(小数位:' + item.config.decimalLen + ') ' : ''
-                                    }` }}
+                    '困难'][item.config.difficulty - 0] : ['20以内', '100以内'][item.config.difficulty - 0]
+                    }) / `
+                    + (item.config.isMixed === 1 ? '混合' : '非混合') + '/'
+                    + `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
+                        ? '(小数位:' + item.config.decimalLen + ') ' : ''
+                                }` }}
                             </div>
                         </div>
                     </div>
@@ -476,7 +490,11 @@ const getStorageData = () => { // 读取设置缓存
 
 const storageConf = getStorageData() // 获取用户保存的设置
 
-uni.setStorageSync('config', { [envVersion]: storageConf.lastAccess < 1 ? storageConf : { ...storageConf, lastAccess: Date.now() } }) // 重新更新用户配置时间
+uni.setStorageSync('config', {
+    [envVersion]: storageConf.lastAccess < 1
+        ? storageConf
+        : { ...storageConf, lastAccess: Date.now() }
+}) // 重新更新用户配置时间
 
 const setConfig = reactive( // 配制项
     Object.assign(storageConf, {
@@ -528,15 +546,20 @@ const recordSaveStorage = (key = 'record') => {
         return
     }
     uni.setStorageSync(key, {
-        numList,
-        config: uni.getStorageSync('config')
+        [envVersion]: {
+            numList,
+            config: uni.getStorageSync('config')[envVersion]
+        }
     })
 }
 
 const recordReadStorage = (key = 'record') => {
-    const { numList: _numList, config } = uni.getStorageSync(key)
-    Object.assign(numList, nulToUndef(_numList))
+    // const aaa = uni.getStorageSync(key)
+    // console.log(aaa);
+    // debugger
+    const { numList: _numList, config } = uni.getStorageSync(key)[envVersion]
     Object.assign(storageConf, config)
+    Object.assign(numList, nulToUndef(_numList))
     saveConfig()
 }
 // 存读档弹窗
@@ -814,7 +837,9 @@ function createList(isInit = true) {
             })
             return _expression.concat(_getOperator)
         }
-        if (isInit) numList.length = 0 // 初始化完全新建
+        if (isInit) {
+            numList.length = 0 // 初始化完全新建
+        }
 
         const _numList = new Array(num).fill(undefined).map(res => {
             /**
@@ -873,6 +898,11 @@ function createList(isInit = true) {
 createList(true);
 const keyboardCode = reactive(createKeyboardCode())
 
+const reCreate = () => {
+    createList(true)
+    uni.removeStorageSync('autoRecord')
+    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
+}
 function nulToUndef(data) {
     return data.map(res => {
         if (Array.isArray(res)) {
@@ -1081,7 +1111,7 @@ const subEnter = () => {
         ? historyConfList.unshift(_historyConf)
         : historyConfList.splice(hasHistoryIdx, 1, _historyConf)
     if (historyConfList.length > 50) historyConfList.length = 50
-    uni.setStorageSync('historyConfList', historyConfList)
+    uni.setStorageSync('historyConfList', { [envVersion]: historyConfList })
 };
 
 // 设置窗口显隐
@@ -1222,7 +1252,7 @@ const deleteHistory = (ev, id) => {
             if (confirm) {
                 const idx = historyConf.list.findIndex(res => res.id === id)
                 historyConf.list.splice(idx, 1)
-                uni.setStorageSync('historyConfList', historyConf.list)
+                uni.setStorageSync('historyConfList', { [envVersion]: historyConf.list })
             }
         },
         fail: function (res) { }
@@ -1244,7 +1274,7 @@ const historyClean = () => {
         success: function ({ confirm, cancel }) {
             playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
             if (confirm) {
-                uni.setStorageSync('historyConfList', [])
+                uni.setStorageSync('historyConfList', { [envVersion]: [] })
                 historyConf.list = []
             }
         },
