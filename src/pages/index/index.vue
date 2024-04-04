@@ -7,36 +7,50 @@
 <template>
     <view class="page">
         <view class="content">
-            <navigator class="list" open-type="navigate" url="/pages/yuwen/index">语文：拼音练习</navigator>
-            <navigator class="list" open-type="navigate" url="/pages/shuxue/index">数学：四则运算训练</navigator>
+            <navigator
+                class="list"
+                open-type="navigate"
+                url="/pages/yuwen/index"
+                >语文：拼音练习</navigator
+            >
+            <navigator
+                class="list"
+                open-type="navigate"
+                url="/pages/shuxue/index"
+                >数学：四则运算训练</navigator
+            >
         </view>
         <div class="footer">
             <div class="footer-item">
                 &copy; Tovi 2023-present
-                <navigator class="about" open-type="navigate" url="/pages/about/index">@关于与反馈</navigator>
+                <navigator
+                    class="about"
+                    open-type="navigate"
+                    url="/pages/about/index"
+                    >@关于与反馈</navigator
+                >
             </div>
-            <div class="footer-item">好好学习 天天向上 version: {{ version }}</div>
+            <div class="footer-item">
+                好好学习 天天向上 version: {{ version }}
+            </div>
         </div>
     </view>
 </template>
 <script setup>
-import { onMounted, ref, watch, reactive } from 'vue';
-import {
-    getGradeName
-} from "../../module/tools";
-const { miniProgram } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {}
-const version = (miniProgram?.version || '0.0.2').match(/^\d+(\.\d+){2}/)[0]
+import { onMounted, ref, watch, reactive } from "vue";
+import { getGradeName } from "../../module/tools";
+const { miniProgram } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {};
+const version = (miniProgram?.version || "0.0.2").match(/^\d+(\.\d+){2}/)[0];
 
 // #ifdef MP-WEIXIN
 
 uni.showShareMenu({
-    title: `四小${['一', '二', '三', '四', '五', '六'][getGradeName().y]}(8)班`,
-    content: '课外练习',
-    imageUrl: '/assets/icon.jpeg',
-    path: '/pages/index/index'
+    title: `四小${["一", "二", "三", "四", "五", "六"][getGradeName().y]}(8)班`,
+    content: "课外练习",
+    imageUrl: "/assets/icon.jpeg",
+    path: "/pages/index/index",
 });
 // #endif
-
 </script>
 
 <style lang="less">
@@ -93,7 +107,7 @@ uni.showShareMenu({
     text-align: center;
     line-height: 1.6em;
     font-size: 28rpx;
-    padding: .5em 0;
+    padding: 0.5em 0;
 
     .footer-item {
         display: flex;
@@ -106,4 +120,3 @@ uni.showShareMenu({
     }
 }
 </style>
-

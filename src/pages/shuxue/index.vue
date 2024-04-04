@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2024-03-07 23:28:41
+ * @LastEditTime : 2024-03-10 16:06:07
 -->
 <template>
     <view class="content">
@@ -393,7 +393,7 @@
                     }) / `
                     + (item.config.isMixed === 1 ? '混合' : '非混合') + '/'
                     + `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
-                        ? '(小数位:' + item.config.decimalLen + ') ' : ''
+                                ? '(小数位:' + item.config.decimalLen + ') ' : ''
                                 }` }}
                             </div>
                         </div>
@@ -464,7 +464,9 @@ const defaultConf = { // 默认配置
     vertical: false, // 开启竖式
     decimalLen: 2, // 最大小数位
     bgmSelectValue: 'bgm-sxg_mp3',
-    lastAccess: 0
+    lastSucc: 0, // 最后完成时间
+    // Todo:计时bugger
+    countTime: 0
 }
 const { miniProgram = {} } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {}
 const { envVersion } = Object.assign(miniProgram, {
@@ -476,13 +478,13 @@ const { envVersion } = Object.assign(miniProgram, {
 const getStorageData = () => { // 读取设置缓存
     const storageConf = uni.getStorageSync('config')?.[envVersion] || {}
 
-    const _storageConf = storageConf.lastAccess && storageConf.lastAccess > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 7)
+    const _storageConf = storageConf.lastSucc && storageConf.lastSucc > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 7)
         ? storageConf
         : {}
     return Object.assign(
         {},
         defaultConf,
-        storageConf.lastAccess && storageConf.lastAccess > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 15)
+        storageConf.lastSucc && storageConf.lastSucc > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 15)
             ? storageConf
             : {}
     );
@@ -491,9 +493,9 @@ const getStorageData = () => { // 读取设置缓存
 const storageConf = getStorageData() // 获取用户保存的设置
 
 uni.setStorageSync('config', {
-    [envVersion]: storageConf.lastAccess < 1
+    [envVersion]: storageConf.lastSucc < 1
         ? storageConf
-        : { ...storageConf, lastAccess: Date.now() }
+        : { ...storageConf, lastSucc: Date.now() }
 }) // 重新更新用户配置时间
 
 const setConfig = reactive( // 配制项
@@ -1018,6 +1020,8 @@ const keyClick = (key) => {
 
 // 查看得分事件
 const subEnter = () => {
+    // 提交自动删除自动保存数据
+    uni.removeStorageSync('autoRecord')
     playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
     subEnterTime.value = Date.now()
     // 锁定提交状态
@@ -1142,7 +1146,7 @@ const saveConfig = () => {
 
     // 配置存 stroage
     const _setConfig = {
-        [envVersion]: { ...setConfig, lastAccess: Date.now() }
+        [envVersion]: { ...setConfig, lastucc: Date.now() }
     }
 
     delete _setConfig.status
