@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2024-03-10 16:06:07
+ * @LastEditTime : 2024-04-05 00:59:30
 -->
 <template>
     <view class="content">
@@ -393,7 +393,7 @@
                     }) / `
                     + (item.config.isMixed === 1 ? '混合' : '非混合') + '/'
                     + `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
-                                ? '(小数位:' + item.config.decimalLen + ') ' : ''
+                        ? '(小数位:' + item.config.decimalLen + ') ' : ''
                                 }` }}
                             </div>
                         </div>
@@ -478,20 +478,24 @@ const { envVersion } = Object.assign(miniProgram, {
 const getStorageData = () => { // 读取设置缓存
     const storageConf = uni.getStorageSync('config')?.[envVersion] || {}
 
-    const _storageConf = storageConf.lastSucc && storageConf.lastSucc > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 7)
-        ? storageConf
-        : {}
-    return Object.assign(
+    // const _storageConf = storageConf.lastSucc && storageConf.lastSucc > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 7)
+    //     ? storageConf
+    //     : {}
+    const _storageConf = Object.assign(
         {},
         defaultConf,
-        storageConf.lastSucc && storageConf.lastSucc > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 15)
-            ? storageConf
-            : {}
+        storageConf
+        // storageConf.lastSucc && storageConf.lastSucc > Date.now()
+        //  - (['develop', 'trial', 'web'].includes(envVersion)
+        //         ? 10000 : 86400000 * 15)
+        // ['develop', 'trial', 'web'].includes(envVersion)
+        // ? storageConf
+        // : {}
     );
+    return _storageConf
 }
 
 const storageConf = getStorageData() // 获取用户保存的设置
-
 uni.setStorageSync('config', {
     [envVersion]: storageConf.lastSucc < 1
         ? storageConf
@@ -606,6 +610,7 @@ const popupConf = reactive({
         fn: {
             clean() {
                 popupConf.status = false
+                uni.removeStorageSync('autoRecord')
             },
             submit() {
                 recordReadStorage('autoRecord')
@@ -937,7 +942,6 @@ function contTime(isStop = false) {
             if (_diff.h - 0 > 0) _tpl.push('H小时')
             if (_diff.i - 0 > 0) _tpl.push('i分钟')
             if (_diff.s - 0 > 0) _tpl.push('s秒')
-
             startTimed.value = date.duration(_tpl.join(''), diff)
         }, 1000)
     }
@@ -1146,7 +1150,7 @@ const saveConfig = () => {
 
     // 配置存 stroage
     const _setConfig = {
-        [envVersion]: { ...setConfig, lastucc: Date.now() }
+        [envVersion]: { ...setConfig, lastSucc: Date.now() }
     }
 
     delete _setConfig.status
@@ -1334,7 +1338,7 @@ onLoad(() => {
     })
     const reCord = uni.getStorageSync('record'); // 存档信息
     const autoRecord = uni.getStorageSync('autoRecord'); // 自动存档信息
-    historyConf.list = uni.getStorageSync('historyConfList') || [] // 历史信息
+    historyConf.list = uni.getStorageSync('historyConfList')[envVersion] || [] // 历史信息
 
     if (autoRecord) {
         popupConf.curKey = 'readAutoSave'
