@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2024-04-05 00:59:30
+ * @LastEditTime : 2024-04-05 09:24:33
 -->
 <template>
     <view class="content">
@@ -393,7 +393,7 @@
                     }) / `
                     + (item.config.isMixed === 1 ? '混合' : '非混合') + '/'
                     + `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
-                        ? '(小数位:' + item.config.decimalLen + ') ' : ''
+                                ? '(小数位:' + item.config.decimalLen + ') ' : ''
                                 }` }}
                             </div>
                         </div>
@@ -445,6 +445,7 @@ const score = ref(0); // 得分
 const comment = ref(""); // 评语
 const curidx = ref(); // 当前所计算的索引数据
 const startTime = ref(0) // 开始时间
+// Todo:计时bugger
 const startTimed = ref('') // 已用时
 const subEnterTime = ref('') // 提交时间
 const contTimeId = ref() // 计时定时器 ID
@@ -465,8 +466,6 @@ const defaultConf = { // 默认配置
     decimalLen: 2, // 最大小数位
     bgmSelectValue: 'bgm-sxg_mp3',
     lastSucc: 0, // 最后完成时间
-    // Todo:计时bugger
-    countTime: 0
 }
 const { miniProgram = {} } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {}
 const { envVersion } = Object.assign(miniProgram, {
@@ -477,10 +476,6 @@ const { envVersion } = Object.assign(miniProgram, {
 
 const getStorageData = () => { // 读取设置缓存
     const storageConf = uni.getStorageSync('config')?.[envVersion] || {}
-
-    // const _storageConf = storageConf.lastSucc && storageConf.lastSucc > Date.now() - (['develop', 'trial', 'web'].includes(envVersion) ? 10000 : 86400000 * 7)
-    //     ? storageConf
-    //     : {}
     const _storageConf = Object.assign(
         {},
         defaultConf,
