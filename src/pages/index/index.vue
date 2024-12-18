@@ -10,14 +10,26 @@
             <navigator
                 class="list"
                 open-type="navigate"
-                url="/pages/yuwen/index"
-                >语文：拼音练习</navigator
+                url="/pages/discipline/yuwen/index"
+                >语文</navigator
             >
             <navigator
                 class="list"
                 open-type="navigate"
-                url="/pages/shuxue/index"
-                >数学：四则运算训练</navigator
+                url="/pages/discipline/shuxue/index"
+                >数学</navigator
+            >
+            <navigator
+                class="list"
+                open-type="navigate"
+                url="/pages/discipline/yingyu/index"
+                >英语</navigator
+            >
+            <navigator
+                class="list"
+                open-type="navigate"
+                url="/pages/fn/countDown/index"
+                >倒记时</navigator
             >
         </view>
         <div class="footer">
@@ -67,16 +79,19 @@ uni.showShareMenu({
     justify-content: space-evenly;
     align-items: center;
     flex: 1;
+    flex-wrap: wrap;
     background-color: var(--c-safegray-hlighter);
 
     .list {
-        width: 11em;
+        width: 7em;
         height: 3em;
         line-height: 3em;
         font-size: 28rpx;
         background-color: var(--c-safegray-hlight);
+        border: 1rpx var(--c-safegray-lighter) solid;
         border-radius: 5rpx;
         text-align: center;
+        flex-shrink: 0;
     }
 }
 

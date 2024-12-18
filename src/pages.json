@@ -2,26 +2,59 @@
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 		{
 			"path": "pages/index/index",
+			"name":"home",
 			"style": {
-				"navigationBarTitleText": "四小二(8)班"
+				"navigationBarTitleText": "四小三(8)班"
 			}
 		},
 		{
-			"path": "pages/shuxue/index",
+			"path": "pages/discipline/shuxue/index",
+			"name": "sizeyunshuan",
+			"style": {
+				"navigationBarTitleText": "数学"
+			}
+		},
+		{
+			"path": "pages/discipline/shuxue/jisuan",
+			"name": "sizeyunshuan",
 			"style": {
 				"navigationBarTitleText": "数学：四则运算练习"
 			}
 		},
 		{
-			"path": "pages/yuwen/index",
+			"path": "pages/discipline/yuwen/index",
+			"name":"yuwen",
 			"style": {
-				"navigationBarTitleText": "语文：拼音练习"
+				"navigationBarTitleText": "语文"
+			}
+		},
+		{
+			"path": "pages/discipline/yuwen/pinyin",
+			"name":"yunwen-pinyin",
+			"style": {
+				"navigationBarTitleText": "语文拼音练习"
+			}
+		},
+		{
+			"path": "pages/discipline/yingyu/index",
+			"name":"yingyu",
+			"style": {
+				"navigationBarTitleText": "小学英语"
 			}
 		},
 		{
 			"path": "pages/about/index",
+			"name": "about",
 			"style": {
 				"navigationBarTitleText": "关于本程序"
+			}
+		},
+		{
+			"path": "pages/fn/countDown/index",
+			"name": "countDown",
+			"style": {
+				"navigationStyle": "custom", // 使用自定义导航栏，系统会关闭默认的原生导航栏
+				"navigationBarTitleText": "倒计时"
 			}
 		}
 	],

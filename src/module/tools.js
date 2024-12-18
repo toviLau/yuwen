@@ -287,7 +287,7 @@ const getGradeName = () => {
     const d = new Date()
     const Y = d.getFullYear()
     const m = d.getMonth() + 1
-    const nowDate = new Date(Y, m) - new Date(2021, 9)
+    const nowDate = new Date(Y, m) - new Date(2021, 8)
     return date.duration('all', nowDate)
 }
 export {

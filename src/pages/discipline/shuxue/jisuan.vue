@@ -2,67 +2,107 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2023-09-29 02:25:21
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2024-04-05 09:24:33
+ * @LastEditTime : 2024-09-02 15:28:00
 -->
 <template>
     <view class="content">
         <div class="top">
             <div class="top-item">
-                <div class="top-left">日期: {{ date('Y-m-d') }}</div>
+                <div class="top-left">日期: {{ date("Y-m-d") }}</div>
                 <div class="top-right">用时: {{ startTimed }}</div>
                 <span class="top-audio">
-                    <div class="iconfont icon-audio" :class="{ pause: bgmPause }" @click="bgmPause = !bgmPause"></div>
+                    <div
+                        class="iconfont icon-audio"
+                        :class="{ pause: bgmPause }"
+                        @click="bgmPause = !bgmPause"
+                    ></div>
                 </span>
             </div>
         </div>
-        <scroll-view :scroll-top="scrollTop" class="scroll-view" scroll-y="true">
+        <scroll-view
+            :scroll-top="scrollTop"
+            class="scroll-view"
+            scroll-y="true"
+        >
             <div class="list">
-                <div class="list-item" v-for="(v, i) in numList" :key="i" @click="ckItem(i)" :class="{
-                    'min-font1': isMixed && hasDecimal && decimalLen === 1,
-                    'min-font2': isMixed && hasDecimal && decimalLen === 2,
-                    'min-font3': isMixed && hasDecimal && decimalLen === 3,
-                }">
-                    <div class="list-item-li" :class="{
-                    'cur-item': !setConfig.status && i === curidx && submited === 0,
-                    cursor1: cursorType === false,
-                    cursor2: cursorType === true,
-                    right: v[2] === 1,
-                    wrong: v[2] === 0 && !['', undefined].includes(v[1]),
-                }">
-
+                <div
+                    class="list-item"
+                    v-for="(v, i) in numList"
+                    :key="i"
+                    @click="ckItem(i)"
+                    :class="{
+                        'min-font1': isMixed && hasDecimal && decimalLen === 1,
+                        'min-font2': isMixed && hasDecimal && decimalLen === 2,
+                        'min-font3': isMixed && hasDecimal && decimalLen === 3,
+                    }"
+                >
+                    <div
+                        class="list-item-li"
+                        :class="{
+                            'cur-item':
+                                !setConfig.status &&
+                                i === curidx &&
+                                submited === 0,
+                            cursor1: cursorType === false,
+                            cursor2: cursorType === true,
+                            right: v[2] === 1,
+                            wrong:
+                                v[2] === 0 && !['', undefined].includes(v[1]),
+                        }"
+                    >
                         <div class="edited" v-if="v[3] > 0">{{ v[3] }}</div>
-                        <div class="empty-edit" v-if="!v[1] && submited === 1"></div>
-                        <div class="wait-edited" v-if="v[2] === 0 && !v[3]"></div>
-                        <div class="list-item-idx" v-if="showIdx">{{ i + 1 }}</div>
+                        <div
+                            class="empty-edit"
+                            v-if="!v[1] && submited === 1"
+                        ></div>
+                        <div
+                            class="wait-edited"
+                            v-if="v[2] === 0 && !v[3]"
+                        ></div>
+                        <div class="list-item-idx" v-if="showIdx">
+                            {{ i + 1 }}
+                        </div>
                         {{
-                    renderExpression(v[0]) +
-                    `${Array.isArray(v[0][3]) ? '≈' : '='}${curidx !== undefined && ![undefined,
-                        null].includes(v[1]) ?
-                        v[1] : ""}`
-                }}
-                        <div class="tip-wrong active-show" v-if="Array.isArray(v[0][3])">请用四舍五入法保留{{ v[0][3][1] }}位小数
+                            renderExpression(v[0]) +
+                            `${Array.isArray(v[0][3]) ? "≈" : "="}${
+                                curidx !== undefined &&
+                                ![undefined, null].includes(v[1])
+                                    ? v[1]
+                                    : ""
+                            }`
+                        }}
+                        <div
+                            class="tip-wrong active-show"
+                            v-if="Array.isArray(v[0][3])"
+                        >
+                            请用四舍五入法保留{{ v[0][3][1] }}位小数
                         </div>
 
                         <div v-show="v[2] === 0">
                             <div class="tip-wrong">
                                 {{
-                    v[1] - 0 === v[0][0] + v[0][1]
-                        ? '粗心了吧，是不是当成加(+)法算啦。'
-                        : v[1] - 0 === v[0][0] - v[0][1] + 10
-                            ? '忘记借位了吧？'
-                            : v[1] - 0 === v[0][0] - v[0][1]
-                                ? '这是加法哦，粗心当减(-)法算了么？'
-                                : v[1] - 0 === v[0][0] + v[0][1] - 10 && v[0][0] % 10 + v[0][1] % 10 > 9
-                                    ? '忘记进位了吧?'
-                                    : ''
-                }}
+                                    v[1] - 0 === v[0][0] + v[0][1]
+                                        ? "粗心了吧，是不是当成加(+)法算啦。"
+                                        : v[1] - 0 === v[0][0] - v[0][1] + 10
+                                        ? "忘记借位了吧？"
+                                        : v[1] - 0 === v[0][0] - v[0][1]
+                                        ? "这是加法哦，粗心当减(-)法算了么？"
+                                        : v[1] - 0 === v[0][0] + v[0][1] - 10 &&
+                                          (v[0][0] % 10) + (v[0][1] % 10) > 9
+                                        ? "忘记进位了吧?"
+                                        : ""
+                                }}
                             </div>
                         </div>
                     </div>
-                    <div v-if="vertical" class="vertical" :class="{
-                    plus: v[0][2] === 0,
-                    minus: v[0][2] === 1
-                }">
+                    <div
+                        v-if="vertical"
+                        class="vertical"
+                        :class="{
+                            plus: v[0][2] === 0,
+                            minus: v[0][2] === 1,
+                        }"
+                    >
                         <!-- <div class="vertical-li">
                             <div class="vertical-li-nums" v-for="vItem in v[0][0].toString().split('')">{{ vItem }}</div>
                         </div>
@@ -76,31 +116,66 @@
                         </div> -->
                     </div>
                 </div>
-                <div class="list-item list-item-none" v-for="i in 10" :key="i" />
+                <div
+                    class="list-item list-item-none"
+                    v-for="i in 10"
+                    :key="i"
+                />
             </div>
         </scroll-view>
-        <div class="footer" v-show="curidx !== undefined"
-            v-if="submited === 0 && curidx !== '' || submited === 1 || setConfig.status" :class="{
-                    dsb: curidx && (numList[curidx][1] === undefined ? '' : numList[curidx][1] + '').length > 2,
-                }">
+        <div
+            class="footer"
+            v-show="curidx !== undefined"
+            v-if="
+                (submited === 0 && curidx !== '') ||
+                submited === 1 ||
+                setConfig.status
+            "
+            :class="{
+                dsb:
+                    curidx &&
+                    (numList[curidx][1] === undefined
+                        ? ''
+                        : numList[curidx][1] + ''
+                    ).length > 2,
+            }"
+        >
             <!-- 键盘 -->
-            <div class="pan" :class="{
-                    dsb: numList[curidx][2] === 1, easyKeyboard: !keyboard,
-                    'has-decimal': hasDecimal
-                }" v-if="submited === 0 && curidx !== '' && !setConfig.status">
+            <div
+                class="pan"
+                :class="{
+                    dsb: numList[curidx][2] === 1,
+                    easyKeyboard: !keyboard,
+                    'has-decimal': hasDecimal,
+                }"
+                v-if="submited === 0 && curidx !== '' && !setConfig.status"
+            >
                 <template v-for="item in keyboardCode" :key="item.idx">
-                    <div class="pan-item" @click="keyClick(item.value)"
-                        v-if="keyboard && item.fullKey || !keyboard && item.easyKey">
+                    <div
+                        class="pan-item"
+                        @click="keyClick(item.value)"
+                        v-if="
+                            (keyboard && item.fullKey) ||
+                            (!keyboard && item.easyKey)
+                        "
+                    >
                         <div class="pan-item-container">{{ item.name }}</div>
                     </div>
                 </template>
 
                 <div class="pan-footer">
-                    <div class="pan-item pan-enter" @click="subEnter()">查看得分</div>
-                    <div class="pan-item pan-set">
-                        <span class="iconfont icon-set pan-set-btn" @click="showConfig(true)"></span>
+                    <div class="pan-item pan-enter" @click="subEnter()">
+                        查看得分
                     </div>
-                    <div class="pan-item pan-del" @click="keyClick('del')">⇐</div>
+                    <div class="pan-item pan-set">
+                        <span
+                            class="iconfont icon-set pan-set-btn"
+                            @click="showConfig(true)"
+                        ></span>
+                    </div>
+                    <div class="pan-item pan-del" @click="keyClick('del')">
+                        ⇐
+                    </div>
                 </div>
             </div>
             <!-- 得分 -->
@@ -112,11 +187,26 @@
                 <div class="score">{{ score }}</div>
                 <div class="comment">{{ comment }}</div>
                 <div class="fen-btns">
-                    <div class="fen-item fen-edit"
-                        @click="[edit(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]"
-                        :class="{ dsb: score === 100 }">去订正</div>
+                    <div
+                        class="fen-item fen-edit"
+                        @click="
+                            [
+                                edit(),
+                                playSound({
+                                    src: musicArr['dian2_mp3'],
+                                    volume: setConfig.bgmVolume / 2,
+                                }),
+                            ]
+                        "
+                        :class="{ dsb: score === 100 }"
+                    >
+                        去订正
+                    </div>
                     <div class="pan-item pan-set">
-                        <span class="iconfont icon-set pan-set-btn" @click="showConfig(true)"></span>
+                        <span
+                            class="iconfont icon-set pan-set-btn"
+                            @click="showConfig(true)"
+                        ></span>
                     </div>
                     <div class="fen-item fen-new" @click="reCreate()">
                         做新题
@@ -128,7 +218,9 @@
                 <div class="set-sys-title">
                     <div class="set-sys-title-left">设置</div>
                     <div class="set-sys-title-right">
-                        <div class="rest-default" @click="setNumDefault">恢复默认</div>
+                        <div class="rest-default" @click="setNumDefault">
+                            恢复默认
+                        </div>
                     </div>
                 </div>
                 <div class="set-sys-bd">
@@ -157,33 +249,68 @@
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">题目数量：</div>
                         <div class="set-sys-db-list-right">
-                            <hao-slider :step="10" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="10"
-                                :value="setConfig.totalNum" @change="setNumChange" class="set-slider" />
+                            <hao-slider
+                                :step="10"
+                                :sliderHeight="4"
+                                sliderLeftColor="#55a4f3"
+                                :min="10"
+                                :value="setConfig.totalNum"
+                                @change="setNumChange"
+                                class="set-slider"
+                            />
                         </div>
                     </div>
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">运算规则：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.opType }">加减
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-l"
+                                    :class="{ cur: !setConfig.opType }"
+                                >
+                                    加减
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="18" v-model="setConfig.opType" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3" backgroundColorOff="#55a4f3"
-                                        @change="opTypeChange" />
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-c"
+                                >
+                                    <zeroSwitch
+                                        :size="18"
+                                        v-model="setConfig.opType"
+                                        inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc"
+                                        backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#55a4f3"
+                                        @change="opTypeChange"
+                                    />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.opType }">四则
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-r"
+                                    :class="{ cur: setConfig.opType }"
+                                >
+                                    四则
                                 </div>
                             </div>
                             <div class="label" v-if="setConfig.opType">
-                                <uni-data-checkbox multiple v-model="setConfig.notDivision" selectedColor="#55a4f3"
-                                    class="label-ckd" :localdata="[{ 'value': 1, 'text': '屏蔽除法' }]"
-                                    @change="mixedChange"></uni-data-checkbox>
+                                <uni-data-checkbox
+                                    multiple
+                                    v-model="setConfig.notDivision"
+                                    selectedColor="#55a4f3"
+                                    class="label-ckd"
+                                    :localdata="[
+                                        { value: 1, text: '屏蔽除法' },
+                                    ]"
+                                    @change="mixedChange"
+                                ></uni-data-checkbox>
                             </div>
                             <div class="label">
-                                <uni-data-checkbox multiple v-model="setConfig.isMixed" selectedColor="#55a4f3"
-                                    class="label-ckd" :localdata="[{ 'value': 1, 'text': '混合' }]"
-                                    @change="mixedChange"></uni-data-checkbox>
+                                <uni-data-checkbox
+                                    multiple
+                                    v-model="setConfig.isMixed"
+                                    selectedColor="#55a4f3"
+                                    class="label-ckd"
+                                    :localdata="[{ value: 1, text: '混合' }]"
+                                    @change="mixedChange"
+                                ></uni-data-checkbox>
                             </div>
                         </div>
                     </div>
@@ -202,18 +329,29 @@
                         <div class="set-sys-db-list-left">难易度：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l"
-                                    :class="{ cur: !setConfig.difficulty }">
-                                    {{ setConfig.opType ? '简单' : '20以内' }}
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-l"
+                                    :class="{ cur: !setConfig.difficulty }"
+                                >
+                                    {{ setConfig.opType ? "简单" : "20以内" }}
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="18" v-model="setConfig.difficulty" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
-                                        backgroundColorOff="#55a4f3" />
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-c"
+                                >
+                                    <zeroSwitch
+                                        :size="18"
+                                        v-model="setConfig.difficulty"
+                                        inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc"
+                                        backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#55a4f3"
+                                    />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r"
-                                    :class="{ cur: setConfig.difficulty }">
-                                    {{ setConfig.opType ? '困难' : '100以内' }}
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-r"
+                                    :class="{ cur: setConfig.difficulty }"
+                                >
+                                    {{ setConfig.opType ? "困难" : "100以内" }}
                                 </div>
                             </div>
                         </div>
@@ -235,15 +373,30 @@
                         <div class="set-sys-db-list-right">
                             <div class="lv2 has-next">
                                 <div class="set-sys-switch">
-                                    <zeroSwitch :size="18" v-model="setConfig.hasDecimal" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
-                                        backgroundColorOff="#cfcfcf" />
+                                    <zeroSwitch
+                                        :size="18"
+                                        v-model="setConfig.hasDecimal"
+                                        inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc"
+                                        backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#cfcfcf"
+                                    />
                                 </div>
-                                <div class="lv2-next" v-if="setConfig.hasDecimal">
+                                <div
+                                    class="lv2-next"
+                                    v-if="setConfig.hasDecimal"
+                                >
                                     <div class="lv2-label">最多有效位数:</div>
-                                    <hao-slider :step="1" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="1" :max="3"
-                                        :value="setConfig.decimalLen" @change="setDecimalLenChange"
-                                        class="set-slider" />
+                                    <hao-slider
+                                        :step="1"
+                                        :sliderHeight="4"
+                                        sliderLeftColor="#55a4f3"
+                                        :min="1"
+                                        :max="3"
+                                        :value="setConfig.decimalLen"
+                                        @change="setDecimalLenChange"
+                                        class="set-slider"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -253,10 +406,17 @@
                         <div class="set-sys-db-list-left">显示序号：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="18" v-model="setConfig.showIdx" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
-                                        backgroundColorOff="#cfcfcf" />
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-c"
+                                >
+                                    <zeroSwitch
+                                        :size="18"
+                                        v-model="setConfig.showIdx"
+                                        inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc"
+                                        backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#cfcfcf"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -265,15 +425,28 @@
                         <div class="set-sys-db-list-left">键盘布局：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l" :class="{ cur: !setConfig.keyboard }">
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-l"
+                                    :class="{ cur: !setConfig.keyboard }"
+                                >
                                     简约
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-c">
-                                    <zeroSwitch :size="18" v-model="setConfig.keyboard" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
-                                        backgroundColorOff="#55a4f3" />
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-c"
+                                >
+                                    <zeroSwitch
+                                        :size="18"
+                                        v-model="setConfig.keyboard"
+                                        inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc"
+                                        backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#55a4f3"
+                                    />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r" :class="{ cur: setConfig.keyboard }">
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-r"
+                                    :class="{ cur: setConfig.keyboard }"
+                                >
                                     九宫格
                                 </div>
                             </div>
@@ -283,18 +456,28 @@
                         <div class="set-sys-db-list-left">光标提示符：</div>
                         <div class="set-sys-db-list-right">
                             <div class="set-sys-switch">
-                                <div class="set-sys-switch-item set-sys-switch-l"
-                                    :class="{ cur: !setConfig.cursorType }">
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-l"
+                                    :class="{ cur: !setConfig.cursorType }"
+                                >
                                     {{ `下划线 _` }}
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-c">
-
-                                    <zeroSwitch :size="18" v-model="setConfig.cursorType" inactiveColor="#fcfcfc"
-                                        activeColor="#fcfcfc" backgroundColorOn="#55a4f3"
-                                        backgroundColorOff="#55a4f3" />
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-c"
+                                >
+                                    <zeroSwitch
+                                        :size="18"
+                                        v-model="setConfig.cursorType"
+                                        inactiveColor="#fcfcfc"
+                                        activeColor="#fcfcfc"
+                                        backgroundColorOn="#55a4f3"
+                                        backgroundColorOff="#55a4f3"
+                                    />
                                 </div>
-                                <div class="set-sys-switch-item set-sys-switch-r"
-                                    :class="{ cur: setConfig.cursorType }">
+                                <div
+                                    class="set-sys-switch-item set-sys-switch-r"
+                                    :class="{ cur: setConfig.cursorType }"
+                                >
                                     {{ `竖线 | ` }}
                                 </div>
                             </div>
@@ -303,58 +486,139 @@
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">背景音量：</div>
                         <div class="set-sys-db-list-right">
-                            <hao-slider :step="1" :sliderHeight="4" sliderLeftColor="#55a4f3" :min="0"
-                                :value="setConfig.bgmVolume" :max="20" @change="bgmVolumeChange" class="set-slider" />
+                            <hao-slider
+                                :step="1"
+                                :sliderHeight="4"
+                                sliderLeftColor="#55a4f3"
+                                :min="0"
+                                :value="setConfig.bgmVolume"
+                                :max="20"
+                                @change="bgmVolumeChange"
+                                class="set-slider"
+                            />
                         </div>
                     </div>
                     <div class="set-sys-db-list">
                         <div class="set-sys-db-list-left">背景音乐：</div>
                         <div class="set-sys-db-list-right">
                             <div class="check-box" @click="switchBgmClick">
-                                <div class="check-box-item" :data-text='item.title' :class="{
-                    cur: item.value === setConfig.bgmSelectValue
-                }" v-for=" item  in  bgmSelect " :key="item.value">{{ item.title }}</div>
+                                <div
+                                    class="check-box-item"
+                                    :data-text="item.title"
+                                    :class="{
+                                        cur:
+                                            item.value ===
+                                            setConfig.bgmSelectValue,
+                                    }"
+                                    v-for="item in bgmSelect"
+                                    :key="item.value"
+                                >
+                                    {{ item.title }}
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="declare divider-line">
                         <div>
-                            <div>个人版非商用，不采集个人信息。所有数据仅存储在本地</div>
+                            <div>
+                                个人版非商用，不采集个人信息。所有数据仅存储在本地
+                            </div>
                             <div>如果清除微信缓存,您保存的所有数据就会丢失</div>
                         </div>
                     </div>
                     <div class="btns">
-                        <div class="set-btn set-btn-submit" @click="saveConfig()">保存</div>
-                        <div class="set-btn set-btn-clean" @click="cleanConfig()">取消</div>
+                        <div
+                            class="set-btn set-btn-submit"
+                            @click="saveConfig()"
+                        >
+                            保存
+                        </div>
+                        <div
+                            class="set-btn set-btn-clean"
+                            @click="cleanConfig()"
+                        >
+                            取消
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </view>
-    <cc-popup :isShow='popupConf.status' width="calc(100vw - 70px)" height="auto" radius="16rpx">
+    <cc-popup
+        :isShow="popupConf.status"
+        width="calc(100vw - 70px)"
+        height="auto"
+        radius="16rpx"
+    >
         <div class="popup-dialog">
             <div class="popup-dialog-content">
-                <div class="popup-dialog-msg">{{ popupConf[popupConf.curKey].msg }}</div>
+                <div class="popup-dialog-msg">
+                    {{ popupConf[popupConf.curKey].msg }}
+                </div>
             </div>
             <div class="popup-dialog-footer">
-                <div class="popup-dialog-footer-item clean" vif="popupConf[popupConf.curKey].curKey==="
-                    @click="[popupConf[popupConf.curKey].fn.clean(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">
-                    取消</div>
-                <div class="popup-dialog-footer-item submit" vif="popupConf[popupConf.curKey].fn.submit" :class="{
-                    danger: popupConf[popupConf.curKey].isDanger
-                }"
-                    @click="[popupConf[popupConf.curKey].fn.submit(), playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]">
-                    确定</div>
+                <div
+                    class="popup-dialog-footer-item clean"
+                    vif="popupConf[popupConf.curKey].curKey==="
+                    @click="
+                        [
+                            popupConf[popupConf.curKey].fn.clean(),
+                            playSound({
+                                src: musicArr['dian2_mp3'],
+                                volume: setConfig.bgmVolume / 2,
+                            }),
+                        ]
+                    "
+                >
+                    取消
+                </div>
+                <div
+                    class="popup-dialog-footer-item submit"
+                    vif="popupConf[popupConf.curKey].fn.submit"
+                    :class="{
+                        danger: popupConf[popupConf.curKey].isDanger,
+                    }"
+                    @click="
+                        [
+                            popupConf[popupConf.curKey].fn.submit(),
+                            playSound({
+                                src: musicArr['dian2_mp3'],
+                                volume: setConfig.bgmVolume / 2,
+                            }),
+                        ]
+                    "
+                >
+                    确定
+                </div>
             </div>
         </div>
     </cc-popup>
-    <cc-popup :isShow='historyConf.status' width="100vw" height="auto" radius="16rpx" :opacity="0.65"
-        bgcolor="transparent">
-
+    <cc-popup
+        :isShow="historyConf.status"
+        width="100vw"
+        height="auto"
+        radius="16rpx"
+        :opacity="0.65"
+        bgcolor="transparent"
+    >
         <div class="history-dialog">
-            <span class="iconfont icon-wrong history-dialog-close"
-                @click="[historyConf.status = false, playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })]"></span>
-            <span class="iconfont icon-clean history-dialog-clean" @click="historyClean()">清除全部</span>
+            <span
+                class="iconfont icon-wrong history-dialog-close"
+                @click="
+                    [
+                        (historyConf.status = false),
+                        playSound({
+                            src: musicArr['dian2_mp3'],
+                            volume: setConfig.bgmVolume / 2,
+                        }),
+                    ]
+                "
+            ></span>
+            <span
+                class="iconfont icon-clean history-dialog-clean"
+                @click="historyClean()"
+                >清除全部</span
+            >
             <div class="history-title">历史成绩</div>
             <div class="history-tab">
                 <div class="history-th">
@@ -369,32 +633,80 @@
                     </div>
                 </div>
                 <scroll-view class="history-tb" scroll-y="true">
-                    <div class="history-tr" v-for="( item, idx ) in  historyConf.list "
+                    <div
+                        class="history-tr"
+                        v-for="(item, idx) in historyConf.list"
                         v-if="historyConf.list.length > 0"
-                        @click="() => playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })"
-                        :key="item.endTime">
+                        @click="
+                            () =>
+                                playSound({
+                                    src: musicArr['dian1_mp3'],
+                                    volume: setConfig.bgmVolume / 2,
+                                })
+                        "
+                        :key="item.endTime"
+                    >
                         <div class="history-li">
                             <!-- <div class="history-td">{{ date('Y-m-d H:i:s', item.startTime) }}</div> -->
-                            <div class="history-td">{{ date('Y-m-d H:i:s', item.endTime) }}</div>
-                            <div class="history-td">{{ date.duration('H:i:s', item.endTime - item.startTime) }}</div>
-                            <div class="history-td">{{ `${item.totalNum} / ${item.answered} / ${item.corrected}` }}
+                            <div class="history-td">
+                                {{ date("Y-m-d H:i:s", item.endTime) }}
+                            </div>
+                            <div class="history-td">
+                                {{
+                                    date.duration(
+                                        "H:i:s",
+                                        item.endTime - item.startTime
+                                    )
+                                }}
+                            </div>
+                            <div class="history-td">
+                                {{
+                                    `${item.totalNum} / ${item.answered} / ${item.corrected}`
+                                }}
                             </div>
                             <div class="history-td">{{ item.score }}</div>
                             <div class="history-td">{{ item.revision }}</div>
                             <div class="history-td">
-                                <span class="iconfont icon-delete" @click="deleteHistory($event, item.id)"></span>
+                                <span
+                                    class="iconfont icon-delete"
+                                    @click="deleteHistory($event, item.id)"
+                                ></span>
                             </div>
                         </div>
                         <div class="history-li">
                             <div class="history-td">{{ idx + 1 }}</div>
-                            <div class="history-td">题目设置:
-                                {{ `${['加减运算', '四则运算'][item.config.opType - 0]}(${item.config.opType ? ['简单',
-                    '困难'][item.config.difficulty - 0] : ['20以内', '100以内'][item.config.difficulty - 0]
-                    }) / `
-                    + (item.config.isMixed === 1 ? '混合' : '非混合') + '/'
-                    + `${['未开启小数', '开启小数'][item.config.hasDecimal - 0]}${item.config.hasDecimal
-                                ? '(小数位:' + item.config.decimalLen + ') ' : ''
-                                }` }}
+                            <div class="history-td">
+                                题目设置:
+                                {{
+                                    `${
+                                        ["加减运算", "四则运算"][
+                                            item.config.opType - 0
+                                        ]
+                                    }(${
+                                        item.config.opType
+                                            ? ["简单", "困难"][
+                                                  item.config.difficulty - 0
+                                              ]
+                                            : ["20以内", "100以内"][
+                                                  item.config.difficulty - 0
+                                              ]
+                                    }) / ` +
+                                    (item.config.isMixed === 1
+                                        ? "混合"
+                                        : "非混合") +
+                                    "/" +
+                                    `${
+                                        ["未开启小数", "开启小数"][
+                                            item.config.hasDecimal - 0
+                                        ]
+                                    }${
+                                        item.config.hasDecimal
+                                            ? "(小数位:" +
+                                              item.config.decimalLen +
+                                              ") "
+                                            : ""
+                                    }`
+                                }}
                             </div>
                         </div>
                     </div>
@@ -406,7 +718,6 @@
                 </scroll-view>
             </div>
             <div class="history-tips">最多只保留最近50条历史记录</div>
-
         </div>
     </cc-popup>
 </template>
@@ -420,37 +731,38 @@ import {
     expressionResult,
     createKeyboardCode,
     throttle,
-    getGradeName
-} from "../../module/tools";
-import date from 'date-php'
-import Bignumber from 'BigNumber.js'
-import haoSlider from "../../uni_modules/hao-slider/hao-slider.vue"
+    getGradeName,
+} from "../../../module/tools";
+import date from "date-php";
+import Bignumber from "BigNumber.js";
+import haoSlider from "../../../uni_modules/hao-slider/hao-slider.vue";
 // import uniNavBar from "../../uni_modules/uni-nav-bar/uni-nav-bar.vue"
-import zeroSwitch from "../../uni_modules/zero-switch/components/zero-switch"
-import ccPopup from "../../uni_modules/cc-popup"
-import { onReady, onShow, onHide, onUnload, onLoad } from '@dcloudio/uni-app'
-import uniDataCheckbox from '../../uni_modules/uni-data-checkbox/uni-data-checkbox.vue'
+import zeroSwitch from "../../../uni_modules/zero-switch/components/zero-switch";
+import ccPopup from "../../../uni_modules/cc-popup";
+import { onReady, onShow, onHide, onUnload, onLoad } from "@dcloudio/uni-app";
+import uniDataCheckbox from "../../../uni_modules/uni-data-checkbox/uni-data-checkbox.vue";
 // 导入音频 - 准备弃用(已上传至 OSS)
-const musics = import.meta.globEager('../../assets/music/*.mp3')
-const musicArr = reactive({})
-Object.keys(musics).forEach(key => {
-    const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, '$1_$2')
-    musicArr[_key] = musics[key].default
-})
-let bgm = {}
+const musics = import.meta.globEager("../../../assets/music/*.mp3");
+const musicArr = reactive({});
+Object.keys(musics).forEach((key) => {
+    const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, "$1_$2");
+    musicArr[_key] = musics[key].default;
+});
+let bgm = {};
 
 const numList = reactive([]); // 数据列表:[[[数字1 || [数字1,数字2, 运算符], 数字2 || [数字1,数字2, 运算符], 运算符], 用户运算结果, 结果对错判定, 订正次数], ...]
 const submited = ref(0); // 是否提交
 const score = ref(0); // 得分
 const comment = ref(""); // 评语
 const curidx = ref(); // 当前所计算的索引数据
-const startTime = ref(0) // 开始时间
+const startTime = ref(0); // 开始时间
 // Todo:计时bugger
-const startTimed = ref('') // 已用时
-const subEnterTime = ref('') // 提交时间
-const contTimeId = ref() // 计时定时器 ID
-const bgmPause = ref(false)
-const defaultConf = { // 默认配置
+const startTimed = ref(""); // 已用时
+const subEnterTime = ref(""); // 提交时间
+const contTimeId = ref(); // 计时定时器 ID
+const bgmPause = ref(false);
+const defaultConf = {
+    // 默认配置
     showIdx: false, // 显示序号
     keyboard: true, // 键盘类型[false:简单, true:九宫格]
     bgmVolume: 10, // 背景音乐音量
@@ -464,18 +776,21 @@ const defaultConf = { // 默认配置
     hasDecimal: false, // 启用小数
     vertical: false, // 开启竖式
     decimalLen: 2, // 最大小数位
-    bgmSelectValue: 'bgm-sxg_mp3',
+    bgmSelectValue: "bgm-sxg_mp3",
     lastSucc: 0, // 最后完成时间
-}
-const { miniProgram = {} } = uni.getAccountInfoSync ? uni.getAccountInfoSync() : {}
+};
+const { miniProgram = {} } = uni.getAccountInfoSync
+    ? uni.getAccountInfoSync()
+    : {};
 const { envVersion } = Object.assign(miniProgram, {
     // #ifdef WEB
-    envVersion: 'web'
+    envVersion: "web",
     // #endif
-})
+});
 
-const getStorageData = () => { // 读取设置缓存
-    const storageConf = uni.getStorageSync('config')?.[envVersion] || {}
+const getStorageData = () => {
+    // 读取设置缓存
+    const storageConf = uni.getStorageSync("config")?.[envVersion] || {};
     const _storageConf = Object.assign(
         {},
         defaultConf,
@@ -487,251 +802,270 @@ const getStorageData = () => { // 读取设置缓存
         // ? storageConf
         // : {}
     );
-    return _storageConf
-}
+    return _storageConf;
+};
 
-const storageConf = getStorageData() // 获取用户保存的设置
-uni.setStorageSync('config', {
-    [envVersion]: storageConf.lastSucc < 1
-        ? storageConf
-        : { ...storageConf, lastSucc: Date.now() }
-}) // 重新更新用户配置时间
+const storageConf = getStorageData(); // 获取用户保存的设置
+uni.setStorageSync("config", {
+    [envVersion]:
+        storageConf.lastSucc < 1
+            ? storageConf
+            : { ...storageConf, lastSucc: Date.now() },
+}); // 重新更新用户配置时间
 
-const setConfig = reactive( // 配制项
+const setConfig = reactive(
+    // 配制项
     Object.assign(storageConf, {
         status: false, // 设置框显隐
     })
-)
-const totalNum = ref(storageConf.totalNum) // 题目数量
-const numListId = ref()
-const keyboard = ref(storageConf.keyboard) // 键盘类型 false: 简约, true: 九宫格
-const showIdx = ref(storageConf.showIdx) // 显示序号
-const opType = ref(storageConf.opType) // 运算类型
-const difficulty = ref(storageConf.difficulty) // 困难度
-const isMixed = ref(storageConf.isMixed) // 是否混合运算
-const notDivision = ref(storageConf.notDivision) // 屏蔽除法
-const cursorType = ref(storageConf.cursorType) // 光标类型
-const hasDecimal = ref(storageConf.hasDecimal) // 是否包涵小数
-const decimalLen = ref(storageConf.decimalLen) // 小数位数
-const scrollTop = ref(0) // 滚动位置
-const vertical = ref(storageConf.vertical) // 开启竖式
-const historyConf = reactive({ // 历史记录
+);
+const totalNum = ref(storageConf.totalNum); // 题目数量
+const numListId = ref();
+const keyboard = ref(storageConf.keyboard); // 键盘类型 false: 简约, true: 九宫格
+const showIdx = ref(storageConf.showIdx); // 显示序号
+const opType = ref(storageConf.opType); // 运算类型
+const difficulty = ref(storageConf.difficulty); // 困难度
+const isMixed = ref(storageConf.isMixed); // 是否混合运算
+const notDivision = ref(storageConf.notDivision); // 屏蔽除法
+const cursorType = ref(storageConf.cursorType); // 光标类型
+const hasDecimal = ref(storageConf.hasDecimal); // 是否包涵小数
+const decimalLen = ref(storageConf.decimalLen); // 小数位数
+const scrollTop = ref(0); // 滚动位置
+const vertical = ref(storageConf.vertical); // 开启竖式
+const historyConf = reactive({
+    // 历史记录
     status: false,
-    list: []
-})
+    list: [],
+});
 
-const bgmSelectValue = ref(storageConf.bgmSelectValue)
+const bgmSelectValue = ref(storageConf.bgmSelectValue);
 // 滚动条将当前光标自动滚动到可视区域内
 const autoCurItemPosition = async () => {
     function createSelectorQuery(selector) {
-        return new Promise(resolve => {
-            uni.createSelectorQuery().select(selector).boundingClientRect(({ top, bottom, left, right, height }) => {
-                resolve({ top, bottom, left, right, height })
-            }).exec()
-        })
+        return new Promise((resolve) => {
+            uni.createSelectorQuery()
+                .select(selector)
+                .boundingClientRect(({ top, bottom, left, right, height }) => {
+                    resolve({ top, bottom, left, right, height });
+                })
+                .exec();
+        });
     }
-    const { top: scrollT, height: scrollH } = await createSelectorQuery('.scroll-view')
-    const { top: listTop, height: listHeight } = await createSelectorQuery('.list')
-    const { top: curItemTop, height: curItemHeight } = await createSelectorQuery('.cur-item')
-    scrollTop.value = curItemTop < 0
-        ? Math.abs(listTop) + curItemTop - curItemHeight * 2
-        : curItemTop + curItemHeight > scrollH
+    const { top: scrollT, height: scrollH } = await createSelectorQuery(
+        ".scroll-view"
+    );
+    const { top: listTop, height: listHeight } = await createSelectorQuery(
+        ".list"
+    );
+    const { top: curItemTop, height: curItemHeight } =
+        await createSelectorQuery(".cur-item");
+    scrollTop.value =
+        curItemTop < 0
+            ? Math.abs(listTop) + curItemTop - curItemHeight * 2
+            : curItemTop + curItemHeight > scrollH
             ? Math.abs(listTop) + scrollH - curItemHeight * 2
-            : scrollTop.value || 0
-}
+            : scrollTop.value || 0;
+};
 
-const recordSaveStorage = (key = 'record') => {
-    const isEmpty = numList.every(res => [undefined, ''].includes(res[1]))
-    if (key === 'autoRecord' && isEmpty) {
-        uni.removeStorageSync('autoRecord')
-        return
+const recordSaveStorage = (key = "record") => {
+    const isEmpty = numList.every((res) => [undefined, ""].includes(res[1]));
+    if (key === "autoRecord" && isEmpty) {
+        uni.removeStorageSync("autoRecord");
+        return;
     }
     uni.setStorageSync(key, {
         [envVersion]: {
             numList,
-            config: uni.getStorageSync('config')[envVersion]
-        }
-    })
-}
+            config: uni.getStorageSync("config")[envVersion],
+        },
+    });
+};
 
-const recordReadStorage = (key = 'record') => {
+const recordReadStorage = (key = "record") => {
     // const aaa = uni.getStorageSync(key)
     // console.log(aaa);
     // debugger
-    const { numList: _numList, config } = uni.getStorageSync(key)[envVersion]
-    Object.assign(storageConf, config)
-    Object.assign(numList, nulToUndef(_numList))
-    saveConfig()
-}
+    const { numList: _numList, config } = uni.getStorageSync(key)[envVersion];
+    Object.assign(storageConf, config);
+    Object.assign(numList, nulToUndef(_numList));
+    saveConfig();
+};
 // 存读档弹窗
 const popupConf = reactive({
     status: false,
-    curKey: 'save',
+    curKey: "save",
     save: {
-        msg: '检测到您当前有一份存档记录，“确定”后将覆盖当前记录。',
+        msg: "检测到您当前有一份存档记录，“确定”后将覆盖当前记录。",
         isDanger: true,
         fn: {
             clean() {
-                popupConf.status = false
+                popupConf.status = false;
             },
             submit() {
-                popupConf.status = false
-                recordSaveStorage()
+                popupConf.status = false;
+                recordSaveStorage();
                 // setConfig.status=false
             },
-        }
+        },
     },
     read: {
-        msg: '您确定要读档么?此操作将会覆盖当前正在计算的所有算术题。',
+        msg: "您确定要读档么?此操作将会覆盖当前正在计算的所有算术题。",
         isDanger: true,
         fn: {
             clean() {
-                popupConf.status = false
+                popupConf.status = false;
             },
             submit() {
-                recordReadStorage()
-                popupConf.status = false
+                recordReadStorage();
+                popupConf.status = false;
                 setTimeout(() => {
-                    popupConf.status = true
-                    popupConf.curKey = 'del'
-                    setConfig.status = false
-                }, 500)
+                    popupConf.status = true;
+                    popupConf.curKey = "del";
+                    setConfig.status = false;
+                }, 500);
             },
-        }
+        },
     },
     readAutoSave: {
-        msg: '检测到您有一份未完成的算术题, 是否恢复?',
+        msg: "检测到您有一份未完成的算术题, 是否恢复?",
         isDanger: true,
         fn: {
             clean() {
-                popupConf.status = false
-                uni.removeStorageSync('autoRecord')
+                popupConf.status = false;
+                uni.removeStorageSync("autoRecord");
             },
             submit() {
-                recordReadStorage('autoRecord')
-                popupConf.status = false
+                recordReadStorage("autoRecord");
+                popupConf.status = false;
             },
-        }
+        },
     },
     del: {
-        msg: '存档记录已读取，是否删除当前存档',
+        msg: "存档记录已读取，是否删除当前存档",
         isDanger: true,
         fn: {
             clean() {
-                popupConf.status = false
+                popupConf.status = false;
             },
             submit() {
-                popupConf.status = false
-                uni.removeStorageSync('record')
+                popupConf.status = false;
+                uni.removeStorageSync("record");
             },
-        }
+        },
     },
     recordUnll: {
-        msg: '您还没有存档哦?',
+        msg: "您还没有存档哦?",
         isDanger: false,
         fn: {
             clean() {
-                popupConf.status = false
+                popupConf.status = false;
             },
             submit() {
-                popupConf.status = false
+                popupConf.status = false;
             },
-        }
+        },
     },
     recordDel: {
-        msg: '您确定要删除存档么？',
+        msg: "您确定要删除存档么？",
         isDanger: true,
         fn: {
             clean() {
-                popupConf.status = false
+                popupConf.status = false;
             },
             submit() {
-                popupConf.status = false
-                uni.removeStorageSync('record')
+                popupConf.status = false;
+                uni.removeStorageSync("record");
                 uni.showToast({
-                    icon: 'none',
-                    title: '存档已删除'
-                })
+                    icon: "none",
+                    title: "存档已删除",
+                });
             },
-        }
+        },
     },
     onLoad: {
-        msg: '检测到您有一份存档，请问是否读取？',
+        msg: "检测到您有一份存档，请问是否读取？",
         isDanger: false,
         fn: {
             clean() {
-                popupConf.status = false
+                popupConf.status = false;
             },
             submit() {
-                popupConf.status = false
-                recordReadStorage()
+                popupConf.status = false;
+                recordReadStorage();
                 // setConfig.status=false
                 setTimeout(() => {
-                    popupConf.status = true
-                    popupConf.curKey = 'del'
-                }, 300)
+                    popupConf.status = true;
+                    popupConf.curKey = "del";
+                }, 300);
             },
-        }
-    }
-})
+        },
+    },
+});
 
-const bgmSelect = [{
-    title: '上学歌',
-    value: 'bgm-sxg_mp3',
-    // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-sxg.mp3'
-}, {
-    title: '读书郞',
-    value: 'bgm-dsl_mp3',
-    // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-dsl.mp3'
-}, {
-    title: '劳动最光荣',
-    value: 'bgm-ldzgr_mp3',
-    // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-ldzgr.mp3'
-}]
-const findBgm = key => bgmSelect.find(res => res.value === key) || bgmSelect.find(res => res.value === defaultConf.bgmSelectValue)
+const bgmSelect = [
+    {
+        title: "上学歌",
+        value: "bgm-sxg_mp3",
+        // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-sxg.mp3'
+    },
+    {
+        title: "读书郞",
+        value: "bgm-dsl_mp3",
+        // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-dsl.mp3'
+    },
+    {
+        title: "劳动最光荣",
+        value: "bgm-ldzgr_mp3",
+        // src: 'http://file.7bzc.com/mp-yuwen/audio/bgm-ldzgr.mp3'
+    },
+];
+const findBgm = (key) =>
+    bgmSelect.find((res) => res.value === key) ||
+    bgmSelect.find((res) => res.value === defaultConf.bgmSelectValue);
 
 // 监听键盘输入, 滚动条自动滚动到光标, 让光标出现在可视区
 watch(keyboard, () => {
-    autoCurItemPosition()
-})
+    autoCurItemPosition();
+});
 
 watch(cursorType, () => {
-    setConfig.cursorType = cursorType.value
-})
+    setConfig.cursorType = cursorType.value;
+});
 
-watch(setConfig,
-    val => {
-        (throttle(() => {
+watch(
+    setConfig,
+    (val) => {
+        throttle(() => {
             playSound({
-                src: musicArr['dian2_mp3'],
+                src: musicArr["dian2_mp3"],
                 volume: setConfig.bgmVolume / 2,
-                instanceName: 'set-config',
-                sessionCategory: 'soloAmbient'
-            })
-        }, 100))()
+                instanceName: "set-config",
+                sessionCategory: "soloAmbient",
+            });
+        }, 100)();
 
-        cursorType.value = val.cursorType
-        showIdx.value = val.showIdx
-        vertical.value = val.vertical
-    },
+        cursorType.value = val.cursorType;
+        showIdx.value = val.showIdx;
+        vertical.value = val.vertical;
+    }
     // { immediate: true }
-)
+);
 
-watch(bgmPause, val => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    val ? bgm.pause() : bgm.play()
-})
+watch(bgmPause, (val) => {
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+    val ? bgm.pause() : bgm.play();
+});
 
 // 混合模式改变
 const mixedChange = ({ detail: { value: val } }) => {
-    if (val) setConfig.vertical = false
-}
+    if (val) setConfig.vertical = false;
+};
 
 // 运算规则改变
-const opTypeChange = val => {
-    if (val) setConfig.vertical = false
-    setConfig.difficulty = !val // false
-}
+const opTypeChange = (val) => {
+    if (val) setConfig.vertical = false;
+    setConfig.difficulty = !val; // false
+};
 
 // TODO: 竖式
 // const verticalChange = val => {
@@ -742,28 +1076,28 @@ const opTypeChange = val => {
 // }
 
 // 获取运算符
-const getOperator = i => ["+", "-", '×', '÷'][i]
+const getOperator = (i) => ["+", "-", "×", "÷"][i];
 
 // render 表达式
 const renderExpression = (data) => {
-    const _data = [...data]
-    if (Array.isArray(_data[0])) _data[0] = renderExpression(_data[0])
+    const _data = [...data];
+    if (Array.isArray(_data[0])) _data[0] = renderExpression(_data[0]);
     if (Array.isArray(_data[1])) {
-        _data[1] = renderExpression(_data[1])
+        _data[1] = renderExpression(_data[1]);
         if (_data[2] === 1 && !/[÷×]/.test(_data[1])) {
-            _data[1] = ['(', _data[1], ')'].join('')
+            _data[1] = ["(", _data[1], ")"].join("");
         }
     }
-    return `${_data[0]}${getOperator(_data[2])}${_data[1]}`
-}
+    return `${_data[0]}${getOperator(_data[2])}${_data[1]}`;
+};
 
 // #ifdef MP-WEIXIN
 // 条件编译--仅微信
 uni.showShareMenu({
-    title: `四小${['一', '二', '三', '四', '五', '六'][getGradeName().y]}(8)班`,
-    content: '四则运算练习',
-    imageUrl: '/assets/icon.jpeg',
-    path: '/pages/shuxue/index'
+    title: `四小${["一", "二", "三", "四", "五", "六"][getGradeName().y]}(8)班`,
+    content: "四则运算练习",
+    imageUrl: "/assets/icon.jpeg",
+    path: "/pages/shuxue/index",
 });
 //#endif
 
@@ -780,9 +1114,19 @@ function createList(isInit = true) {
      */
     function createData(num) {
         // 随机生成运算符 0:'+' | 1:'-' | 2:'*' | 3:'/'
-        const createOperator = (operator) => Math.floor(Math.random() * (operator || (opType.value ? (notDivision.value.includes(1) ? 3 : 4) : 2)) + 0)
+        const createOperator = (operator) =>
+            Math.floor(
+                Math.random() *
+                    (operator ||
+                        (opType.value
+                            ? notDivision.value.includes(1)
+                                ? 3
+                                : 4
+                            : 2)) +
+                    0
+            );
 
-        // 
+        //
         /**
          * 创建题
          * @Date         : 2023-10-01 21:22:15
@@ -793,57 +1137,82 @@ function createList(isInit = true) {
          * @return        算术题
          */
         const createExpression = function (operator) {
-            const _getOperator = createOperator(operator)
-            const _expression = new Array(2).fill(undefined)
+            const _getOperator = createOperator(operator);
+            const _expression = new Array(2).fill(undefined);
 
-            const _expressionMax1 = !opType.value && !difficulty.value ? '1-15' : '10-90'
-            const _expressionMax2 = !opType.value && !difficulty.value ? '20' : '99'
+            const _expressionMax1 =
+                !opType.value && !difficulty.value ? "1-15" : "10-90";
+            const _expressionMax2 =
+                !opType.value && !difficulty.value ? "20" : "99";
             switch (_getOperator) {
                 case 0: // '+'
-                    _expression[0] = random(8, _expressionMax1)
-                    _expression[1] = random(8, `10 - ${_expressionMax2 - _expression[0]}`)
+                    _expression[0] = random(8, _expressionMax1);
+                    _expression[1] = random(
+                        8,
+                        `10 - ${_expressionMax2 - _expression[0]}`
+                    );
                     break;
 
                 case 1: // '-'
-                    _expression[1] = random(8, _expressionMax1)
-                    _expression[0] = random(8, `${_expression[1]} - ${_expressionMax2}`)
+                    _expression[1] = random(8, _expressionMax1);
+                    _expression[0] = random(
+                        8,
+                        `${_expression[1]} - ${_expressionMax2}`
+                    );
                     break;
 
                 case 2: // '*'
-                    _expression[0] = random(8, difficulty.value ? '10-50' : '1-10')
-                    _expression[1] = random(8, difficulty.value ? '10-50' : '1-10')
+                    _expression[0] = random(
+                        8,
+                        difficulty.value ? "10-50" : "1-10"
+                    );
+                    _expression[1] = random(
+                        8,
+                        difficulty.value ? "10-50" : "1-10"
+                    );
                     break;
 
                 case 3: // '/'
                     const divisionFn = () => {
-                        _expression[1] = random(8, `${difficulty.value ? '10-50' : '1-10'}`)
-                        _expression[0] = random(8, `${_expression[1]} - ${difficulty.value ? '999' : '99'}`)
+                        _expression[1] = random(
+                            8,
+                            `${difficulty.value ? "10-50" : "1-10"}`
+                        );
+                        _expression[0] = random(
+                            8,
+                            `${_expression[1]} - ${
+                                difficulty.value ? "999" : "99"
+                            }`
+                        );
 
-                        const BN = new Bignumber(_expression[0])
-                        const _bn = BN.modulo(_expression[1]) // 取模
-                        _expression[0] = BN.minus(_bn) // 除法只做了可以整除, 小数万一有无限小数就不好判定了
+                        const BN = new Bignumber(_expression[0]);
+                        const _bn = BN.modulo(_expression[1]); // 取模
+                        _expression[0] = BN.minus(_bn); // 除法只做了可以整除, 小数万一有无限小数就不好判定了
                         if (
-                            _expression[1] === 0 // 被除数为0, 小学阶段无意义
-                            || _expression[0] === 0 // 排除商为0，此条可以删除 
-                            || _expression[0] === _expression[1] // 排除商为1，此条可以删除
-                        ) divisionFn() // 不符合要求重新创建
-                    }
-                    divisionFn()
+                            _expression[1] === 0 || // 被除数为0, 小学阶段无意义
+                            _expression[0] === 0 || // 排除商为0，此条可以删除
+                            _expression[0] === _expression[1] // 排除商为1，此条可以删除
+                        )
+                            divisionFn(); // 不符合要求重新创建
+                    };
+                    divisionFn();
                     break;
             }
 
             // 开启小数处理,添加小数位
-            if (hasDecimal.value) _expression.forEach((item, idx) => {
-                const decimal = Math.random()
-                _expression[idx] = (item + decimal - 0).toFixed(decimalLen.value) - 0
-            })
-            return _expression.concat(_getOperator)
-        }
+            if (hasDecimal.value)
+                _expression.forEach((item, idx) => {
+                    const decimal = Math.random();
+                    _expression[idx] =
+                        (item + decimal - 0).toFixed(decimalLen.value) - 0;
+                });
+            return _expression.concat(_getOperator);
+        };
         if (isInit) {
-            numList.length = 0 // 初始化完全新建
+            numList.length = 0; // 初始化完全新建
         }
 
-        const _numList = new Array(num).fill(undefined).map(res => {
+        const _numList = new Array(num).fill(undefined).map((res) => {
             /**
              * // 每项数据结构
              * [
@@ -853,67 +1222,73 @@ function createList(isInit = true) {
              *      订正次数
              * ]
              */
-            const numArr = new Array(4).fill(undefined)
-            const mData = mergeData(createExpression(), createExpression(2))
+            const numArr = new Array(4).fill(undefined);
+            const mData = mergeData(createExpression(), createExpression(2));
 
             // 获取小数位信息: 长度与小数值
-            const getDecimalArr = val => {
-                const _decimalMatch = val.toString().match(/\.\d+/) // 小数值匹配
-                const _decimal = _decimalMatch ? _decimalMatch[0] : '' // 小数位值
-                const _decimalLen = _decimal.toString().substring(1).length // 真实小数位数
-                const _decimalFixed = val.toFixed(decimalLen.value) - 0 // 四舍五入值
+            const getDecimalArr = (val) => {
+                const _decimalMatch = val.toString().match(/\.\d+/); // 小数值匹配
+                const _decimal = _decimalMatch ? _decimalMatch[0] : ""; // 小数位值
+                const _decimalLen = _decimal.toString().substring(1).length; // 真实小数位数
+                const _decimalFixed = val.toFixed(decimalLen.value) - 0; // 四舍五入值
                 return {
                     decimalValue: _decimal - 0,
                     decimalFixed: _decimalFixed - 0,
-                    decimalLength: _decimalLen
-                }
-            }
-            numArr[0] = isMixed.value[0] ? mData : createExpression()
-            const expressionSucc = expressionResult(numArr[0])
-            const { /*decimalValue,*/ decimalLength } = getDecimalArr(expressionSucc)
-            if (decimalLength > decimalLen.value) { // 运算结果超出设定范围
-                const expressionSuccFixed = expressionSucc.toFixed(decimalLen.value)
-                const { /*decimalValue: decimalFixedValue,*/ decimalLength: decimalFixedLength } = getDecimalArr(expressionSucc.toFixed(decimalLen.value) - 0)
-                numArr[0][3] = [expressionSuccFixed - 0, decimalFixedLength]
+                    decimalLength: _decimalLen,
+                };
+            };
+            numArr[0] = isMixed.value[0] ? mData : createExpression();
+            const expressionSucc = expressionResult(numArr[0]);
+            const { /*decimalValue,*/ decimalLength } =
+                getDecimalArr(expressionSucc);
+            if (decimalLength > decimalLen.value) {
+                // 运算结果超出设定范围
+                const expressionSuccFixed = expressionSucc.toFixed(
+                    decimalLen.value
+                );
+                const {
+                    /*decimalValue: decimalFixedValue,*/ decimalLength:
+                        decimalFixedLength,
+                } = getDecimalArr(expressionSucc.toFixed(decimalLen.value) - 0);
+                numArr[0][3] = [expressionSuccFixed - 0, decimalFixedLength];
             } else {
-                numArr[0][3] = expressionSucc
+                numArr[0][3] = expressionSucc;
             }
-            return numArr
-        })
-        numList.push(..._numList)
+            return numArr;
+        });
+        numList.push(..._numList);
     }
-    isInit  // 计算要创建的数量
+    isInit // 计算要创建的数量
         ? createData(totalNum.value) // 与用户设定一制
         : totalNum.value > numList.length
-            ? createData(totalNum.value - numList.length) // 增量创建
-            : numList.length = totalNum.value // 直接删除多出的数据
+        ? createData(totalNum.value - numList.length) // 增量创建
+        : (numList.length = totalNum.value); // 直接删除多出的数据
 
-    score.value = 0
+    score.value = 0;
 
     edit(true);
     curidx.value = "";
-    startTime.value = Date.now()
-    contTime()
+    startTime.value = Date.now();
+    contTime();
     curidx.value = 0;
-    numListId.value = Date.now().toString(16) // 当前题目列表ID, 用户不重新生成数据, 每次提交历史都会更新这个 ID 下的数据,不新增历史记录 
+    numListId.value = Date.now().toString(16); // 当前题目列表ID, 用户不重新生成数据, 每次提交历史都会更新这个 ID 下的数据,不新增历史记录
 }
 createList(true);
-const keyboardCode = reactive(createKeyboardCode())
+const keyboardCode = reactive(createKeyboardCode());
 
 const reCreate = () => {
-    createList(true)
-    uni.removeStorageSync('autoRecord')
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-}
+    createList(true);
+    uni.removeStorageSync("autoRecord");
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+};
 function nulToUndef(data) {
-    return data.map(res => {
+    return data.map((res) => {
         if (Array.isArray(res)) {
-            return nulToUndef(res)
+            return nulToUndef(res);
         } else {
-            return res === null ? undefined : res
+            return res === null ? undefined : res;
         }
-    })
-
+    });
 }
 /**
  * 计时操作
@@ -922,42 +1297,54 @@ function nulToUndef(data) {
  */
 function contTime(isStop = false) {
     if (isStop) {
-        clearInterval(contTimeId.value)
-        contTimeId.value = ''
+        clearInterval(contTimeId.value);
+        contTimeId.value = "";
     } else {
-        contTimeId.value = contTimeId.value || setInterval(() => {
-            const diff = Date.now() - startTime.value
-            const _diff = {
-                h: date.duration("H", diff),
-                i: date.duration("i", diff),
-                s: date.duration("s", diff)
-            }
-            const _tpl = []
+        contTimeId.value =
+            contTimeId.value ||
+            setInterval(() => {
+                const diff = Date.now() - startTime.value;
+                const _diff = {
+                    h: date.duration("H", diff),
+                    i: date.duration("i", diff),
+                    s: date.duration("s", diff),
+                };
+                const _tpl = [];
 
-            if (_diff.h - 0 > 0) _tpl.push('H小时')
-            if (_diff.i - 0 > 0) _tpl.push('i分钟')
-            if (_diff.s - 0 > 0) _tpl.push('s秒')
-            startTimed.value = date.duration(_tpl.join(''), diff)
-        }, 1000)
+                if (_diff.h - 0 > 0) _tpl.push("H小时");
+                if (_diff.i - 0 > 0) _tpl.push("i分钟");
+                if (_diff.s - 0 > 0) _tpl.push("s秒");
+                startTimed.value = date.duration(_tpl.join(""), diff);
+            }, 1000);
     }
 }
 
 const switchBgmClick = (ev) => {
-    const succ = bgmSelect.find(res => res.title === (ev.target?.innerText || ev.target?.dataset?.text || ''))
-    if (!succ || setConfig.bgmSelectValue === succ?.value) return
-    setConfig.bgmSelectValue = succ.value
-    bgm.src = succ.src || musicArr[succ.value]
+    const succ = bgmSelect.find(
+        (res) =>
+            res.title ===
+            (ev.target?.innerText || ev.target?.dataset?.text || "")
+    );
+    if (!succ || setConfig.bgmSelectValue === succ?.value) return;
+    setConfig.bgmSelectValue = succ.value;
+    bgm.src = succ.src || musicArr[succ.value];
     // oss 方式
     // bgm.src = succ.src
-}
+};
 
 // 订正事件
 function edit() {
-    if (score.value === 100) return
+    if (score.value === 100) return;
     submited.value = 0;
-    curidx.value = numList.findIndex(res => [undefined, 0, ''].includes(res[2]))
-    startTime.value = startTime.value + ((Date.now() - subEnterTime.value).toString().replace(/\d{3}$/, '000') - 0 + 1000)
-    contTime()
+    curidx.value = numList.findIndex((res) =>
+        [undefined, 0, ""].includes(res[2])
+    );
+    startTime.value =
+        startTime.value +
+        ((Date.now() - subEnterTime.value).toString().replace(/\d{3}$/, "000") -
+            0 +
+            1000);
+    contTime();
 }
 
 /**
@@ -966,9 +1353,13 @@ function edit() {
  * @param {number} idx // 索引号
  */
 const ckItem = (idx) => {
-    if (submited.value === 0) playSound({ src: musicArr['dian1_mp3'], volume: setConfig.bgmVolume / 2 })
+    if (submited.value === 0)
+        playSound({
+            src: musicArr["dian1_mp3"],
+            volume: setConfig.bgmVolume / 2,
+        });
     curidx.value = idx;
-    if (numList[idx][2] === 0 && submited.value !== 1) numList[idx][2] = ''
+    if (numList[idx][2] === 0 && submited.value !== 1) numList[idx][2] = "";
 };
 
 /**
@@ -977,61 +1368,75 @@ const ckItem = (idx) => {
  * @param {string|number} key // 键盘数字 || 或del
  */
 const keyClick = (key) => {
-    autoCurItemPosition()
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
+    autoCurItemPosition();
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
     if (
-        numList[curidx.value][2] === 1 && key !== 'next' // 已判定当前题为正确
-        || key === 'del' && ['', undefined].includes(numList[curidx.value][1]) // 册除事件 并 内容为空时
-    ) return
+        (numList[curidx.value][2] === 1 && key !== "next") || // 已判定当前题为正确
+        (key === "del" && ["", undefined].includes(numList[curidx.value][1])) // 册除事件 并 内容为空时
+    )
+        return;
 
-    const _val = (numList[curidx.value][1] || "") + '';
+    const _val = (numList[curidx.value][1] || "") + "";
 
     switch (key) {
-        case 'del': // 删除事件
+        case "del": // 删除事件
             // 如果提交后已判错, 删除是全部,其它情况单个从右到左删除
-            numList[curidx.value][1] = numList[curidx.value][2] === 0 ? '' : _val.substring(0, _val.length - 1)
+            numList[curidx.value][1] =
+                numList[curidx.value][2] === 0
+                    ? ""
+                    : _val.substring(0, _val.length - 1);
             break;
 
-        case 'next': // 下一题
-            if (curidx.value >= numList.length - 1) return
-            const _curidx = curidx.value + 1
+        case "next": // 下一题
+            if (curidx.value >= numList.length - 1) return;
+            const _curidx = curidx.value + 1;
             // 查找没有做的 与 结果非正确的题
-            const _nextIdx = numList[_curidx][2] === 1
-                ? numList.findIndex((res, idx) => res[2] !== 1 && idx > _curidx)
-                : _curidx
-            curidx.value = _nextIdx > numList.length - 1 ? curidx.value : _nextIdx
+            const _nextIdx =
+                numList[_curidx][2] === 1
+                    ? numList.findIndex(
+                          (res, idx) => res[2] !== 1 && idx > _curidx
+                      )
+                    : _curidx;
+            curidx.value =
+                _nextIdx > numList.length - 1 ? curidx.value : _nextIdx;
             break;
 
-        case '.':
-        default: // 默认数字输入事件 
-            const _succ = Array.isArray(numList[curidx.value][0][3]) ? numList[curidx.value][0][3][0] : numList[curidx.value][0][3];
-            let _succLen = _succ.toString().length
-            _succLen = _succLen + (_succLen % 2 === 0 ? 1 : 0)
+        case ".":
+        default: // 默认数字输入事件
+            const _succ = Array.isArray(numList[curidx.value][0][3])
+                ? numList[curidx.value][0][3][0]
+                : numList[curidx.value][0][3];
+            let _succLen = _succ.toString().length;
+            _succLen = _succLen + (_succLen % 2 === 0 ? 1 : 0);
             const _keyVal = _val.length < _succLen ? _val + key : _val;
-            numList[curidx.value][1] = _keyVal.match(/^(0\.?|[1-9]\d*(\.?\d*))/)[0]
+            numList[curidx.value][1] = _keyVal.match(
+                /^(0\.?|[1-9]\d*(\.?\d*))/
+            )[0];
             break;
     }
     // 恢复下标4(对错判断)标识为:空 (错:0, 对:1, 无:'')
-    numList[curidx.value].splice(2, 1, '')
+    numList[curidx.value].splice(2, 1, "");
 
-    recordSaveStorage('autoRecord') // 自动保存
+    recordSaveStorage("autoRecord"); // 自动保存
 };
 
 // 查看得分事件
 const subEnter = () => {
     // 提交自动删除自动保存数据
-    uni.removeStorageSync('autoRecord')
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    subEnterTime.value = Date.now()
+    uni.removeStorageSync("autoRecord");
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+    subEnterTime.value = Date.now();
     // 锁定提交状态
     submited.value = 1;
-    contTime(true)
+    contTime(true);
 
     // 对错判定
     numList.map((res) => {
         const _val = Array.isArray(res[0][3]) ? res[0][3][0] : res[0][3];
-        if ([''].includes(res[2]) && !['', undefined].includes(res[1])) res[3] = !['', undefined].includes(res[3]) ? res[3] + 1 : 0 // 订正次数
-        if (!['', undefined].includes(res[1])) res[2] = _val === res[1] - 0 ? 1 : 0; // 1对,0错
+        if ([""].includes(res[2]) && !["", undefined].includes(res[1]))
+            res[3] = !["", undefined].includes(res[3]) ? res[3] + 1 : 0; // 订正次数
+        if (!["", undefined].includes(res[1]))
+            res[2] = _val === res[1] - 0 ? 1 : 0; // 1对,0错
     });
 
     const totleLen = numList.length; // 总题数
@@ -1052,25 +1457,37 @@ const subEnter = () => {
     switch (true) {
         case score.value > 99: // 100
             comment.value = commentArr[0];
-            playSound({ src: musicArr['wa_mp3'], volume: setConfig.bgmVolume })
+            playSound({ src: musicArr["wa_mp3"], volume: setConfig.bgmVolume });
             break;
         case score.value > 89: // 90+
             comment.value = commentArr[1];
-            playSound({ src: musicArr['ao_mp3'], volume: setConfig.bgmVolume })
+            playSound({ src: musicArr["ao_mp3"], volume: setConfig.bgmVolume });
             break;
         case score.value > 79: // 80+
             comment.value = commentArr[2];
-            playSound({ src: musicArr['tantiao_mp3'], volume: setConfig.bgmVolume })
+            playSound({
+                src: musicArr["tantiao_mp3"],
+                volume: setConfig.bgmVolume,
+            });
             break;
         case score.value > 69: // 70+
             comment.value = commentArr[3];
-            playSound({ src: musicArr['jiong_mp3'], volume: setConfig.bgmVolume })
+            playSound({
+                src: musicArr["jiong_mp3"],
+                volume: setConfig.bgmVolume,
+            });
             break;
         default:
             comment.value = commentArr[4];
-            playSound({ src: musicArr['wrong_mp3'], volume: setConfig.bgmVolume }).onEnded(() => {
-                playSound({ src: musicArr['ou-no_mp3'], volume: setConfig.bgmVolume })
-            })
+            playSound({
+                src: musicArr["wrong_mp3"],
+                volume: setConfig.bgmVolume,
+            }).onEnded(() => {
+                playSound({
+                    src: musicArr["ou-no_mp3"],
+                    volume: setConfig.bgmVolume,
+                });
+            });
     }
 
     // 没有做满50%题不给评语
@@ -1082,11 +1499,11 @@ const subEnter = () => {
         answered = 0,
         corrected = 0;
 
-    numList.forEach(item => {
-        revision += (item[3] || 0)
+    numList.forEach((item) => {
+        revision += item[3] || 0;
         answered += item[1] !== undefined ? 1 : 0;
         corrected += item[2] ? 1 : 0;
-    })
+    });
 
     // 历史记录信息
     const _historyConf = {
@@ -1105,250 +1522,270 @@ const subEnter = () => {
             difficulty: difficulty.value,
             isMixed: isMixed.value[0],
             hasDecimal: hasDecimal.value,
-            decimalLen: decimalLen.value
-        }
-    }
-    const historyConfList = historyConf.list
-    const hasHistoryIdx = historyConfList.findIndex(res => res.id === _historyConf.id)
+            decimalLen: decimalLen.value,
+        },
+    };
+    const historyConfList = historyConf.list;
+    const hasHistoryIdx = historyConfList.findIndex(
+        (res) => res.id === _historyConf.id
+    );
     hasHistoryIdx === -1
         ? historyConfList.unshift(_historyConf)
-        : historyConfList.splice(hasHistoryIdx, 1, _historyConf)
-    if (historyConfList.length > 50) historyConfList.length = 50
-    uni.setStorageSync('historyConfList', { [envVersion]: historyConfList })
+        : historyConfList.splice(hasHistoryIdx, 1, _historyConf);
+    if (historyConfList.length > 50) historyConfList.length = 50;
+    uni.setStorageSync("historyConfList", { [envVersion]: historyConfList });
 };
 
 // 设置窗口显隐
 const showConfig = (val = false) => {
     // playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    if (val) Object.assign(setConfig, getStorageData())
-    setConfig.status = val
-}
+    if (val) Object.assign(setConfig, getStorageData());
+    setConfig.status = val;
+};
 
 // 滑块题目数量设置
 function setNumFn(num) {
-    setConfig.totalNum = num
+    setConfig.totalNum = num;
 }
 
 // 恢复默认
 const setNumDefault = () => {
     // playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    Object.assign(setConfig, defaultConf)
+    Object.assign(setConfig, defaultConf);
     // cursorType.value = setConfig.cursorType
-    bgm.volume = setConfig.bgmVolume / 20
-    bgm.src = findBgm(setConfig.bgmSelectValue).src || musicArr[setConfig.bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
-}
+    bgm.volume = setConfig.bgmVolume / 20;
+    bgm.src =
+        findBgm(setConfig.bgmSelectValue).src ||
+        musicArr[setConfig.bgmSelectValue] ||
+        musicArr[defaultConf.bgmSelectValue];
+};
 
 // 保存设置事件
 const saveConfig = () => {
-    showConfig(false)
-
+    showConfig(false);
 
     // 配置存 stroage
     const _setConfig = {
-        [envVersion]: { ...setConfig, lastSucc: Date.now() }
-    }
+        [envVersion]: { ...setConfig, lastSucc: Date.now() },
+    };
 
-    delete _setConfig.status
-    uni.setStorageSync('config', _setConfig)
+    delete _setConfig.status;
+    uni.setStorageSync("config", _setConfig);
 
     // 应用配置信息
-    keyboard.value = setConfig.keyboard
-    showIdx.value = setConfig.showIdx
-    cursorType.value = setConfig.cursorType
-    vertical.value = setConfig.vertical
+    keyboard.value = setConfig.keyboard;
+    showIdx.value = setConfig.showIdx;
+    cursorType.value = setConfig.cursorType;
+    vertical.value = setConfig.vertical;
 
     if (!bgmPause.value) {
-        bgm.volume = setConfig.bgmVolume / 20
-        bgmPause.value = false
+        bgm.volume = setConfig.bgmVolume / 20;
+        bgmPause.value = false;
     } else {
-        bgm.pause()
+        bgm.pause();
     }
 
     // 运算规则 或 难度变动 列表都要重新生成
-    if (opType.value !== setConfig.opType
-        || difficulty.value !== setConfig.difficulty
-        || isMixed.value[0] !== setConfig.isMixed[0]
-        || notDivision.value[0] !== setConfig.notDivision[0]
-        || hasDecimal.value !== setConfig.hasDecimal
-        || decimalLen.value !== setConfig.decimalLen
+    if (
+        opType.value !== setConfig.opType ||
+        difficulty.value !== setConfig.difficulty ||
+        isMixed.value[0] !== setConfig.isMixed[0] ||
+        notDivision.value[0] !== setConfig.notDivision[0] ||
+        hasDecimal.value !== setConfig.hasDecimal ||
+        decimalLen.value !== setConfig.decimalLen
     ) {
-        opType.value = setConfig.opType // 运算规则变动
-        difficulty.value = setConfig.difficulty // 难度变动
-        isMixed.value = setConfig.isMixed
-        notDivision.value = setConfig.notDivision
-        hasDecimal.value = setConfig.hasDecimal
-        decimalLen.value = setConfig.decimalLen
-        createList(true) // 运算规则类型变动重新生成列表
+        opType.value = setConfig.opType; // 运算规则变动
+        difficulty.value = setConfig.difficulty; // 难度变动
+        isMixed.value = setConfig.isMixed;
+        notDivision.value = setConfig.notDivision;
+        hasDecimal.value = setConfig.hasDecimal;
+        decimalLen.value = setConfig.decimalLen;
+        createList(true); // 运算规则类型变动重新生成列表
     }
 
     // 题目数量变动，只需差量增减
     if (totalNum.value !== setConfig.totalNum) {
-        totalNum.value = setConfig.totalNum
-        createList(false)
+        totalNum.value = setConfig.totalNum;
+        createList(false);
     }
-}
+};
 
 // 取消设置事件
 const cleanConfig = () => {
-    showConfig(false)
+    showConfig(false);
     const {
         bgmVolume: volume,
         cursorType: _cursorType,
         showIdx: _showIdx,
         vertical,
-        bgmSelectValue
-    } = getStorageData()
+        bgmSelectValue,
+    } = getStorageData();
 
-    const bgmSrc = findBgm(bgmSelectValue).src || musicArr[bgmSelectValue] || musicArr[defaultConf.bgmSelectValue]
-    if (bgmSrc !== bgm.src) bgm.src = bgmSrc
-    !bgmPause.value ? bgmPause.value = false : bgm.pause()
+    const bgmSrc =
+        findBgm(bgmSelectValue).src ||
+        musicArr[bgmSelectValue] ||
+        musicArr[defaultConf.bgmSelectValue];
+    if (bgmSrc !== bgm.src) bgm.src = bgmSrc;
+    !bgmPause.value ? (bgmPause.value = false) : bgm.pause();
 
-    cursorType.value = _cursorType
-    showIdx.value = _showIdx
-    bgm.volume = volume / 20
+    cursorType.value = _cursorType;
+    showIdx.value = _showIdx;
+    bgm.volume = volume / 20;
     Object.assign(setConfig, {
         showIdx: _showIdx,
-        vertical
-    })
-
-}
+        vertical,
+    });
+};
 
 // 题目数量滑块更新
-const setNumChange = val => {
+const setNumChange = (val) => {
     // bgm.volume = setConfig.bgmVolume / 20
-    setNumFn(Math.round(val / 10) * 10)
-}
+    setNumFn(Math.round(val / 10) * 10);
+};
 
 // 最多有效位数变动
-const setDecimalLenChange = val => {
-    setConfig.decimalLen = val
-}
+const setDecimalLenChange = (val) => {
+    setConfig.decimalLen = val;
+};
 
 // 音量滑块更新
-const bgmVolumeChange = val => {
-    setConfig.bgmVolume = val
-    bgm.volume = val / 20
-}
+const bgmVolumeChange = (val) => {
+    setConfig.bgmVolume = val;
+    bgm.volume = val / 20;
+};
 
 // 显示历史弹窗
 const historyList = () => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    historyConf.status = true
-}
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+    historyConf.status = true;
+};
 
 // 册除单条历史事件
 const deleteHistory = (ev, id) => {
-    ev.stopPropagation()
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    const curHistory = historyConf.list.find(res => res.id === id)
-    uni.showModal({
-        // title: 'title',
-        // editable: false, 
-        content: `您确定要删除 ${date('Y-m-d H:i:s', curHistory.endTime)} 这条历史记录么 ? `,
-        showCancel: true,
-        // cancelText: '取消'
-        cancelColor: '#999',
-        // confirmText: '确定',
-        confirmColor: '#ed5d46',
-        success: function ({ confirm, cancel }) {
-            playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-            if (confirm) {
-                const idx = historyConf.list.findIndex(res => res.id === id)
-                historyConf.list.splice(idx, 1)
-                uni.setStorageSync('historyConfList', { [envVersion]: historyConf.list })
-            }
-        },
-        fail: function (res) { }
-    })
-}
-
-// 清除历史事件
-const historyClean = () => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
+    ev.stopPropagation();
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+    const curHistory = historyConf.list.find((res) => res.id === id);
     uni.showModal({
         // title: 'title',
         // editable: false,
-        content: '您确定要清除所有历史记录么?',
+        content: `您确定要删除 ${date(
+            "Y-m-d H:i:s",
+            curHistory.endTime
+        )} 这条历史记录么 ? `,
         showCancel: true,
         // cancelText: '取消'
-        cancelColor: '#999',
+        cancelColor: "#999",
         // confirmText: '确定',
-        confirmColor: '#ed5d46',
+        confirmColor: "#ed5d46",
         success: function ({ confirm, cancel }) {
-            playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
+            playSound({
+                src: musicArr["dian2_mp3"],
+                volume: setConfig.bgmVolume / 2,
+            });
             if (confirm) {
-                uni.setStorageSync('historyConfList', { [envVersion]: [] })
-                historyConf.list = []
+                const idx = historyConf.list.findIndex((res) => res.id === id);
+                historyConf.list.splice(idx, 1);
+                uni.setStorageSync("historyConfList", {
+                    [envVersion]: historyConf.list,
+                });
             }
         },
-        fail: function (res) { }
-    })
-}
+        fail: function (res) {},
+    });
+};
+
+// 清除历史事件
+const historyClean = () => {
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+    uni.showModal({
+        // title: 'title',
+        // editable: false,
+        content: "您确定要清除所有历史记录么?",
+        showCancel: true,
+        // cancelText: '取消'
+        cancelColor: "#999",
+        // confirmText: '确定',
+        confirmColor: "#ed5d46",
+        success: function ({ confirm, cancel }) {
+            playSound({
+                src: musicArr["dian2_mp3"],
+                volume: setConfig.bgmVolume / 2,
+            });
+            if (confirm) {
+                uni.setStorageSync("historyConfList", { [envVersion]: [] });
+                historyConf.list = [];
+            }
+        },
+        fail: function (res) {},
+    });
+};
 
 // 读档
 const recordRead = () => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    const record = uni.getStorageSync('record')
-    popupConf.status = true
-    popupConf.curKey = record ? 'read' : 'recordUnll'
-}
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+    const record = uni.getStorageSync("record");
+    popupConf.status = true;
+    popupConf.curKey = record ? "read" : "recordUnll";
+};
 // 存档
 const recordSave = () => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    const record = uni.getStorageSync('record')
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+    const record = uni.getStorageSync("record");
     if (record) {
-        popupConf.curKey = 'save'
-        popupConf.status = true
+        popupConf.curKey = "save";
+        popupConf.status = true;
     } else {
         // uni.setStorageSync('record', numList)
-        recordSaveStorage()
+        recordSaveStorage();
         uni.showToast({
-            icon: 'none',
-            title: '存档成功'
-        })
+            icon: "none",
+            title: "存档成功",
+        });
     }
-}
+};
 // 删档
 const recordDel = () => {
-    playSound({ src: musicArr['dian2_mp3'], volume: setConfig.bgmVolume / 2 })
-    const record = uni.getStorageSync('record')
-    popupConf.status = true
-    popupConf.curKey = record ? 'recordDel' : 'recordUnll'
-}
-
+    playSound({ src: musicArr["dian2_mp3"], volume: setConfig.bgmVolume / 2 });
+    const record = uni.getStorageSync("record");
+    popupConf.status = true;
+    popupConf.curKey = record ? "recordDel" : "recordUnll";
+};
 
 onShow(() => {
     if (!bgmPause.value) bgm.play();
-})
+});
 onHide(() => {
-    bgm.pause()
-})
+    bgm.pause();
+});
 onLoad(() => {
     // BGM
     bgm = playSound({
-        src: findBgm(bgmSelectValue.value).src || musicArr[bgmSelectValue.value] || musicArr[defaultConf.bgmSelectValue],
+        src:
+            findBgm(bgmSelectValue.value).src ||
+            musicArr[bgmSelectValue.value] ||
+            musicArr[defaultConf.bgmSelectValue],
         volume: setConfig.bgmVolume,
         loop: true,
-        instanceName: 'BGM'
-    })
-    const reCord = uni.getStorageSync('record'); // 存档信息
-    const autoRecord = uni.getStorageSync('autoRecord'); // 自动存档信息
-    historyConf.list = uni.getStorageSync('historyConfList')[envVersion] || [] // 历史信息
+        instanceName: "BGM",
+    });
+    const reCord = uni.getStorageSync("record"); // 存档信息
+    const autoRecord = uni.getStorageSync("autoRecord"); // 自动存档信息
+    historyConf.list = uni.getStorageSync("historyConfList")[envVersion] || []; // 历史信息
 
     if (autoRecord) {
-        popupConf.curKey = 'readAutoSave'
-        popupConf.status = true
-        setConfig.status = false
+        popupConf.curKey = "readAutoSave";
+        popupConf.status = true;
+        setConfig.status = false;
     } else if (reCord) {
-        popupConf.curKey = 'onLoad'
-        popupConf.status = true
-        setConfig.status = false
+        popupConf.curKey = "onLoad";
+        popupConf.status = true;
+        setConfig.status = false;
     }
-})
+});
 
 onUnload(() => {
-    bgm.destroy()
-})
+    bgm.destroy();
+});
 </script>
 
 <style lang="less">

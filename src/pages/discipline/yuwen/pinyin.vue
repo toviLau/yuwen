@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2022-09-23 22:46:19
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2024-04-04 17:05:32
+ * @LastEditTime : 2024-09-02 17:13:18
 -->
 <template>
     <page-meta class="page" page-orientation="landscape" root-font-size="16px">
@@ -147,10 +147,10 @@
 
 <script setup>
 import { onMounted, ref, reactive, watch } from "vue";
-import { getGradeName, playSound } from "../../module/tools";
-import ccPopup from "../../uni_modules/cc-popup";
+import { getGradeName, playSound } from "@/module/tools";
+import ccPopup from "@/uni_modules/cc-popup";
 
-const pinyins = import.meta.globEager("../../assets/pinyin/*.mp3");
+const pinyins = import.meta.globEager("../../../assets/pinyin/*.mp3");
 const pinyinArr = reactive({});
 Object.keys(pinyins).forEach((key) => {
     const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, "$1_$2");
@@ -655,85 +655,105 @@ const pyList = {
         title: "整体认读",
         list: [
             {
+                key: "zi",
                 value: "zi",
                 audio: { src: pinyinArr["sm2_mp3"], areaTime: [14, 1500] },
             },
             {
+                key: "ci",
                 value: "ci",
                 audio: { src: pinyinArr["sm2_mp3"], areaTime: [16, 1500] },
             },
             {
+                key: "si",
                 value: "si",
                 audio: { src: pinyinArr["sm2_mp3"], areaTime: [18, 1500] },
             },
             {
+                key: "zhi",
                 value: "zhi",
                 audio: { src: pinyinArr["sm2_mp3"], areaTime: [20, 1500] },
             },
             {
+                key: "chi",
                 value: "chi",
                 audio: { src: pinyinArr["sm2_mp3"], areaTime: [22, 1500] },
             },
             {
+                key: "shi",
                 value: "shi",
                 audio: { src: pinyinArr["sm2_mp3"], areaTime: [24, 1500] },
             },
             {
+                key: "ri",
                 value: "ri",
                 audio: { src: pinyinArr["sm2_mp3"], areaTime: [26, 1500] },
             },
 
             {
+                key: "y~",
                 value: "y~",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [60, 1500] },
             },
             {
+                key: "y!",
                 value: "y!",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [62, 1500] },
             },
             {
+                key: "y@",
                 value: "y@",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [64, 1500] },
             },
             {
+                key: "y#",
                 value: "y#",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [66, 1500] },
             },
 
             {
+                key: "w$",
                 value: "w$",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [70, 1500] },
             },
             {
+                key: "w%",
                 value: "w%",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [72, 1500] },
             },
             {
+                key: "w^",
                 value: "w^",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [74, 1500] },
             },
             {
+                key: "w&",
                 value: "w&",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [76, 1500] },
             },
 
             {
-                value: "y*",
+                key: "y$",
+                value: "y$",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [80, 1500] },
             },
             {
-                value: "y(",
+                key: "y%",
+                value: "y%",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [82, 1500] },
             },
             {
-                value: "y)",
+                key: "y^",
+                value: "y^",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [84, 1500] },
             },
             {
-                value: "y_",
+                key: "y&",
+                value: "y&",
                 audio: { src: pinyinArr["dym_mp3"], areaTime: [86, 1500] },
             },
             {
+                key: "ye",
                 value: "ye",
                 audio: { src: pinyinArr["fym_mp3"], areaTime: [70, 1500] },
             },
@@ -741,6 +761,7 @@ const pyList = {
             // { value: 'ye', audio: '' },
             // { value: 'ye', audio: '' },
             {
+                key: "yue",
                 value: "yue",
                 audio: { src: pinyinArr["fym_mp3"], areaTime: [72, 1500] },
             },
@@ -748,18 +769,22 @@ const pyList = {
             // { value: 'yue', audio: '' },
             // { value: 'yue', audio: '' },
             {
+                key: "yuan",
                 value: "yuan",
                 audio: { src: pinyinArr["bym_mp3"], areaTime: [18, 1500] },
             },
             {
+                key: "yin",
                 value: "yin",
                 audio: { src: pinyinArr["bym_mp3"], areaTime: [20, 1500] },
             },
             {
-                value: "yvn",
+                key: "yun",
+                value: "yun",
                 audio: { src: pinyinArr["bym_mp3"], areaTime: [22, 1500] },
             },
             {
+                key: "ying",
                 value: "ying",
                 audio: { src: pinyinArr["bym_mp3"], areaTime: [24, 1500] },
             },
@@ -1023,7 +1048,7 @@ onMounted(() => randomList(selectArr.value));
 @font-face {
     // 引入拼音字体库
     font-family: "pinyin";
-    src: url("../../assets/font/pinyinok.ttf?v=1") format("truetype");
+    src: url("../../../assets/font/pinyinok.ttf?v=1") format("truetype");
 }
 
 .line {
