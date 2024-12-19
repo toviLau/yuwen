@@ -7,33 +7,48 @@
 <template>
     <view class="page">
         <view class="content">
-            <navigator
-                class="list"
-                open-type="navigate"
-                url="/pages/discipline/yuwen/index"
-                >语文</navigator
-            >
-            <navigator
-                class="list"
-                open-type="navigate"
-                url="/pages/discipline/shuxue/index"
-                >数学</navigator
-            >
-            <navigator
-                class="list"
-                open-type="navigate"
-                url="/pages/discipline/yingyu/index"
-                >英语</navigator
-            >
-            <navigator
-                class="list"
-                open-type="navigate"
-                url="/pages/fn/countDown/index"
-                >倒记时</navigator
-            >
+            <view class="content-list">
+                <view class="content-list-t">
+                    <view class="content-list-label">学科</view>
+                </view>
+                <view class="content-list-b">
+                    <navigator
+                        class="content-list-item"
+                        open-type="navigate"
+                        url="/pages/discipline/yuwen/index"
+                        >语文</navigator
+                    >
+                    <navigator
+                        class="content-list-item"
+                        open-type="navigate"
+                        url="/pages/discipline/shuxue/index"
+                        >数学</navigator
+                    >
+                    <navigator
+                        class="content-list-item"
+                        open-type="navigate"
+                        url="/pages/discipline/yingyu/index"
+                        >英语</navigator
+                    >
+                </view>
+            </view>
+
+            <view class="content-list">
+                <view class="content-list-t">
+                    <view class="content-list-label">小工具</view>
+                </view>
+                <view class="content-list-b">
+                    <navigator
+                        class="content-list-item"
+                        open-type="navigate"
+                        url="/pages/fn/countDown/index"
+                        >倒记时</navigator
+                    >
+                </view>
+            </view>
         </view>
-        <div class="footer">
-            <div class="footer-item">
+        <view class="footer">
+            <view class="footer-item">
                 &copy; Tovi 2023-present
                 <navigator
                     class="about"
@@ -41,11 +56,11 @@
                     url="/pages/about/index"
                     >@关于与反馈</navigator
                 >
-            </div>
-            <div class="footer-item">
+            </view>
+            <view class="footer-item">
                 好好学习 天天向上 version: {{ version }}
-            </div>
-        </div>
+            </view>
+        </view>
     </view>
 </template>
 <script setup>
@@ -73,18 +88,64 @@ uni.showShareMenu({
     flex-direction: column;
     // background-color: #f3f3f3;
 }
-
 .content {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
     flex: 1;
-    flex-wrap: wrap;
-    background-color: var(--c-safegray-hlighter);
-
-    .list {
+    display: flex;
+    flex-direction: column;
+    .content-list {
+        display: flex;
+        padding: 0 1em;
+        // justify-content: center;
+        flex: 1;
+        flex-direction: column;
+        &:last-child {
+            flex-grow: 0;
+            background-color: var(--c-safegray-hlight);
+        }
+        .content-list-t,
+        .content-list-b {
+            display: flex;
+            justify-content: space-between;
+            // flex: 1;
+            flex-wrap: wrap;
+            // background-color: var(--c-safegray-hlighter);
+            align-items: center;
+        }
+        .content-list-t {
+            margin: 0.8em 0;
+            // background-color: var(--c-safegray-lighter);
+            &::before,
+            &::after {
+                content: "";
+                flex: 1;
+                height: 2rpx;
+                background-color: var(--c-safegray-lighter);
+            }
+            &::before {
+                margin-right: 1em;
+            }
+            &::after {
+                margin-left: 1em;
+            }
+        }
+        .content-list-b {
+        }
+        &:last-child {
+            border-top: 3rpx solid var(--c-safegray-light);
+            .content-list-b {
+                margin-bottom: 1em;
+            }
+            .content-list-item {
+                background-color: var(--color-G);
+                width: auto;
+                padding: 0 1em;
+                line-height: 2.5em;
+            }
+        }
+    }
+    .content-list-item {
         width: 7em;
-        height: 3em;
+        // height: 3em;
         line-height: 3em;
         font-size: 28rpx;
         background-color: var(--c-safegray-hlight);

@@ -7,14 +7,21 @@
                 open-type="navigate"
                 url="/pages/discipline/shuxue/jisuan"
             >
-                算术运算练习
+                常规算术运算练习
             </navigator>
             <navigator
                 class="list-li"
                 open-type="navigate"
                 u-rl="/pages/yuwen/index"
             >
-                计算公式<br/>开发中...
+                速算技巧(开发中...)
+            </navigator>
+            <navigator
+                class="list-li"
+                open-type="navigate"
+                u-rl="/pages/yuwen/index"
+            >
+                计算公式(开发中...)
             </navigator>
         </view>
     </div>
