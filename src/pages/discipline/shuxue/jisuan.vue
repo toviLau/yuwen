@@ -95,7 +95,7 @@
                             </div>
                         </div>
                     </div>
-                    <div
+                    <!-- <div
                         v-if="vertical"
                         class="vertical"
                         :class="{
@@ -103,7 +103,7 @@
                             minus: v[0][2] === 1,
                         }"
                     >
-                        <!-- <div class="vertical-li">
+                        <div class="vertical-li">
                             <div class="vertical-li-nums" v-for="vItem in v[0][0].toString().split('')">{{ vItem }}</div>
                         </div>
                         <div class="vertical-li">
@@ -113,8 +113,8 @@
                         <div class="vertical-li">
                             <div class="vertical-li-nums" v-for="vItem in (v[1] || '  ').toString().split('')">{{ vItem }}
                             </div>
-                        </div> -->
-                    </div>
+                        </div>
+                    </div> -->
                 </div>
                 <div
                     class="list-item list-item-none"
@@ -742,7 +742,7 @@ import ccPopup from "../../../uni_modules/cc-popup";
 import { onReady, onShow, onHide, onUnload, onLoad } from "@dcloudio/uni-app";
 import uniDataCheckbox from "../../../uni_modules/uni-data-checkbox/uni-data-checkbox.vue";
 // 导入音频 - 准备弃用(已上传至 OSS)
-const musics = import.meta.globEager("../../../assets/music/*.mp3");
+const musics = import.meta.glob("../../../assets/music/*.mp3",{ eager: true });
 const musicArr = reactive({});
 Object.keys(musics).forEach((key) => {
     const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, "$1_$2");
@@ -1200,6 +1200,7 @@ function createList(isInit = true) {
             }
 
             // 开启小数处理,添加小数位
+            
             if (hasDecimal.value)
                 _expression.forEach((item, idx) => {
                     const decimal = Math.random();
@@ -1274,7 +1275,7 @@ function createList(isInit = true) {
     numListId.value = Date.now().toString(16); // 当前题目列表ID, 用户不重新生成数据, 每次提交历史都会更新这个 ID 下的数据,不新增历史记录
 }
 createList(true);
-const keyboardCode = reactive(createKeyboardCode());
+const keyboardCode = reactive(createKeyboardCode())
 
 const reCreate = () => {
     createList(true);

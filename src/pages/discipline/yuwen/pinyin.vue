@@ -2,7 +2,7 @@
  * @Author       : ToviLau 46134256@qq.com
  * @Date         : 2022-09-23 22:46:19
  * @LastEditors  : ToviLau 46134256@qq.com
- * @LastEditTime : 2024-09-02 17:13:18
+ * @LastEditTime : 2024-12-22 21:12:10
 -->
 <template>
     <page-meta class="page" page-orientation="landscape" root-font-size="16px">
@@ -150,7 +150,7 @@ import { onMounted, ref, reactive, watch } from "vue";
 import { getGradeName, playSound } from "@/module/tools";
 import ccPopup from "@/uni_modules/cc-popup";
 
-const pinyins = import.meta.globEager("../../../assets/pinyin/*.mp3");
+const pinyins = import.meta.glob("../../../assets/pinyin/*.mp3",{ eager: true });
 const pinyinArr = reactive({});
 Object.keys(pinyins).forEach((key) => {
     const _key = key.replace(/.+?([^\/\\]+)\.(\w+)$/g, "$1_$2");

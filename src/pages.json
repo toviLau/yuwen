@@ -21,6 +21,14 @@
 				"navigationBarTitleText": "数学：四则运算练习"
 			}
 		},
+
+		{
+			"path": "pages/discipline/shuxue/qiaosuan",
+			"name": "qiaosuan",
+			"style": {
+				"navigationBarTitleText": "算术的速算与巧算"
+			}
+		},
 		{
 			"path": "pages/discipline/yuwen/index",
 			"name":"yuwen",

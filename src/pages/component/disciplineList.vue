@@ -1,5 +1,5 @@
 <template>
-    <view class="list">
+    <view class="list-menu">
         <!-- <view
             class="list-li"
             :class="{
@@ -64,7 +64,7 @@ const isActive = (path) => currentPath === path;
 </script>
 
 <style lang="less" scoped>
-.list {
+.list-menu {
     background-color: var(--c-safegray-hlight);
     border-right: 1rpx solid var(--c-safegray-lighter);
     height: 100%;
